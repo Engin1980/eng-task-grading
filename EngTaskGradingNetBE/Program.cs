@@ -1,4 +1,5 @@
 ﻿using EngGradesBE.DbModel;
+using EngTaskGradingNetBE.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -21,13 +22,19 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
-app.Lifetime.ApplicationStarted.Register(() => InitDb(app));
+app.MapGet("/", context =>
+{
+  context.Response.Redirect("/api/v1/AppLog");
+  return System.Threading.Tasks.Task.CompletedTask;
+});
 
 Log.Information("Starting main app");
+
 app.Run();
 
 static void BuildServices(WebApplicationBuilder builder)
 {
+  builder.Services.AddTransient<AppLogService>();
   builder.Services.AddControllers();
 }
 

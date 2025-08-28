@@ -1,0 +1,20 @@
+﻿using EngGradesBE.DbModel;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+
+namespace EngTaskGradingNetBE.Services
+{
+  public class AppLogService : DbContextService
+  {
+    public AppLogService([FromServices] AppDbContext context) : base(context)
+    {
+    }
+
+    public async Task<List<AppLog>> GetAllLogsAsync()
+    {
+      return await Db.AppLog
+        .OrderByDescending(log => log.TimeStamp!.Value)
+        .ToListAsync();
+    }
+  }
+}

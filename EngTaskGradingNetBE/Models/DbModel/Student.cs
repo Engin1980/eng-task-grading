@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace EngGradesBE.DbModel;
+namespace EngTaskGradingNetBE.Models.DbModel;
 
 [Table("Student")]
 public class Student

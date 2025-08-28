@@ -1,10 +1,10 @@
-﻿using EngGradesBE.DbModel;
+﻿using EngTaskGradingNetBE.Models.DbModel;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace EngTaskGradingNetBE.Services
 {
-  public class AppLogService : DbContextService
+  public class AppLogService : DbContextBaseService
   {
     public AppLogService([FromServices] AppDbContext context) : base(context)
     {

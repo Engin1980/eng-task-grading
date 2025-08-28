@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace EngGradesBE.DbModel
+namespace EngTaskGradingNetBE.Models.DbModel
 {
   public class AppDbContext(DbContextOptions<AppDbContext> ctx) : DbContext(ctx)
   {
@@ -15,22 +15,35 @@ namespace EngGradesBE.DbModel
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-      modelBuilder.Entity<Student>()
-          .HasMany(s => s.Courses)
+      modelBuilder.Entity<Student>(e =>
+      {
+        e.HasMany(s => s.Courses)
           .WithMany(k => k.Students)
           .UsingEntity(j => j.ToTable("StudentCourse"));
 
-      modelBuilder.Entity<Teacher>()
-          .HasMany(t => t.Courses)
+        e.HasIndex(s => s.Number).IsUnique();
+        e.HasIndex(s => s.Email).IsUnique();
+      });
+
+
+      modelBuilder.Entity<Teacher>(e =>
+      {
+        e.HasMany(t => t.Courses)
           .WithMany(c => c.Teachers)
           .UsingEntity(j => j.ToTable("TeacherCourse"));
 
-      // link courses and tasks
-      modelBuilder.Entity<Course>()
-          .HasMany(c => c.Tasks)
+        e.HasIndex(t => t.Email).IsUnique();
+      });
+
+      modelBuilder.Entity<Course>(e =>
+      {
+        e.HasMany(c => c.Tasks)
           .WithOne(t => t.Course)
           .HasForeignKey(t => t.CourseId)
           .OnDelete(DeleteBehavior.Cascade);
+
+        e.HasIndex(c => c.Code).IsUnique();
+      });
     }
   }
 }

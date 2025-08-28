@@ -1,4 +1,5 @@
-﻿using EngGradesBE.DbModel;
+﻿using EngTaskGradingNetBE.Middleware;
+using EngTaskGradingNetBE.Models.DbModel;
 using EngTaskGradingNetBE.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -18,6 +19,7 @@ Log.Information("Building main app");
 var app = builder.Build();
 
 InitDb(app);
+app.UseMiddleware<GlobalExceptionHandler>(); // must be the first one
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

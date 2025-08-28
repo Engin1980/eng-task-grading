@@ -1,17 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace EngGradesBE.DbModel;
+namespace EngTaskGradingNetBE.Models.DbModel;
 
-public class TeacherToken
+public class StudentToken
 {
-  public enum TokenType
-  {
-    Unset = 0,
-    PasswordReset = 1,
-    Refresh = 2
-  }
-
   [Key]
   [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
   public int Id { get; set; }
@@ -21,8 +14,6 @@ public class TeacherToken
 
   public DateTime ExpirationDate { get; set; }
 
-  public TokenType Type { get; set; }
-
-  public int TeacherId { get; set; }
-  public Teacher Teacher { get; set; } = null!;
+  public int StudentId { get; set; }
+  public Student Student { get; set; } = null!;
 }

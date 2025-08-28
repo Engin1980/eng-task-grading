@@ -1,4 +1,4 @@
-﻿using EngGradesBE.DbModel;
+﻿using EngTaskGradingNetBE.Models.DbModel;
 using EngTaskGradingNetBE.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

@@ -1,0 +1,29 @@
+meta {
+  name: (KC) Get Token
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:8080/realms/master/protocol/openid-connect/token
+  body: formUrlEncoded
+  auth: inherit
+}
+
+body:form-urlencoded {
+  client_id: admin-cli
+  username: sa
+  password: Bublinka#1
+  grant_type: password
+}
+
+body:multipart-form {
+  grant_type: password
+  client_id: admin-cli
+  username: admin
+  password: admin
+}
+
+settings {
+  encodeUrl: true
+}

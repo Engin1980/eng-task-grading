@@ -1,0 +1,29 @@
+meta {
+  name: (KC) Create user
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://localhost:8080/admin/realms/TaskGradingRealm/users
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJSZnR6b29RTXdqU0xwWXdVdlZsejk1bUZZWm1odzV3R2tTWm9NNC13TENrIn0.eyJleHAiOjE3NTY1MDI2MjgsImlhdCI6MTc1NjUwMjU2OCwianRpIjoiYzg1N2FlY2MtZTg0MS00MGQwLWE3OGQtNTRiZGVjYWI4MGU2IiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwL3JlYWxtcy9tYXN0ZXIiLCJzdWIiOiJmYTliYzQzZC1iYjg1LTRlY2EtYjI3Zi1hYzMyMDlkNTQ5NWQiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJhZG1pbi1jbGkiLCJzaWQiOiIzOTVmZmZmMy0yNmMzLTQ1MTctYmJkYi00MGRmNDkzNzk3YmMiLCJhY3IiOiIxIiwic2NvcGUiOiJwcm9maWxlIGVtYWlsIiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJzYSJ9.CNQtwnnEV-Jd47Xr7jdUVkDqxJ_BtDgmWUKE0tfb9shnh9cMV0cUDVrFuUvXIeHTD1hSeJmTZgXM74KfzH3E_WKt4RgO1UjtS4QodACIKlaxLJd3Dodn6jTcGcLArr70pseCVx8c3HQs2YG4aTzR4v8bkbPadMGN9a9u8RcKQJw2olNbuKaeLe_GJzhFyFkqlUhlpihdVkdQYT-udTfTyTq2dK6EtO__WWlcmWnHmOmmMwXjnNmLc_c655mMS_TwJWMuzO4BclCdBw2zg-OXiK4DvrkWhGkOY7KCXNNkBDzUKGmyE3Ut26VtbbVVNO_jz9VKPA__2FoCXCaIXDhcUg
+}
+
+body:json {
+  {
+    "username" : "dudla",
+    "email" : "dudla@osu.cz",
+    "enabled":true,
+    "firstName": "Dudlik",
+    "lastName": "Truhlik"
+  }
+}
+
+settings {
+  encodeUrl: true
+}

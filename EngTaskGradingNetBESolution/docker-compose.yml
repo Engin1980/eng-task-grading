@@ -1,0 +1,44 @@
+services:
+
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: mssql
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=Bublinka#1   # must be >= 8 chars, incl. upper/lowercase & digit
+    ports:
+      - "1433:1433"                   # SQL -> localhost,1433
+    networks:
+      - mynet
+    volumes:
+      - mssql-data:/var/opt/mssql 
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:25.0.0
+    container_name: keycloak
+    command: start-dev
+    environment:
+      KEYCLOAK_ADMIN: sa
+      KEYCLOAK_ADMIN_PASSWORD: Bublinka#1
+    ports:
+      - "8080:8080"
+    networks:
+      - mynet
+
+  engtaskgradingnetbe:
+    image: ${DOCKER_REGISTRY-}engtaskgradingnetbe
+    build:
+      context: .
+      dockerfile: EngTaskGradingNetBE/Dockerfile
+    ports:
+      - "55555:8080"
+      - "55556:8081"
+    networks:
+      - mynet
+
+networks:
+  mynet:
+    driver: bridge
+
+volumes:
+  mssql-data:

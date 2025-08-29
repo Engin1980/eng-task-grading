@@ -26,7 +26,7 @@ app.MapControllers();
 
 app.MapGet("/", context =>
 {
-  context.Response.Redirect("/api/v1/AppLog");
+  context.Response.Redirect("/api/v1/applog");
   return System.Threading.Tasks.Task.CompletedTask;
 });
 
@@ -37,6 +37,8 @@ app.Run();
 static void BuildServices(WebApplicationBuilder builder)
 {
   builder.Services.AddTransient<AppLogService>();
+  builder.Services.AddTransient<AuthService>();
+  builder.Services.AddTransient<TeacherService>();
   builder.Services.AddControllers();
 }
 

@@ -9,7 +9,7 @@ using EngTaskGradingNetBE.Lib;
 namespace EngTaskGradingNetBE.Controllers
 {
   [ApiController]
-  [Route("api/[controller]")]
+  [Route("api/v1/teacher")]
   public class TeacherController(AuthService authService, TeacherService teacherService) : ControllerBase
   {
     [HttpPost("login")]
@@ -32,6 +32,13 @@ namespace EngTaskGradingNetBE.Controllers
       // add security
       var teachers = await teacherService.GetAllTeachersAsync();
       return EObjectMapper.To(teachers);
+    }
+
+    [HttpGet("{id}")]
+    public async Task<TeacherDto> GetById(int id)
+    {
+      var teacher = await teacherService.GetAsync(id);
+      return EObjectMapper.To(teacher);
     }
   }
 }

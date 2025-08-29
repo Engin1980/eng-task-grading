@@ -7,12 +7,7 @@ public static class EObjectMapper
 {
   public static TeacherDto To(Teacher teacher)
   {
-    return new TeacherDto
-    {
-      Id = teacher.Id,
-      Email = teacher.Email,
-      IsAdmin = teacher.IsAdmin
-    };
+    return new TeacherDto(teacher.Id, teacher.Email, teacher.IsAdmin);
   }
 
   public static List<TeacherDto> To(IEnumerable<Teacher> teachers)

@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace EngTaskGradingNetBE.Controllers;
 
 [ApiController]
-[Route("api/v1/[controller]")]
+[Route("api/v1/applog")]
 public class AppLogController(AppLogService appLogService) : ControllerBase
 {
   [HttpGet]

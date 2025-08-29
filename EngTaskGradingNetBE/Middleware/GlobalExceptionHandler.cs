@@ -6,7 +6,8 @@ namespace EngTaskGradingNetBE.Middleware
 {
   public class GlobalExceptionHandler
   {
-    private record ErrorData(string Error, int StatusCode);
+
+    private record ErrorData(HttpStatusCode StatusCode, string Error);
     private readonly RequestDelegate _next;
 
     public GlobalExceptionHandler(RequestDelegate next)
@@ -37,16 +38,16 @@ namespace EngTaskGradingNetBE.Middleware
       {
         ArgumentNullException => HandleInternalServerError(ex),
         ArgumentException => HandleInternalServerError(ex),
-        DuplicateEntityException => new ErrorData($"Conflict - {ex.Message}", (int)HttpStatusCode.Conflict),
-        EntityNotFoundException => new ErrorData($"Not Found - {ex.Message}", (int)HttpStatusCode.NotFound),
-        UnauthorizedAccessException => new ErrorData("Unauthorized", (int)HttpStatusCode.Unauthorized),
+        DuplicateEntityException => new ErrorData(HttpStatusCode.Conflict, $"Conflict - {ex.Message}"),
+        EntityNotFoundException => new ErrorData(HttpStatusCode.NotFound, $"Not Found - {ex.Message}"),
+        UnauthorizedAccessException => new ErrorData(HttpStatusCode.Unauthorized, "Unauthorized"),
         _ => HandleInternalServerError(ex)
       };
 
       var result = JsonSerializer.Serialize(new
       {
         error = errorData.Error,
-        statusCode = errorData.StatusCode,
+        statusCode = (int) errorData.StatusCode,
       });
 
       return response.WriteAsync(result);
@@ -54,7 +55,7 @@ namespace EngTaskGradingNetBE.Middleware
 
     private static ErrorData HandleInternalServerError(Exception ex)
     {
-      throw new NotImplementedException();
+      return new(HttpStatusCode.InternalServerError, "Internal server error: " + ex.Message);
     }
   }
 }

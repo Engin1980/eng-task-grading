@@ -1,0 +1,15 @@
+meta {
+  name: AppLog fetch
+  type: http
+  seq: 2
+}
+
+get {
+  url: https://localhost:32777/api/v1/applog
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+}

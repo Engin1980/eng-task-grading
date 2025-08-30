@@ -20,10 +20,16 @@ services:
     environment:
       KEYCLOAK_ADMIN: sa
       KEYCLOAK_ADMIN_PASSWORD: Bublinka#1
+      KC_DB: mssql
+      KC_DB_URL: jdbc:sqlserver://mssql:1433;databaseName=keycloak;encrypt=false
+      KC_DB_USERNAME: sa
+      KC_DB_PASSWORD: Bublinka#1
     ports:
       - "8080:8080"
     networks:
       - mynet
+    depends_on:
+    - mssql
 
   engtaskgradingnetbe:
     image: ${DOCKER_REGISTRY-}engtaskgradingnetbe

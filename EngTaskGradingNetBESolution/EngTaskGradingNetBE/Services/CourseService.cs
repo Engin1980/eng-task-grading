@@ -1,4 +1,5 @@
 ﻿using EngTaskGradingNetBE.Models.DbModel;
+using Microsoft.EntityFrameworkCore;
 
 namespace EngTaskGradingNetBE.Services
 {
@@ -28,13 +29,13 @@ namespace EngTaskGradingNetBE.Services
 
     public async Task<bool> DeleteCourseAsync(int courseId)
     {
-      var course = await Context.Courses.FindAsync(courseId);
+      var course = await Db.Courses.FindAsync(courseId);
       if (course == null)
       {
         return false;
       }
-      Context.Courses.Remove(course);
-      await Context.SaveChangesAsync();
+      Db.Courses.Remove(course);
+      await Db.SaveChangesAsync();
       return true;
     }
 

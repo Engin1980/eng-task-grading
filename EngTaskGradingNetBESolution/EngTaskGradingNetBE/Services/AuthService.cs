@@ -27,7 +27,10 @@ namespace EngTaskGradingNetBE.Services
       try
       {
         var token = await keyCloakService.GetAdminTokenAsync();
-        await keyCloakService.CreateUserAsync(token, newTeacher.Id, newTeacher.Email, newTeacher.Email, password);
+        string keycloakId = await keyCloakService.CreateUserAsync(token, newTeacher.Id, newTeacher.Email, newTeacher.Email, password);
+
+        newTeacher.KeycloakId = keycloakId;
+        await Db.SaveChangesAsync();
       }
       catch (Exception ex)
       {
@@ -38,6 +41,19 @@ namespace EngTaskGradingNetBE.Services
       }
 
       return newTeacher;
+    }
+
+    internal async Task<Teacher> LoginAsync(string email, string password)
+    {
+      EAssert.Arg.IsNotEmpty(email, nameof(email));
+      EAssert.Arg.IsNotEmpty(password, nameof(password));
+
+      var token = await keyCloakService.GetAdminTokenAsync();
+      var response = await keyCloakService.LoginUserAsync(token, email, password);
+
+      Teacher teacher = await Db.Teachers.FirstOrDefaultAsync(t => t.Email == email) ?? throw new EntityNotFoundException(typeof(Teacher), $"No teacher found with email '{email}'.");
+      return teacher;
+      //TODO return token;
     }
   }
 }

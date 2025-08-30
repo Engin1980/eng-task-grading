@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using EngTaskGradingNetBE.Exceptions;
 using EngTaskGradingNetBE.Models.Dtos;
 using EngTaskGradingNetBE.Lib;
+using EngTaskGradingNetBE.Models.DbModel;
 
 namespace EngTaskGradingNetBE.Controllers
 {
@@ -15,9 +16,9 @@ namespace EngTaskGradingNetBE.Controllers
     [HttpPost("login")]
     public async Task<TeacherDto> LoginAsync([FromBody] TeacherLoginDto request)
     {
-      throw new NotImplementedException();
-      //var teacher = await authService.ValidateTeacherCredentialsAsync(request.Email, request.Password);
-      //return EObjectMapper.To(teacher);
+      Teacher teacher = await authService.LoginAsync(request.Email, request.Password);
+      TeacherDto dto = EObjectMapper.To(teacher);
+      return dto;
     }
 
     [HttpPost("register")]

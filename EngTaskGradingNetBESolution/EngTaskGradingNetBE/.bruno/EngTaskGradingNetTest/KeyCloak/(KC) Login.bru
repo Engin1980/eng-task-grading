@@ -1,0 +1,23 @@
+meta {
+  name: (KC) Login
+  type: http
+  seq: 4
+}
+
+post {
+  url: http://localhost:8080/realms/TaskGradingRealm/protocol/openid-connect/token
+  body: formUrlEncoded
+  auth: inherit
+}
+
+body:form-urlencoded {
+  grant_type: password
+  client_id: admin-cli
+  client_secret: IcJ8IvMeYsCp7iBSOJARgz96M9mRin1c
+  username: marek.vajgl@osu.cz
+  password: q
+}
+
+settings {
+  encodeUrl: true
+}

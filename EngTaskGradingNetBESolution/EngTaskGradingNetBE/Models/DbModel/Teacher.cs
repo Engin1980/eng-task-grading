@@ -9,6 +9,8 @@ namespace EngTaskGradingNetBE.Models.DbModel
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
 
+    public string? KeycloakId { get; set; }
+
     [Required]
     public string Email { get; set; } = string.Empty;
 

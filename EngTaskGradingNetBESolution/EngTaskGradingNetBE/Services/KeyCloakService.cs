@@ -1,5 +1,7 @@
-﻿using Newtonsoft.Json;
+﻿using EngTaskGradingNetBE.Exceptions;
+using Newtonsoft.Json;
 using Serilog.Core;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using static System.Net.WebRequestMethods;
@@ -11,6 +13,19 @@ namespace EngTaskGradingNetBE.Services
     private const string KEYCLOAK_URL = "http://keycloak:8080";
     private const string APP_REALM = "TaskGradingRealm";
     private const string MASTER_REALM = "master";
+    private const string CLIENT_ID = "admin-cli";
+    private const string CLIENT_SECRET = "IcJ8IvMeYsCp7iBSOJARgz96M9mRin1c";
+
+    public class KeycloakTokenResponse
+    {
+      public string Access_Token { get; set; } = "";
+      public int Expires_In { get; set; }
+      public int Refresh_Expires_In { get; set; }
+      public string Refresh_Token { get; set; } = "";
+      public string Token_Type { get; set; } = "";
+      public string Id_Token { get; set; } = "";
+      public string Scope { get; set; } = "";
+    }
 
     public async Task<string> GetAdminTokenAsync()
     {
@@ -38,6 +53,7 @@ namespace EngTaskGradingNetBE.Services
       {
         username,
         email,
+        emailVerified = true,
         enabled = true,
         firstName = string.Empty,
         lastName = string.Empty,
@@ -78,7 +94,7 @@ namespace EngTaskGradingNetBE.Services
       return id;
     }
 
-    public async Task SetUserAdminFlag(string token, int userId, bool isAdmin)
+    public async Task SetUserAdminFlagAsync(string token, int userId, bool isAdmin)
     {
       http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
@@ -108,6 +124,32 @@ namespace EngTaskGradingNetBE.Services
           content);
         removeResponse.EnsureSuccessStatusCode();
       }
+    }
+
+    internal async Task<KeycloakTokenResponse> LoginUserAsync(string token, string email, string password)
+    {
+      var tokenEndpoint = $"{KEYCLOAK_URL}/realms/{APP_REALM}/protocol/openid-connect/token";
+
+      var content = new FormUrlEncodedContent(
+      [
+            new KeyValuePair<string, string>("grant_type", "password"),
+            new KeyValuePair<string, string>("client_id", CLIENT_ID),
+            new KeyValuePair<string, string>("client_secret", CLIENT_SECRET),
+            new KeyValuePair<string, string>("username", email),
+            new KeyValuePair<string, string>("password", password),
+        ]);
+
+      var response = await http.PostAsync(tokenEndpoint, content);
+
+      if (!response.IsSuccessStatusCode)
+      {
+        var error = await response.Content.ReadAsStringAsync();
+        throw new Exception($"Keycloak login failed: {response.StatusCode} - {error}");
+      }
+
+      string json = await response.Content.ReadAsStringAsync() ?? throw new UnexpectedNullException();
+      KeycloakTokenResponse ret = System.Text.Json.JsonSerializer.Deserialize<KeycloakTokenResponse>(json) ?? throw new UnexpectedNullException();
+      return ret;
     }
   }
 }

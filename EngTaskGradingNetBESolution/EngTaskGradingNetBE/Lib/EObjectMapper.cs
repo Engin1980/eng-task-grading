@@ -14,4 +14,35 @@ public static class EObjectMapper
   {
     return teachers.Select(To).ToList();
   }
+
+  public static TaskDto To(Task task)
+  {
+    return new TaskDto(
+      task.Id,
+      task.Title ?? string.Empty,
+      task.Keywords
+    );
+  }
+
+  public static StudentDto To(Student student)
+  {
+    return new StudentDto(
+      student.Id,
+      student.Number,
+      student.Email,
+      student.Name,
+      student.Surname
+    );
+  }
+
+  public static CourseOverviewDto ToOverview(Course course)
+  {
+    return new CourseOverviewDto(
+      course.Id,
+      course.Code,
+      course.Name,
+      course.Students.Count,
+      course.Tasks.Count
+    );
+  }
 }

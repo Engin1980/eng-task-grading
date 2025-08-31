@@ -41,13 +41,14 @@ namespace EngTaskGradingNetBE.Middleware
         DuplicateEntityException => new ErrorData(HttpStatusCode.Conflict, $"Conflict - {ex.Message}"),
         EntityNotFoundException => new ErrorData(HttpStatusCode.NotFound, $"Not Found - {ex.Message}"),
         UnauthorizedAccessException => new ErrorData(HttpStatusCode.Unauthorized, "Unauthorized"),
+        BadDataException => new ErrorData(HttpStatusCode.BadRequest, $"Bad Request - {ex.Message}"),
         _ => HandleInternalServerError(ex)
       };
 
       var result = JsonSerializer.Serialize(new
       {
         error = errorData.Error,
-        statusCode = (int) errorData.StatusCode,
+        statusCode = (int)errorData.StatusCode,
       });
 
       return response.WriteAsync(result);

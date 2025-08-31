@@ -35,6 +35,16 @@ public static class EObjectMapper
     );
   }
 
+  public static GradeDto To(Grade grade)
+  {
+    return new GradeDto(
+       grade.Id,
+       grade.StudentId,
+       grade.Value,
+       grade.Comment
+     );
+  }
+
   public static CourseOverviewDto ToOverview(Course course)
   {
     return new CourseOverviewDto(

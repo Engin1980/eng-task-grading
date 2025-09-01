@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import toast from 'react-hot-toast';
+import { useAuth } from "../hooks/use-auth";
 
 export const Route = createFileRoute('/login')({
     component: Login,
@@ -8,13 +9,20 @@ export const Route = createFileRoute('/login')({
 import { useState } from 'react';
 
 function Login() {
+  const { handleLogin } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleSubmit = (e:React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e:React.FormEvent) => {
     e.preventDefault();
+    //TODO remove
     console.log("Email:", email, "Password:", password);
-    toast.success('Někdo něco zmačknul!');
+    try {
+      await handleLogin(email, password);
+      toast.success("Přihlášeno");
+    } catch (ex) {
+      toast.error("Přihlášení selhalo: " + ex);
+    }
   };
 
   return (

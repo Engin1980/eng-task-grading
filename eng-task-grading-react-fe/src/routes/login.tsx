@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
+import toast from 'react-hot-toast';
 
 export const Route = createFileRoute('/login')({
     component: Login,
@@ -6,56 +7,63 @@ export const Route = createFileRoute('/login')({
 
 import { useState } from 'react';
 
-function Login ()  {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-    const handleSubmit = (e :any) => {
-        e.preventDefault();
-        // For now, just log the values
-        console.log('Email:', email);
-        console.log('Password:', password);
-        alert('Login submitted!');
-    };
+  const handleSubmit = (e:React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    console.log("Email:", email, "Password:", password);
+    toast.success('Někdo něco zmačknul!');
+  };
 
-    return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-100">
-            <div className="bg-white p-8 rounded shadow-md w-full max-w-md">
-                <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <div>
-                        <label className="block mb-1 font-medium" htmlFor="email">Email</label>
-                        <input
-                            type="email"
-                            id="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
-                            required
-                        />
-                    </div>
-                    <div>
-                        <label className="block mb-1 font-medium" htmlFor="password">Password</label>
-                        <input
-                            type="password"
-                            id="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
-                            required
-                        />
-                    </div>
-                    <button
-                        type="submit"
-                        className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-                    >
-                        Login
-                    </button>
-                </form>
-                <p className="mt-4 text-center text-gray-600">
-                    Don't have an account? <a href="#" className="text-blue-600 hover:underline">Sign up</a>
-                </p>
-            </div>
-        </div>
-    );
+  return (
+    <div className="flex items-center justify-center">
+      <div className="bg-white p-8 rounded-xl shadow-md w-full max-w-sm">
+        <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Login</h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-gray-700 mb-1" htmlFor="email">
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+              placeholder="you@example.com"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-gray-700 mb-1" htmlFor="password">
+              Password
+            </label>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+              placeholder="••••••••"
+              required
+            />
+          </div>
+          <button
+            type="submit"
+            className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition-colors"
+          >
+            Log In
+          </button>
+        </form>
+        <p className="text-center text-gray-500 text-sm mt-4">
+          Don't have an account?{" "}
+          <a href="/register" className="text-blue-500 hover:underline">
+            Sign up
+          </a>
+        </p>
+      </div>
+    </div>
+  );
 }

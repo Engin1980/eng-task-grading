@@ -1,16 +1,37 @@
 // import React from 'react';
-import { Outlet, Link } from '@tanstack/react-router';
+import { Outlet, } from '@tanstack/react-router';
+import { createRootRoute } from '@tanstack/react-router'
+import { Toaster } from 'react-hot-toast';
+import TopMenu from '../components/global/top-menu';
 
-export const Root = () => {
+function Root() {
     return (
         <div>
-            <nav className="p-4 bg-gray-100">
-                <Link to="/" className="mr-4 text-blue-600">Home</Link>
-                <Link to="/login" className="text-blue-600">Login</Link>
-            </nav>
-            <div className="p-4">
-                <Outlet /> {/* This renders child routes */}
+            <Toaster
+                position="top-right"
+                toastOptions={{
+                    style: {
+                        borderRadius: '8px',
+                        background: '#333',
+                        color: '#fff',
+                    },
+                    duration: 4000,
+                }}
+            />
+
+            <div>
+                <TopMenu />
+                <div className="flex-1 p-4">
+                    <div>
+                        <Outlet /> {/* This renders child routes */}
+                    </div>
+                </div>
             </div>
         </div>
     );
 };
+
+
+export const Route = createRootRoute({
+    component: Root
+})

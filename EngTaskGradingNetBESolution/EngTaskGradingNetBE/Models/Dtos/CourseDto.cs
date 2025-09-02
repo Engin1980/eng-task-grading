@@ -1,10 +1,5 @@
 ﻿namespace EngTaskGradingNetBE.Models.Dtos
 {
-  public record CourseDto(
-    int Id,
-    string Code,
-    string? Name,
-    List<StudentDto> Students,
-    List<TaskDto> Tasks
-  );
+  public record CourseCreateDto(string Code, string? Name);
+  public record CourseDto(int Id, string Code, string? Name, int StudentsCount, int TasksCount);
 }

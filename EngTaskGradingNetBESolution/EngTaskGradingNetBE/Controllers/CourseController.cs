@@ -12,30 +12,34 @@ namespace EngTaskGradingNetBE.Controllers
   public class CourseController(CourseService courseService) : ControllerBase
   {
     [HttpPost]
-    public async Task<ActionResult<Course>> CreateCourse([FromBody] Course course)
+    public async Task<ActionResult<Course>> CreateCourse([FromBody] CourseCreateDto courseCreateDto)
     {
-      if (course == null)
-      {
+      if (courseCreateDto == null)
         return BadRequest("Course data is required.");
-      }
 
+      Course course = EObjectMapper.From(courseCreateDto);
       var createdCourse = await courseService.CreateCourseAsync(course);
-      return CreatedAtAction(nameof(CreateCourse), new { id = createdCourse.Id }, createdCourse);
+      var courseDto = EObjectMapper.ToDto(createdCourse);
+      return CreatedAtAction(nameof(CreateCourse), courseDto.Id, courseDto);
     }
 
     [HttpGet]
-    public async Task<List<CourseOverviewDto>> GetAllCourses()
+    public async Task<List<CourseDto>> GetAllCourses()
     {
       var courses = await courseService.GetAllCoursesAsync();
-      var courseDtos = courses.Select(c => EObjectMapper.ToOverview(c)).ToList();
+      var courseDtos = courses
+        .Select(EObjectMapper.ToDto)
+        .OrderBy(c => c.Code)
+        .ToList();
       return courseDtos;
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Course>> GetCourseById(int id)
+    public async Task<CourseDto> GetCourseById(int id)
     {
-      var course = await courseService.GetCourseByIdAsync(id);
-      return Ok(course);
+      Course course = await courseService.GetCourseByIdAsync(id);
+      var dto = EObjectMapper.ToDto(course);
+      return dto;
     }
 
   }

@@ -33,7 +33,9 @@ namespace EngTaskGradingNetBE.Controllers
     {
       // add security
       var teachers = await teacherService.GetAllTeachersAsync();
-      return EObjectMapper.To(teachers);
+      return teachers.Select(EObjectMapper.To)
+        .OrderBy(q => q.Email)
+        .ToList();
     }
 
     [HttpGet("{id}")]

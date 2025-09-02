@@ -1,18 +1,15 @@
 ﻿namespace EngTaskGradingNetBE.Lib;
 
+using EngTaskGradingNetBE.Controllers;
 using EngTaskGradingNetBE.Models.DbModel;
 using EngTaskGradingNetBE.Models.Dtos;
+using System;
 
 public static class EObjectMapper
 {
   public static TeacherDto To(Teacher teacher)
   {
     return new TeacherDto(teacher.Id, teacher.Email);
-  }
-
-  public static List<TeacherDto> To(IEnumerable<Teacher> teachers)
-  {
-    return teachers.Select(To).ToList();
   }
 
   public static TaskDto To(Task task)
@@ -45,14 +42,23 @@ public static class EObjectMapper
      );
   }
 
-  public static CourseOverviewDto ToOverview(Course course)
+  public static CourseDto ToDto(Course course)
   {
-    return new CourseOverviewDto(
+    return new CourseDto(
       course.Id,
       course.Code,
       course.Name,
-      course.Students.Count,
-      course.Tasks.Count
+      course.Students?.Count ?? -1,
+      course.Tasks?.Count ?? -1
     );
+  }
+
+  internal static Course From(CourseCreateDto courseDto)
+  {
+    return new Course()
+    {
+      Code = courseDto.Code,
+      Name = courseDto.Name
+    };
   }
 }

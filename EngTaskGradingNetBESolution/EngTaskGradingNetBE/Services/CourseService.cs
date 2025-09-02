@@ -7,12 +7,20 @@ namespace EngTaskGradingNetBE.Services
   {
     public async Task<List<Course>> GetAllCoursesAsync()
     {
-      return await Db.Courses.ToListAsync();
+      return await Db.Courses
+        .Include(q => q.Tasks)
+        .Include(q => q.Students)
+        .ToListAsync();
     }
 
     public async Task<Course> GetCourseByIdAsync(int courseId)
     {
-      return await Db.Courses.FindAsync(courseId) ?? throw new Exceptions.EntityNotFoundException(typeof(Course), courseId);
+      return await Db.Courses
+        .Where(q => q.Id == courseId)
+        .Include(q => q.Tasks)
+        .Include(q => q.Students)
+        .FirstOrDefaultAsync()
+        ?? throw new Exceptions.EntityNotFoundException(typeof(Course), courseId);
     }
 
     public async Task<Course> CreateCourseAsync(Course course)
@@ -27,16 +35,12 @@ namespace EngTaskGradingNetBE.Services
       return course;
     }
 
-    public async Task<bool> DeleteCourseAsync(int courseId)
+    public async System.Threading.Tasks.Task DeleteCourseAsync(int courseId)
     {
       var course = await Db.Courses.FindAsync(courseId);
-      if (course == null)
-      {
-        return false;
-      }
+      if (course == null) return;
       Db.Courses.Remove(course);
       await Db.SaveChangesAsync();
-      return true;
     }
 
   }

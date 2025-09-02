@@ -14,27 +14,27 @@ function CoursesPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const logger = useLogger()
+  const logger = useLogger("CoursesPage")
 
   const _loadCourses = async () => {
     logger.info("Načítám kurzíky");
     try {
-      logger.info('CoursesPage: Načítám kurzy')
+      logger.info('Načítám kurzy')
       setLoading(true)
       const coursesData = await courseService.getAllCourses()
       setCourses(coursesData)
-      logger.info(`CoursesPage: Úspěšně načteno ${coursesData.length} kurzů`)
+      logger.info(`Úspěšně načteno ${coursesData.length} kurzů`)
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Neznámá chyba'
       setError(errorMessage)
-      logger.error('CoursesPage: Chyba při načítání kurzů', { error: err })
+      logger.error('Chyba při načítání kurzů', { error: err })
     } finally {
       setLoading(false)
     }
   };
 
   useEffect(() => {
-    logger.info("CoursesPage: useEffect volán, načítám kurzy");
+    logger.info("useEffect volán, načítám kurzy");
     _loadCourses()
   }, [])
 

@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import * as Dialog from '@radix-ui/react-dialog'
-import { logService } from '../../services/log-service'
+import { createLogger } from '../../services/log-service'
 import type { CourseCreateDto } from '../../model/course-dto'
 import { courseService } from '../../services/course-service'
+
+const logger = createLogger("CreateCourseModal");
 
 interface CreateCourseModalProps {
   isOpen: boolean
@@ -20,7 +22,7 @@ export function CreateCourseModal({ isOpen, onOpenChange, onCourseCreated }: Cre
 
   const handleCreateCourse = async () => {
     try {
-      logService.info('CreateCourseModal: Vytváří se nový kurz', newCourse)
+      logger.info('Vytváří se nový kurz', newCourse)
       
       // Připravit data ve formátu CourseCreateDto
       const courseData: CourseCreateDto = {
@@ -29,7 +31,7 @@ export function CreateCourseModal({ isOpen, onOpenChange, onCourseCreated }: Cre
       }
 
       const course = await courseService.createCourse(courseData);
-      logService.info('CreateCourseModal: Kurz byl úspěšně vytvořen', { response: course })
+      logger.info('Kurz byl úspěšně vytvořen', { response: course })
       
       // Resetovat formulář a zavřít modal
       setNewCourse({ code: '', name: '' })
@@ -38,7 +40,7 @@ export function CreateCourseModal({ isOpen, onOpenChange, onCourseCreated }: Cre
       // Zavolat callback pro obnovení dat
       onCourseCreated?.()
     } catch (err) {
-      logService.error('CreateCourseModal: Chyba při vytváření kurzu', { error: err })
+      logger.error('Chyba při vytváření kurzu', { error: err })
     }
   }
 

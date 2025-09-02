@@ -1,6 +1,8 @@
 import axios from "axios";
 import type { AxiosInstance, AxiosResponse } from "axios";
-import { logService } from "./log-service";
+import { createLogger } from "./log-service";
+
+const logger = createLogger("ApiHttp");
 
 // Vytvoříme axios instanci
 const axiosInstance: AxiosInstance = axios.create({
@@ -19,17 +21,17 @@ export const apiHttp = {
    */
   async get<T = any>(url: string, config?: any): Promise<AxiosResponse<T>> {
     url = `${apiHttp.BASE_URL}${url}`;
-    logService.debug(`ApiHttp: GET ${url}`, { config });
+    logger.debug(`GET ${url}`, { config });
     
     try {
       const response = await axiosInstance.get<T>(url, config);
-      logService.debug(`ApiHttp: GET ${url} - SUCCESS`, { 
+      logger.debug(`GET ${url} - SUCCESS`, { 
         status: response.status, 
         dataLength: Array.isArray(response.data) ? response.data.length : 'single object'
       });
       return response;
     } catch (error) {
-      logService.error(`ApiHttp: GET ${url} - ERROR`, { error, config });
+      logger.error(`GET ${url} - ERROR`, { error, config });
       throw error;
     }
   },
@@ -39,17 +41,17 @@ export const apiHttp = {
    */
   async post<T = any>(url: string, data?: any, config?: any): Promise<AxiosResponse<T>> {
     url = `${apiHttp.BASE_URL}${url}`;
-    logService.debug(`ApiHttp: POST ${url}`, { data, config });
+    logger.debug(`POST ${url}`, { data, config });
     
     try {
       const response = await axiosInstance.post<T>(url, data, config);
-      logService.debug(`ApiHttp: POST ${url} - SUCCESS`, { 
+      logger.debug(`POST ${url} - SUCCESS`, { 
         status: response.status,
         dataLength: Array.isArray(response.data) ? response.data.length : 'single object'
       });
       return response;
     } catch (error) {
-      logService.error(`ApiHttp: POST ${url} - ERROR`, { error, data, config });
+      logger.error(`POST ${url} - ERROR`, { error, data, config });
       throw error;
     }
   },
@@ -59,17 +61,17 @@ export const apiHttp = {
    */
   async put<T = any>(url: string, data?: any, config?: any): Promise<AxiosResponse<T>> {
     url = `${apiHttp.BASE_URL}${url}`;
-    logService.debug(`ApiHttp: PUT ${url}`, { data, config });
+    logger.debug(`PUT ${url}`, { data, config });
     
     try {
       const response = await axiosInstance.put<T>(url, data, config);
-      logService.debug(`ApiHttp: PUT ${url} - SUCCESS`, { 
+      logger.debug(`PUT ${url} - SUCCESS`, { 
         status: response.status,
         dataLength: Array.isArray(response.data) ? response.data.length : 'single object'
       });
       return response;
     } catch (error) {
-      logService.error(`ApiHttp: PUT ${url} - ERROR`, { error, data, config });
+      logger.error(`PUT ${url} - ERROR`, { error, data, config });
       throw error;
     }
   },
@@ -79,17 +81,17 @@ export const apiHttp = {
    */
   async delete<T = any>(url: string, config?: any): Promise<AxiosResponse<T>> {
     url = `${apiHttp.BASE_URL}${url}`;
-    logService.debug(`ApiHttp: DELETE ${url}`, { config });
+    logger.debug(`DELETE ${url}`, { config });
     
     try {
       const response = await axiosInstance.delete<T>(url, config);
-      logService.debug(`ApiHttp: DELETE ${url} - SUCCESS`, { 
+      logger.debug(`DELETE ${url} - SUCCESS`, { 
         status: response.status,
         dataLength: Array.isArray(response.data) ? response.data.length : 'single object'
       });
       return response;
     } catch (error) {
-      logService.error(`ApiHttp: DELETE ${url} - ERROR`, { error, config });
+      logger.error(`DELETE ${url} - ERROR`, { error, config });
       throw error;
     }
   },
@@ -99,17 +101,17 @@ export const apiHttp = {
    */
   async patch<T = any>(url: string, data?: any, config?: any): Promise<AxiosResponse<T>> {
     url = `${apiHttp.BASE_URL}${url}`;
-    logService.debug(`ApiHttp: PATCH ${url}`, { data, config });
+    logger.debug(`PATCH ${url}`, { data, config });
     
     try {
       const response = await axiosInstance.patch<T>(url, data, config);
-      logService.debug(`ApiHttp: PATCH ${url} - SUCCESS`, { 
+      logger.debug(`PATCH ${url} - SUCCESS`, { 
         status: response.status,
         dataLength: Array.isArray(response.data) ? response.data.length : 'single object'
       });
       return response;
     } catch (error) {
-      logService.error(`ApiHttp: PATCH ${url} - ERROR`, { error, data, config });
+      logger.error(`PATCH ${url} - ERROR`, { error, data, config });
       throw error;
     }
   },

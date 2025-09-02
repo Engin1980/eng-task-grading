@@ -1,47 +1,19 @@
 // src/hooks/useLogger.ts
 import { useCallback } from "react";
-import { apiHttp } from "../services/api-http";
+import { logService } from "../services/log-service";
 
 type LogLevel = "debug" | "info" | "warn" | "error";
 
 export function useLogger() {
   const logToBackend = useCallback(async (level: LogLevel, message: string, meta?: any) => {
-    try {
-      await apiHttp.post("/logs", {
-        level,
-        message,
-        meta,
-        timestamp: new Date().toISOString(),
-      });
-    } catch {
-      // silently fail if logging backend is unreachable
-    }
+    await logService.logToBackend(level, message, meta);
   }, []);
 
   const log = useCallback(
     (level: LogLevel, message: string, meta?: any) => {
-      // log to console
-      switch (level) {
-        case "debug":
-          console.debug(message, meta);
-          break;
-        case "info":
-          console.info(message, meta);
-          break;
-        case "warn":
-          console.warn(message, meta);
-          break;
-        case "error":
-          console.error(message, meta);
-          break;
-      }
-
-      // log to backend
-      if (level === "error") {
-        logToBackend(level, message, meta);
-      }
+      logService.log(level, message, meta);
     },
-    [logToBackend]
+    []
   );
 
   // convenience methods
@@ -50,5 +22,6 @@ export function useLogger() {
     info: (msg: string, meta?: any) => log("info", msg, meta),
     warn: (msg: string, meta?: any) => log("warn", msg, meta),
     error: (msg: string, meta?: any) => log("error", msg, meta),
+    logToBackend, // expose for manual backend logging if needed
   };
 }

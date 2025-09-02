@@ -13,6 +13,22 @@ var builder = WebApplication.CreateBuilder(args);
 BuildLogging(builder);
 BuildServices(builder);
 BuildSecurity(builder);
+BuildCors(builder);
+
+void BuildCors(WebApplicationBuilder builder)
+{
+  builder.Services.AddCors(options =>
+  {
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+      policy.WithOrigins("http://localhost:5173") // tvoje FE adresa
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials(); // pokud používáš cookie/token z Keycloak
+    });
+  });
+}
+
 BuildDb(builder);
 
 Log.Information("Building main app");
@@ -23,6 +39,8 @@ app.UseMiddleware<GlobalExceptionHandler>(); // must be the first one
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.UseHttpsRedirection();
+app.UseCors("AllowFrontend");
 
 app.MapGet("/", context =>
 {
@@ -39,6 +57,7 @@ static void BuildServices(WebApplicationBuilder builder)
   builder.Services.AddTransient<AppLogService>();
   builder.Services.AddTransient<AuthService>();
   builder.Services.AddTransient<TeacherService>();
+  builder.Services.AddTransient<CourseService>();
   builder.Services.AddHttpClient<KeyCloakService>(); // http client for KeyCloakService
   builder.Services.AddTransient<KeyCloakService>();
   builder.Services.AddControllers();

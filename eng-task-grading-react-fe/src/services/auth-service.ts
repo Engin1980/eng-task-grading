@@ -1,7 +1,7 @@
-import { api } from "./api-http";
+import { apiHttp } from "./api-http";
 
 export async function login(payload: LoginPayload): Promise<LoginResponse> {
-  const { data } = await api.post<LoginResponse>("/login", payload);
+  const { data } = await apiHttp.post<LoginResponse>("/login", payload);
   // uložení tokenu
   localStorage.setItem("token", data.token);
 

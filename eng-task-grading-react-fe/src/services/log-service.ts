@@ -1,4 +1,4 @@
-import { apiHttp } from "./api-http";
+import axios from "axios";
 
 type LogLevel = "debug" | "info" | "warn" | "error";
 
@@ -51,7 +51,7 @@ const logImplementation = (level: LogLevel, sender: string, message: string, met
  */
 const logToBackend = async (level: LogLevel, sender: string, message: string, meta?: any) => {
   try {
-    await apiHttp.post("/logs", {
+    await axios.post("/api/logs", {
       level,
       message,
       sender,

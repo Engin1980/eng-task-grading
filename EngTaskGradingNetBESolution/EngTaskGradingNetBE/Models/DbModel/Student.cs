@@ -20,6 +20,10 @@ public class Student
 
   public string? Surname { get; set; }
 
+  public string? UserName { get; set; }
+  public string? StudyProgram { get; set; }
+  public string? StudyForm { get; set; }
+
   public ICollection<Course> Courses { get; set; } = [];
   public ICollection<Grade> Grades { get; set; } = [];
 }

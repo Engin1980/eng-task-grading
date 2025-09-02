@@ -2,7 +2,7 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { courseService } from '../../services/course-service'
 import { useLogger } from '../../hooks/use-logger'
-import { CreateCourseModal } from '../../components/courses/CreateCourseModal'
+import { CreateCourseModal } from '../../components/courses'
 import type { CourseDto } from '../../model/course-dto'
 
 export const Route = createFileRoute('/courses/')({

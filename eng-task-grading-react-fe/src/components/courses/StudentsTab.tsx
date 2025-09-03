@@ -16,6 +16,20 @@ export function StudentsTab({ courseId }: StudentsTabProps) {
   const [studentAnalysisResult, setStudentAnalysisResult] = useState<StudentAnalysisResultDto>();
   const [students, setStudents] = useState<StudentDto[]>();
   const [loading, setLoading] = useState<boolean>(false);
+  const [filterText, setFilterText] = useState<string>("");
+
+  // Funkce pro filtrování studentů
+  const filteredStudents = students?.filter(student => {
+    if (!filterText.trim()) return true;
+    
+    const searchText = filterText.toLowerCase();
+    return (
+      student.number.toLowerCase().includes(searchText) ||
+      (student.name?.toLowerCase().includes(searchText) ?? false) ||
+      (student.surname?.toLowerCase().includes(searchText) ?? false) ||
+      (student.userName?.toLowerCase().includes(searchText) ?? false)
+    );
+  });
 
 
   const loadStudents = async () => {
@@ -49,26 +63,54 @@ export function StudentsTab({ courseId }: StudentsTabProps) {
 
   return (
     <div>
-      <div className='flex justify-end mb-6'>
-        <button
-          onClick={handleImportZero}
-          className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-        >
-          Importovat studenty
-        </button>
-        <ImportStudentsWizardFirstModal
-          isOpen={isImportFirstModalOpen}
-          onClose={() => setIsImportFirstModalOpen(false)}
-          onAnalyzed={handleAnalyzed}
-        />
-        <ImportStudentsWizardSecondModal
-          isOpen={isImportSecondModalOpen}
-          onClose={() => setIsImportSecondModalOpen(false)}
-          analysisResult={studentAnalysisResult!}
-          courseId={courseId}
-          onImported={handleImported}
-        />
-      </div>
+      {/* Hlavní řádek s filtrováním a tlačítkem */}
+      {students && students.length > 0 && (
+        <div className="flex justify-between items-end mb-6 gap-4">
+          <div className="flex-1 max-w-md">
+            <label htmlFor="student-filter" className="block text-sm font-medium text-gray-700 mb-2">
+              Vyhledat studenta
+            </label>
+            <input
+              id="student-filter"
+              type="text"
+              placeholder="Hledat podle čísla, jména, příjmení nebo uživatelského jména..."
+              value={filterText}
+              onChange={(e) => setFilterText(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+          <button
+            onClick={handleImportZero}
+            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 whitespace-nowrap"
+          >
+            Importovat studenty
+          </button>
+        </div>
+      )}
+
+      {(!students || students.length === 0) && (
+        <div className='flex justify-end mb-6'>
+          <button
+            onClick={handleImportZero}
+            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            Importovat studenty
+          </button>
+        </div>
+      )}
+
+      <ImportStudentsWizardFirstModal
+        isOpen={isImportFirstModalOpen}
+        onClose={() => setIsImportFirstModalOpen(false)}
+        onAnalyzed={handleAnalyzed}
+      />
+      <ImportStudentsWizardSecondModal
+        isOpen={isImportSecondModalOpen}
+        onClose={() => setIsImportSecondModalOpen(false)}
+        analysisResult={studentAnalysisResult!}
+        courseId={courseId}
+        onImported={handleImported}
+      />
 
       {loading && <div className="text-center">Načítám studenty...</div>}
 
@@ -76,7 +118,13 @@ export function StudentsTab({ courseId }: StudentsTabProps) {
         <p className="text-gray-500 mb-4">Zatím nejsou přihlášení žádní studenti.</p>
       </div>}
 
-      {students && students.length != 0 &&
+      {filteredStudents && filteredStudents.length === 0 && students && students.length > 0 && (
+        <div className="text-center py-8">
+          <p className="text-gray-500 mb-4">Žádní studenti neodpovídají zadaným kritériím.</p>
+        </div>
+      )}
+
+      {filteredStudents && filteredStudents.length > 0 &&
         <div className="overflow-x-auto">
           <table className="min-w-full bg-white border border-gray-200 rounded-lg">
             <thead className="bg-gray-50">
@@ -108,7 +156,7 @@ export function StudentsTab({ courseId }: StudentsTabProps) {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {students.map((student) => (
+              {filteredStudents.map((student) => (
                 <tr key={student.number} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     {student.number}

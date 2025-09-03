@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using EngTaskGradingNetBE.Models;
-using EngTaskGradingNetBE.Services;
-using EngTaskGradingNetBE.Models.Dtos;
+﻿using EngTaskGradingNetBE.Exceptions;
 using EngTaskGradingNetBE.Lib;
-using EngTaskGradingNetBE.Exceptions;
+using EngTaskGradingNetBE.Models;
+using EngTaskGradingNetBE.Models.DbModel;
+using EngTaskGradingNetBE.Models.Dtos;
+using EngTaskGradingNetBE.Services;
+using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace EngTaskGradingNetBE.Controllers
 {
@@ -12,26 +14,27 @@ namespace EngTaskGradingNetBE.Controllers
   public class GradeController(GradeService gradeService) : ControllerBase
   {
 
-    // Insert a new grade
-    [HttpPost]
-    public async Task<GradeDto> InsertGrade([FromBody] GradeInsertDto request)
+    [HttpGet("for-course/{courseId}")]
+    public async Task<GradeSet> GetCourseGradeSet([FromRoute] int courseId)
     {
-      if (request == null)
-        throw new BadDataException("Request body is null");
+      var tmp = await gradeService.GetGradesByCourseAsync(courseId);
 
-      int teacherId = 1; // TODO: Replace with actual teacher ID from auth context
-      var grade = await gradeService.InsertGradeAsync(request.TaskId, request.StudentId, teacherId, request.Value, request.Comment);
-      var dto = EObjectMapper.To(grade);
-      return dto;
+      GradeSet ret = new GradeSet(tmp.Tasks.Select(EObjectMapper.To).ToList(),
+        tmp.Students.Select(EObjectMapper.To).OrderBy(q => q.Surname).ThenBy(q => q.Name).ToList(),
+        tmp.Grades.Select(EObjectMapper.To).ToList());
+      return ret;
     }
 
-    // Get all grades by course
-    [HttpGet("course/{courseId}")]
-    public async Task<List<GradeDto>> GetGradesByCourse(int courseId)
+    [HttpGet("for-task/{taskId}")]
+    public async Task<GradeSet> GetTaskGradeSet([FromRoute] int taskId)
     {
-      var grades = await gradeService.GetGradesByCourseAsync(courseId);
-      List<GradeDto> dtos = grades.Select(EObjectMapper.To).ToList();
-      return dtos;
+      var tmp = await gradeService.GetGradesByTaskAsync(taskId);
+
+      List<Models.DbModel.Task> tasks = [tmp.Task];
+      GradeSet ret = new GradeSet(tasks.Select(EObjectMapper.To).ToList(),
+        tmp.Students.Select(EObjectMapper.To).OrderBy(q => q.Surname).ThenBy(q => q.Name).ToList(),
+        tmp.Grades.Select(EObjectMapper.To).ToList());
+      return ret;
     }
   }
 }

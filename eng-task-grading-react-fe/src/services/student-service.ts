@@ -19,18 +19,4 @@ export const studentService = {
         logger.info("Studenti podle kurzu načteni.");
         return data;
     }
-
-    // async getAllCourses(): Promise<CourseDto[]> {
-    //     logger.info("Načítám všechny kurzy z API");
-    //     const { data } = await apiHttp.get<CourseDto[]>("/course");
-    //     logger.info(`Načteno ${data.length} kurzů`, { count: data.length });
-    //     return data;
-    // },
-
-    // async createCourse(courseData: CourseCreateDto): Promise<CourseDto> {
-    //     logger.info("Vytvářím nový kurz", courseData);
-    //     const { data } = await apiHttp.post<CourseDto>("/course", courseData);
-    //     logger.info("Kurz byl úspěšně vytvořen", { course: data });
-    //     return data;
-    // }
 };

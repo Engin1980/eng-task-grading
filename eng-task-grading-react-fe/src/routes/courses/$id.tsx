@@ -1,13 +1,13 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useLogger } from '../../hooks/use-logger'
-import { GradesTab, StudentsTab } from '../../components/courses'
+import { GradesTab, StudentsTab, TasksTab } from '../../components/courses'
 
 export const Route = createFileRoute('/courses/$id')({
   component: CourseDetailPage,
 })
 
-type TabType = 'grades' | 'students'
+type TabType = 'grades' | 'students' | 'tasks'
 
 function CourseDetailPage() {
   const { id } = Route.useParams()
@@ -29,21 +29,28 @@ function CourseDetailPage() {
         <nav className="-mb-px flex space-x-8">
           <button
             onClick={() => setActiveTab('grades')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'grades'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${activeTab === 'grades'
+              ? 'border-blue-500 text-blue-600'
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
           >
             Známky
           </button>
           <button
+            onClick={() => setActiveTab('tasks')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${activeTab === 'tasks'
+              ? 'border-blue-500 text-blue-600'
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+          >
+            Úkoly
+          </button>
+          <button
             onClick={() => setActiveTab('students')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'students'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${activeTab === 'students'
+              ? 'border-blue-500 text-blue-600'
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
           >
             Studenti
           </button>
@@ -52,11 +59,9 @@ function CourseDetailPage() {
 
       {/* Tab Content */}
       <div className="min-h-96">
-        {activeTab === 'grades' ? (
-          <GradesTab courseId={id} />
-        ) : (
-          <StudentsTab courseId={id} />
-        )}
+        {activeTab === 'grades' && <GradesTab courseId={id} />}
+        {activeTab === 'students' && <StudentsTab courseId={id} />}
+        {activeTab === 'tasks' && <TasksTab courseId={id} />}
       </div>
     </div>
   )

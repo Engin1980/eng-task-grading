@@ -1,17 +1,35 @@
 ﻿using EngTaskGradingNetBE.Models.DbModel;
-using EngTaskGradingNetBE.Models.Dtos;
 using Microsoft.EntityFrameworkCore;
 
 namespace EngTaskGradingNetBE.Services
 {
   public class GradeService(AppDbContext context) : DbContextBaseService(context)
   {
-    internal async Task<List<Grade>> GetGradesByCourseAsync(int courseId)
+    public record GradesByCourseResult(List<Models.DbModel.Task> Tasks, List<Student> Students, List<Grade> Grades);
+    internal async Task<GradesByCourseResult> GetGradesByCourseAsync(int courseId)
     {
-      var course = await Db.Courses.FindAsync(courseId) ?? throw new Exceptions.EntityNotFoundException(typeof(Course), courseId);
-      var ret = await Db.Grades
-        .Where(g => g.Task.CourseId == courseId)
+      var tasks = await Db.Tasks.Where(q => q.CourseId == courseId)
+        .Include(q => q.Grades).ThenInclude(q => q.Student)
         .ToListAsync();
+      var grades = tasks.SelectMany(q => q.Grades).ToList();
+      var students = grades.Select(q => q.Student).Distinct().ToList();
+
+      var ret = new GradesByCourseResult(tasks, students, grades);
+      return ret;
+    }
+
+    public record GradesByTaskResult(Models.DbModel.Task Task, List<Student> Students, List<Grade> Grades);
+    internal async Task<GradesByTaskResult> GetGradesByTaskAsync(int taskId)
+    {
+      var task = await Db.Tasks
+        .Include(q => q.Course).ThenInclude(q => q.Students)
+        .Include(q => q.Grades)
+        .ThenInclude(q => q.Student)
+        .FirstAsync(q => q.Id == taskId);
+      var grades = task.Grades.ToList();
+      var students = grades.Select(q => q.Student).Union(task.Course.Students).Distinct().ToList();
+
+      var ret = new GradesByTaskResult(task, students, grades);
       return ret;
     }
 

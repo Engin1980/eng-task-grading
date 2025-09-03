@@ -43,5 +43,28 @@ namespace EngTaskGradingNetBE.Services
       await Db.SaveChangesAsync();
     }
 
+    public async System.Threading.Tasks.Task AssignStudentsToCourseAsync(IEnumerable<int> studentIds, int courseId)
+    {
+      var course = await Db.Courses
+          .Include(c => c.Students)
+          .FirstOrDefaultAsync(c => c.Id == courseId);
+
+      if (course == null)
+        throw new Exceptions.EntityNotFoundException(typeof(Course), courseId);
+
+      var studentsToAssign = await Db.Students
+          .Where(s => studentIds.Contains(s.Id))
+          .ToListAsync();
+
+      foreach (var student in studentsToAssign)
+      {
+        if (!course.Students.Any(s => s.Id == student.Id))
+        {
+          course.Students.Add(student);
+        }
+      }
+
+      await Db.SaveChangesAsync();
+    }
   }
 }

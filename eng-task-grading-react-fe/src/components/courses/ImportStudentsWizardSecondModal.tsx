@@ -1,33 +1,35 @@
 import * as Dialog from '@radix-ui/react-dialog';
 import { useLogger } from '../../hooks/use-logger';
-import type { StudentAnalysisResultDto } from '../../model/student-dto';
+import type { StudentAnalysisResultDto, StudentCreateDto } from '../../model/student-dto';
+import { courseService } from '../../services/course-service';
 
-interface StudentAnalysisResultModalProps {
+interface ImportStudentsWizardSecondModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onContinue: () => void;
+  onImported: (students: StudentCreateDto[]) => void;
   analysisResult: StudentAnalysisResultDto | null;
+  courseId: string;
 }
 
-export function StudentAnalysisResultModal({ 
-  isOpen, 
-  onClose, 
-  onContinue, 
-  analysisResult 
-}: StudentAnalysisResultModalProps) {
-  const logger = useLogger("StudentAnalysisResultModal");
+export function ImportStudentsWizardSecondModal({
+  isOpen,
+  onClose,
+  onImported,
+  analysisResult,
+  courseId
+}: ImportStudentsWizardSecondModalProps) {
+  const logger = useLogger("ImportStudentsWizardSecondModal");
 
-  const handleContinue = () => {
-    logger.info('User confirmed analysis result', { 
-      studentsCount: analysisResult?.students.length || 0,
-      errorsCount: analysisResult?.errors.length || 0
-    });
-    onContinue();
+  const handleDoImport = async () => {
+    logger.info("Zahajuji import do kurzu");
+    await courseService.importStudentsToCourse(courseId, analysisResult!.students);
+    logger.info("Import do kurzu dokončen");
+    onImported(analysisResult!.students);
     onClose();
   };
 
   const handleCancel = () => {
-    logger.debug('Analysis result modal cancelled');
+    logger.debug("Analysis result modal cancelled");
     onClose();
   };
 
@@ -43,7 +45,7 @@ export function StudentAnalysisResultModal({
           <Dialog.Title className="text-lg font-semibold text-gray-900 mb-4">
             Výsledek analýzy importu studentů
           </Dialog.Title>
-          
+
           <Dialog.Description className="text-sm text-gray-600 mb-6">
             Zkontrolujte výsledky analýzy před pokračováním v importu.
           </Dialog.Description>
@@ -74,6 +76,9 @@ export function StudentAnalysisResultModal({
                         <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Program
                         </th>
+                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Forma
+                        </th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
@@ -93,6 +98,9 @@ export function StudentAnalysisResultModal({
                           </td>
                           <td className="px-4 py-2 text-sm text-gray-500">
                             {student.studyProgram}
+                          </td>
+                          <td className="px-4 py-2 text-sm text-gray-500">
+                            {student.studyForm}
                           </td>
                         </tr>
                       ))}
@@ -149,10 +157,10 @@ export function StudentAnalysisResultModal({
             </button>
             <button
               type="button"
-              onClick={handleContinue}
+              onClick={handleDoImport}
               className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
-              Pokračovat
+              Importovat do vybraného kurzu
             </button>
           </div>
 

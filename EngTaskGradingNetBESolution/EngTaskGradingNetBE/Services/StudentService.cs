@@ -36,9 +36,9 @@ namespace EngTaskGradingNetBE.Services
       if (lines.Length < 2) return new(result, errors); ;
 
       string firstLine = lines[0];
-      var pts = firstLine.ToLower().Split("\t").Select(q => q.Trim()).ToList();
+      var pts = firstLine.Split("\t").Select(q => q.Trim()).ToList();
       int ptsCount = pts.Count;
-      int numberIndex = pts.IndexOf("oscislo");
+      int numberIndex = pts.IndexOf("osCislo");
       int nameIndex = pts.IndexOf("jmeno");
       int surnameIndex = pts.IndexOf("prijmeni");
       int userNameIndex = pts.IndexOf("userName");
@@ -67,8 +67,9 @@ namespace EngTaskGradingNetBE.Services
       return new(result, errors);
     }
 
-    public async System.Threading.Tasks.Task CreateStudentsAsync(List<StudentCreateDto> students)
+    public async Task<List<Student>> CreateStudentsAsync(List<StudentCreateDto> students)
     {
+      List<Student> createdEntities = [];
       foreach (var dto in students)
       {
         var existing = Db.Students.FirstOrDefault(s => s.Number == dto.Number);
@@ -87,13 +88,17 @@ namespace EngTaskGradingNetBE.Services
           Name = dto.Name,
           Surname = dto.Surname,
           Email = dto.Email,
+          UserName = dto.UserName,
           StudyForm = dto.StudyForm,
           StudyProgram = dto.StudyProgram
         };
 
         await Db.Students.AddAsync(student);
+        createdEntities.Add(student);
       }
       await Db.SaveChangesAsync();
+
+      return createdEntities;
     }
   }
 }

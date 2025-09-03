@@ -28,19 +28,12 @@ namespace EngTaskGradingNetBE.Controllers
       return dto;
     }
 
-    //[HttpPost]
-    //public ActionResult<StudentDto> CreateStudent([FromBody] StudentCreateDto studentDto)
-    //{
-    //  var createdStudent = studentService.CreateStudent(studentDto);
-    //  return CreatedAtAction(nameof(GetStudentById), new { id = createdStudent.Id }, createdStudent);
-    //}
-
-    [HttpPost("analyse-stag-export")]
-    public StudentAnalysisResultDto AnalyseStagExport([FromBody] string data)
-    {
-      var result = studentService.AnalyseStagExport(data);
-      return result;
-    }
+      [HttpPost("analyse-stag-export")]
+      public StudentAnalysisResultDto AnalyseStagExport([FromBody] string data)
+      {
+        var result = studentService.AnalyseStagExport(data);
+        return result;
+      }
 
     [HttpPost("create-students")]
     public async Task CreateStudentsAsync([FromBody] List<StudentCreateDto> students)

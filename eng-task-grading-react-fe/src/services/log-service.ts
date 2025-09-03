@@ -26,7 +26,7 @@ const logImplementation = (level: LogLevel, sender: string, message: string, met
   // log to console
   switch (level) {
     case "debug":
-      console.debug(fullMessage, meta);
+      console.log(`🐛 ${fullMessage}`, meta);
       break;
     case "info":
       console.info(fullMessage, meta);

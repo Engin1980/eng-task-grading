@@ -9,7 +9,7 @@ namespace EngTaskGradingNetBE.Controllers
 {
   [ApiController]
   [Route("api/[controller]")]
-  public class CourseController(CourseService courseService) : ControllerBase
+  public class CourseController(CourseService courseService, StudentService studentService) : ControllerBase
   {
     [HttpPost]
     public async Task<ActionResult<Course>> CreateCourse([FromBody] CourseCreateDto courseCreateDto)
@@ -42,5 +42,13 @@ namespace EngTaskGradingNetBE.Controllers
       return dto;
     }
 
+
+    [HttpPost("{courseId}/import")]
+    public async System.Threading.Tasks.Task DoImportAsync([FromBody] List<StudentCreateDto> students, [FromRoute]int courseId)
+    {
+      var createdStudents = await studentService.CreateStudentsAsync(students);
+      var ids = createdStudents.Select(q => q.Id);
+      await courseService.AssignStudentsToCourseAsync(ids, courseId);
+    }
   }
 }

@@ -1,6 +1,7 @@
 import { apiHttp } from "./api-http";
 import { createLogger } from "./log-service";
 import type { CourseCreateDto, CourseDto } from "../model/course-dto";
+import type { StudentCreateDto } from "../model/student-dto";
 
 const logger = createLogger("CourseService");
 
@@ -21,5 +22,11 @@ export const courseService = {
     const { data } = await apiHttp.post<CourseDto>("/course", courseData);
     logger.info("Kurz byl úspěšně vytvořen", { course: data });
     return data;
+  },
+
+  async importStudentsToCourse(courseId: string, students: StudentCreateDto[]): Promise<void> {
+    logger.info("Importuji studenty do kurzu", { courseId });
+    await apiHttp.post(`/course/${courseId}/import`, students);
+    logger.info("Studenti byli úspěšně importováni do kurzu", { courseId });
   }
 };

@@ -58,6 +58,7 @@ static void BuildServices(WebApplicationBuilder builder)
   builder.Services.AddTransient<AuthService>();
   builder.Services.AddTransient<TeacherService>();
   builder.Services.AddTransient<CourseService>();
+  builder.Services.AddTransient<StudentService>();
   builder.Services.AddHttpClient<KeyCloakService>(); // http client for KeyCloakService
   builder.Services.AddTransient<KeyCloakService>();
   builder.Services.AddControllers();

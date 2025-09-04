@@ -7,6 +7,7 @@ export interface TaskDto {
 }
 
 export interface TaskCreateDto {
+  courseId: number;
   title: string;
   description?: string;
   keywords?: string;

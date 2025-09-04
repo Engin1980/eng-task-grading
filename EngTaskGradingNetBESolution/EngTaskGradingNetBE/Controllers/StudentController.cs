@@ -9,7 +9,7 @@ namespace EngTaskGradingNetBE.Controllers
   [Route("api/v1/[controller]")]
   public class StudentController([FromServices] StudentService studentService) : ControllerBase
   {
-    [HttpGet("by-course/{courseId}")]
+    [HttpGet("for-course/{courseId}")]
     public async Task<IEnumerable<StudentDto>> GetStudentsByCourseIdAsync(int courseId)
     {
       var students = await studentService.GetAllByCourseAsync(courseId);

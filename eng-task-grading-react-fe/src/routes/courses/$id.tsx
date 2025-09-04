@@ -2,12 +2,13 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useLogger } from '../../hooks/use-logger'
 import { GradesTab, StudentsTab, TasksTab } from '../../components/courses'
+import { AttendanceTab } from '../../components/courses'
 
 export const Route = createFileRoute('/courses/$id')({
   component: CourseDetailPage,
 })
 
-type TabType = 'grades' | 'students' | 'tasks'
+type TabType = 'grades' | 'students' | 'tasks' | 'attendances'
 
 function CourseDetailPage() {
   const { id } = Route.useParams()
@@ -46,6 +47,15 @@ function CourseDetailPage() {
             Úkoly
           </button>
           <button
+            onClick={() => setActiveTab('attendances')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${activeTab === 'attendances'
+              ? 'border-blue-500 text-blue-600'
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+          >
+            Účast
+          </button>
+          <button
             onClick={() => setActiveTab('students')}
             className={`py-2 px-1 border-b-2 font-medium text-sm ${activeTab === 'students'
               ? 'border-blue-500 text-blue-600'
@@ -62,6 +72,7 @@ function CourseDetailPage() {
         {activeTab === 'grades' && <GradesTab courseId={id} />}
         {activeTab === 'students' && <StudentsTab courseId={id} />}
         {activeTab === 'tasks' && <TasksTab courseId={id} />}
+        {activeTab === 'attendances' && <AttendanceTab courseId={id} />}
       </div>
     </div>
   )

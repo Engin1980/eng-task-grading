@@ -13,6 +13,11 @@ namespace EngTaskGradingNetBE.Models.DbModel
     public DbSet<StudentToken> StudentTokens => Set<StudentToken>();
     public DbSet<AppLog> AppLog => Set<AppLog>();
 
+    public DbSet<Attendance> Attendances => Set<Attendance>();
+    public DbSet<AttendanceValue> AttendanceValues => Set<AttendanceValue>();
+    public DbSet<AttendanceDay> AttendanceDays => Set<AttendanceDay>();
+
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
       modelBuilder.Entity<Student>(e =>

@@ -5,7 +5,7 @@ import type { StudentDto } from '../../model/student-dto';
 import type { GradeDto, GradeSet } from '../../model/grade-dto';
 import { gradeService } from '../../services/grade-service';
 import { taskService } from '../../services/task-service';
-import { AddGradeModal } from '../../components/tasks';
+import { AddGradeModal, EditGradeModal } from '../../components/tasks';
 
 export const Route = createFileRoute('/tasks/$id')({
   component: RouteComponent,
@@ -28,6 +28,8 @@ function RouteComponent() {
   const [filterText, setFilterText] = useState<string>("");
   const [isAddGradeModalOpen, setIsAddGradeModalOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<StudentDto | null>(null);
+  const [isEditGradeModalOpen, setIsEditGradeModalOpen] = useState(false);
+  const [selectedGrade, setSelectedGrade] = useState<GradeDto | null>(null);
 
   // Funkce pro filtrování studentů
   const filteredStudentData = data?.studentDatas.filter(studentData => {
@@ -91,6 +93,61 @@ function RouteComponent() {
   const handleCloseModal = () => {
     setIsAddGradeModalOpen(false);
     setSelectedStudent(null);
+  };
+
+  const handleEditGrade = (student: StudentDto, grade: GradeDto) => {
+    console.log('handleEditGrade called with:', student.name, grade.value);
+    setSelectedStudent(student);
+    setSelectedGrade(grade);
+    setIsEditGradeModalOpen(true);
+  };
+
+  const handleGradeUpdated = (updatedGrade: GradeDto) => {
+    // Aktualizace dat s upravenou známkou
+    if (data) {
+      const updatedStudentDatas = data.studentDatas.map(studentData => {
+        if (studentData.student.id === updatedGrade.studentId) {
+          return {
+            ...studentData,
+            grades: studentData.grades.map(grade => 
+              grade.id === updatedGrade.id ? updatedGrade : grade
+            ).sort((a, b) => {
+              const dateA = new Date(a.date);
+              const dateB = new Date(b.date);
+              return dateB.getTime() - dateA.getTime();
+            })
+          };
+        }
+        return studentData;
+      });
+      setData({ studentDatas: updatedStudentDatas });
+    }
+  };
+
+  const handleCloseEditModal = () => {
+    setIsEditGradeModalOpen(false);
+    setSelectedStudent(null);
+    setSelectedGrade(null);
+  };
+
+  const handleDeleteGrade = async (gradeId: number) => {
+    if (window.confirm('Opravdu chcete smazat tuto známku? Tato akce je nevratná.')) {
+      try {
+        await gradeService.deleteGrade(gradeId.toString());
+        
+        // Aktualizace dat po smazání známky
+        if (data) {
+          const updatedStudentDatas = data.studentDatas.map(studentData => ({
+            ...studentData,
+            grades: studentData.grades.filter(grade => grade.id !== gradeId)
+          }));
+          setData({ studentDatas: updatedStudentDatas });
+        }
+      } catch (error) {
+        console.error('Error deleting grade:', error);
+        alert('Chyba při mazání známky');
+      }
+    }
   };
 
   useEffect(() => {
@@ -179,6 +236,9 @@ function RouteComponent() {
                   <th className="px-3 py-3 text-center">
                     {/* Prázdný sloupec pro tlačítko + */}
                   </th>
+                  <th className="px-3 py-3 text-center">
+                    {/* Prázdný sloupec pro akce */}
+                  </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Datum
                   </th>
@@ -211,7 +271,10 @@ function RouteComponent() {
                           +
                         </button>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500" colSpan={2}>
+                      <td className="px-3 py-4 text-center">
+                        {/* Prázdné pro akce */}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500" colSpan={3}>
                         Bez známky
                       </td>
                     </tr>
@@ -243,12 +306,30 @@ function RouteComponent() {
                             </button>
                           </td>
                         )}
+                        <td className="px-3 py-4 text-center">
+                          <div className="flex justify-center space-x-1">
+                            <button
+                              onClick={() => handleEditGrade(studentData.student, grade)}
+                              className="inline-flex items-center justify-center w-6 h-6 text-sm font-medium text-white bg-blue-500 rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                              title="Upravit známku"
+                            >
+                              🖉
+                            </button>
+                            <button
+                              onClick={() => handleDeleteGrade(grade.id)}
+                              className="inline-flex items-center justify-center w-6 h-6 text-sm font-medium text-white bg-red-500 rounded-full hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                              title="Smazat známku"
+                            >
+                              ⨯
+                            </button>
+                          </div>
+                        </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           {new Date(grade.date).toLocaleString('cs-CZ')}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            grade.value >= 60 
+                            grade.value >= (task?.minGrade || 0)
                               ? 'bg-green-100 text-green-800' 
                               : 'bg-red-100 text-red-800'
                           }`}>
@@ -276,6 +357,15 @@ function RouteComponent() {
         student={selectedStudent}
         taskId={id}
         onGradeAdded={handleGradeAdded}
+      />
+
+      {/* Edit Grade Modal */}
+      <EditGradeModal
+        isOpen={isEditGradeModalOpen}
+        onClose={handleCloseEditModal}
+        student={selectedStudent}
+        grade={selectedGrade}
+        onGradeUpdated={handleGradeUpdated}
       />
     </div>
   );

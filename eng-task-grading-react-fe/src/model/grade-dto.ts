@@ -17,6 +17,11 @@ export interface GradeCreateDto {
   comment: string | null;
 }
 
+export interface GradeUpdateDto {
+  value?: number;
+  comment?: string | null;
+}
+
 export interface GradeSet {
   tasks: TaskDto[];
   students: StudentDto[];

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useLogger } from '../../hooks/use-logger';
 import type { GradeSet, GradeDto } from '../../model/grade-dto';
+import { gradeService } from '../../services/grade-service';
 
 interface GradesTabProps {
   courseId: string;
@@ -15,222 +16,11 @@ export function GradesTab({ courseId }: GradesTabProps) {
   const [studentFilter, setStudentFilter] = useState<string>("");
   const [taskFilter, setTaskFilter] = useState<string>("");
 
-  // Mock data pro ukázku - bude nahrazeno voláním API
   const loadGradeSet = async () => {
     try {
       setLoading(true);
-
-      // Mock data
-      const mockGradeSet: GradeSet = {
-        tasks: [
-          {
-            id: 1,
-            title: 'Domácí úkol 1',
-            description: 'Základy OOP',
-            keywords: 'programování, OOP',
-            minGrade: 60
-          },
-          {
-            id: 2,
-            title: 'Semestrální práce',
-            description: 'Větší projekt',
-            keywords: 'projekt, aplikace',
-            minGrade: 70
-          },
-          {
-            id: 3,
-            title: 'Test 1',
-            description: 'Teoretické znalosti',
-            keywords: 'test, teorie',
-            minGrade: 50
-          },
-          {
-            id: 4,
-            title: 'Prezentace',
-            description: 'Obhajoba projektu',
-            keywords: 'prezentace, obhajoba',
-            minGrade: 80
-          },
-          {
-            id: 5,
-            title: 'Domácí úkol 2',
-            description: 'Pokročilé programování',
-            keywords: 'programování, pokročilé',
-            minGrade: 65
-          },
-          {
-            id: 6,
-            title: 'Laboratorní práce 1',
-            description: 'Praktické cvičení',
-            keywords: 'laboratoř, praxe',
-            minGrade: 55
-          },
-          {
-            id: 7,
-            title: 'Test 2',
-            description: 'Mezitímní zkouška',
-            keywords: 'test, zkouška',
-            minGrade: 60
-          },
-          {
-            id: 8,
-            title: 'Domácí úkol 3',
-            description: 'Databáze a SQL',
-            keywords: 'databáze, SQL',
-            minGrade: 70
-          },
-          {
-            id: 9,
-            title: 'Skupinový projekt',
-            description: 'Týmová práce',
-            keywords: 'projekt, tým',
-            minGrade: 75
-          },
-          {
-            id: 10,
-            title: 'Laboratorní práce 2',
-            description: 'Pokročilé techniky',
-            keywords: 'laboratoř, pokročilé',
-            minGrade: 60
-          },
-          {
-            id: 11,
-            title: 'Seminární práce',
-            description: 'Teoretická analýza',
-            keywords: 'seminář, teorie',
-            minGrade: 65
-          },
-          {
-            id: 12,
-            title: 'Finální test',
-            description: 'Závěrečné hodnocení',
-            keywords: 'test, finální',
-            minGrade: 70
-          },
-          {
-            id: 13,
-            title: 'Portfolio',
-            description: 'Sbírka prací',
-            keywords: 'portfolio, kolekce',
-            minGrade: 60
-          },
-          {
-            id: 14,
-            title: 'Code Review',
-            description: 'Hodnocení kódu',
-            keywords: 'kód, review',
-            minGrade: 50
-          }
-        ],
-        students: [
-          {
-            id: 1,
-            number: 'A21B0001P',
-            name: 'Jan',
-            surname: 'Novák',
-            userName: 'novakj01',
-            email: 'novakj01@fel.cvut.cz',
-            studyProgram: 'Informatika',
-            studyForm: 'Prezenční'
-          },
-          {
-            id: 2,
-            number: 'A21B0002P',
-            name: 'Marie',
-            surname: 'Svobodová',
-            userName: 'svobom02',
-            email: 'svobom02@fel.cvut.cz',
-            studyProgram: 'Informatika',
-            studyForm: 'Prezenční'
-          },
-          {
-            id: 3,
-            number: 'A21B0003P',
-            name: 'Petr',
-            surname: 'Dvořák',
-            userName: 'dvorap03',
-            email: 'dvorap03@fel.cvut.cz',
-            studyProgram: 'Informatika',
-            studyForm: 'Kombinované'
-          },
-          {
-            id: 4,
-            number: 'A21B0004P',
-            name: 'Anna',
-            surname: 'Krásná',
-            userName: 'krasna04',
-            email: 'krasna04@fel.cvut.cz',
-            studyProgram: 'Informatika',
-            studyForm: 'Prezenční'
-          },
-          {
-            id: 5,
-            number: 'A21B0005P',
-            name: 'Tomáš',
-            surname: 'Černý',
-            userName: 'cernyto05',
-            email: 'cernyto05@fel.cvut.cz',
-            studyProgram: 'Informatika',
-            studyForm: 'Kombinované'
-          }
-        ],
-        grades: [
-          // Jan Novák
-          { id: 1, taskId: 1, studentId: 1, value: 85, comment: 'Velmi dobrá práce', date: new Date('2025-09-01') },
-          { id: 7196, taskId: 1, studentId: 1, value: 21, comment: 'Příště lépe', date: new Date('2025-08-01') },
-          { id: 7198, taskId: 1, studentId: 1, value: 14, comment: 'No to jsi zase dosral', date: new Date('2025-08-05') },
-          { id: 2, taskId: 2, studentId: 1, value: 78, comment: 'Solidní projekt', date: new Date('2025-09-05') },
-          { id: 3, taskId: 3, studentId: 1, value: 92, comment: 'Výborné znalosti', date: new Date('2025-09-10') },
-          { id: 15, taskId: 5, studentId: 1, value: 72, comment: 'Dobrý pokrok', date: new Date('2025-09-12') },
-          { id: 16, taskId: 7, studentId: 1, value: 68, comment: 'Průměrný výkon', date: new Date('2025-09-18') },
-          { id: 17, taskId: 9, studentId: 1, value: 82, comment: 'Dobrá týmová práce', date: new Date('2025-09-22') },
-          { id: 18, taskId: 11, studentId: 1, value: 75, comment: 'Solidní analýza', date: new Date('2025-09-25') },
-
-          // Marie Svobodová
-          { id: 4, taskId: 1, studentId: 2, value: 95, comment: 'Vynikající práce', date: new Date('2025-09-01') },
-          { id: 5, taskId: 2, studentId: 2, value: 88, comment: 'Velmi dobrý projekt', date: new Date('2025-09-05') },
-          { id: 6, taskId: 3, studentId: 2, value: 76, comment: 'Dobré znalosti', date: new Date('2025-09-10') },
-          { id: 7, taskId: 4, studentId: 2, value: 91, comment: 'Skvělá prezentace', date: new Date('2025-09-15') },
-          { id: 19, taskId: 5, studentId: 2, value: 89, comment: 'Výborné řešení', date: new Date('2025-09-12') },
-          { id: 20, taskId: 6, studentId: 2, value: 62, comment: 'Základní úroveň', date: new Date('2025-09-16') },
-          { id: 21, taskId: 7, studentId: 2, value: 84, comment: 'Dobré znalosti', date: new Date('2025-09-18') },
-          { id: 22, taskId: 8, studentId: 2, value: 91, comment: 'Perfektní SQL', date: new Date('2025-09-20') },
-          { id: 23, taskId: 10, studentId: 2, value: 78, comment: 'Pokročilé techniky', date: new Date('2025-09-24') },
-          { id: 24, taskId: 12, studentId: 2, value: 86, comment: 'Finální úspěch', date: new Date('2025-09-28') },
-
-          // Petr Dvořák
-          { id: 8, taskId: 1, studentId: 3, value: 45, comment: 'Nedostatečné', date: new Date('2025-09-01') },
-          { id: 9, taskId: 1, studentId: 3, value: 67, comment: 'Opraveno', date: new Date('2025-09-03') },
-          { id: 10, taskId: 3, studentId: 3, value: 58, comment: 'Základní znalosti', date: new Date('2025-09-10') },
-          { id: 25, taskId: 5, studentId: 3, value: 42, comment: 'Potřebuje zlepšení', date: new Date('2025-09-12') },
-          { id: 26, taskId: 6, studentId: 3, value: 71, comment: 'Lepší výkon', date: new Date('2025-09-16') },
-          { id: 27, taskId: 8, studentId: 3, value: 55, comment: 'Slabé SQL', date: new Date('2025-09-20') },
-          { id: 28, taskId: 13, studentId: 3, value: 64, comment: 'Průměrné portfolio', date: new Date('2025-09-26') },
-
-          // Anna Krásná
-          { id: 11, taskId: 1, studentId: 4, value: 72, comment: 'Dobrá práce', date: new Date('2025-09-01') },
-          { id: 12, taskId: 2, studentId: 4, value: 84, comment: 'Kvalitní projekt', date: new Date('2025-09-05') },
-          { id: 13, taskId: 4, studentId: 4, value: 87, comment: 'Dobrá prezentace', date: new Date('2025-09-15') },
-          { id: 29, taskId: 6, studentId: 4, value: 68, comment: 'Solidní práce', date: new Date('2025-09-16') },
-          { id: 30, taskId: 7, studentId: 4, value: 79, comment: 'Dobrý test', date: new Date('2025-09-18') },
-          { id: 31, taskId: 9, studentId: 4, value: 88, comment: 'Výborná spolupráce', date: new Date('2025-09-22') },
-          { id: 32, taskId: 11, studentId: 4, value: 73, comment: 'Dobrá analýza', date: new Date('2025-09-25') },
-          { id: 33, taskId: 14, studentId: 4, value: 56, comment: 'Základní review', date: new Date('2025-09-30') },
-
-          // Tomáš Černý - rozšířené známky
-          { id: 34, taskId: 3, studentId: 5, value: 48, comment: 'Pod očekáváním', date: new Date('2025-09-10') },
-          { id: 35, taskId: 6, studentId: 5, value: 59, comment: 'Těsně pod limitem', date: new Date('2025-09-16') },
-          { id: 36, taskId: 8, studentId: 5, value: 73, comment: 'Zlepšující se', date: new Date('2025-09-20') },
-          { id: 37, taskId: 10, studentId: 5, value: 61, comment: 'Splněno', date: new Date('2025-09-24') },
-          { id: 38, taskId: 12, studentId: 5, value: 74, comment: 'Dobrý finál', date: new Date('2025-09-28') }
-        ]
-      };
-
-      setGradeSet(mockGradeSet);
-
-      // TODO: Nahradit mock data skutečným API voláním:
-      // const gradeSetData = await gradeService.getGradesByCourse(courseId);
-      // setGradeSet(gradeSetData);
+      const data = await gradeService.getGradesByCourse(courseId);
+      setGradeSet(data);
     } catch (error) {
       logger.error('Error loading grades:', error);
     } finally {
@@ -402,7 +192,7 @@ export function GradesTab({ courseId }: GradesTabProps) {
 
       {/* Tabulka */}
       <div className="overflow-x-auto">
-        <table className="w-full bg-white border border-gray-200 rounded-lg table-auto">
+        <table className="bg-white border border-gray-200 rounded-lg table-auto">
           <thead className="bg-gray-50">
             <tr>
               <th className="px-4 py-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky left-0 bg-gray-50 z-10 w-48">
@@ -414,7 +204,7 @@ export function GradesTab({ courseId }: GradesTabProps) {
               {filteredTasks?.map((task) => (
                 <th
                   key={task.id}
-                  className="px-2 py-3 border-b border-gray-200 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  className="min-w-24 max-w-48 px-2 py-3 border-b border-gray-200 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
                   title={task.description || task.title}
                 >
                   <button

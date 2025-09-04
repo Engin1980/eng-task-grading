@@ -21,7 +21,7 @@ namespace EngTaskGradingNetBE.Controllers
       return dto;
     }
 
-    [HttpPost("register")]
+    [HttpPost]
     public async Task<TeacherDto> RegisterAsync([FromBody] TeacherRegisterDto request)
     {
       var teacher = await authService.RegisterTeacher(request.Email, request.Password);

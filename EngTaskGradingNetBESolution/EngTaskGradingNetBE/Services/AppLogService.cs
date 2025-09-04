@@ -4,12 +4,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EngTaskGradingNetBE.Services
 {
-  public class AppLogService : DbContextBaseService
+  public class AppLogService([FromServices] AppDbContext context) : DbContextBaseService(context)
   {
-    public AppLogService([FromServices] AppDbContext context) : base(context)
-    {
-    }
-
     public async Task<List<AppLog>> GetAllLogsAsync()
     {
       return await Db.AppLog

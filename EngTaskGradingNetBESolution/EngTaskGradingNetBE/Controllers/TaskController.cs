@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace EngTaskGradingNetBE.Controllers
 {
   [ApiController]
-  [Route("api/[controller]")]
+  [Route("api/v1/[controller]")]
   public class TaskController(TaskService taskService) : ControllerBase
   {
     [HttpGet("for-course/{courseId}")]
@@ -20,11 +20,11 @@ namespace EngTaskGradingNetBE.Controllers
       return taskDtos;
     }
 
-    [HttpPost("for-course/{courseId}")]
-    public async Task<TaskDto> CreateTaskAsync([FromBody] TaskCreateDto taskCreateDto, [FromRoute] int courseId)
+    [HttpPost()]
+    public async Task<TaskDto> CreateTaskAsync([FromBody] TaskCreateDto taskCreateDto)
     {
       var task = EObjectMapper.From(taskCreateDto);
-      var createdTask = await taskService.CreateForCourseAsync(courseId, task);
+      var createdTask = await taskService.CreateAsync(taskCreateDto.CourseId, task);
       var taskDto = EObjectMapper.To(createdTask);
       return taskDto;
     }

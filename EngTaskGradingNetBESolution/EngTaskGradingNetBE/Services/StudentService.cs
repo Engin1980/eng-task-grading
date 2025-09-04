@@ -1,29 +1,40 @@
 ﻿using EngTaskGradingNetBE.Models.DbModel;
 using EngTaskGradingNetBE.Models.Dtos;
+using Microsoft.EntityFrameworkCore;
 
 namespace EngTaskGradingNetBE.Services
 {
   public class StudentService(AppDbContext context) : DbContextBaseService(context)
   {
-    public IEnumerable<Student> GetAll()
+    public async Task<IEnumerable<Student>> GetAllAsync()
     {
-      return Db.Students.ToList();
+      return await Db.Students
+        .OrderBy(q => q.Surname)
+        .ThenBy(q => q.Name)
+        .ToListAsync();
     }
 
-    public IEnumerable<Student> GetAllByCourseId(int courseId)
+    public async Task<IEnumerable<Student>> GetAllByCourseAsync(int courseId)
     {
-      return Db.Students.Where(s => s.Courses.Any(c => c.Id == courseId)).ToList();
+      return await Db.Students
+        .Where(s => s.Courses.Any(c => c.Id == courseId))
+        .OrderBy(q => q.Surname)
+        .ThenBy(q => q.Name)
+        .ToListAsync();
     }
 
-    public IEnumerable<Student> GetStudentsByCourse(Course course)
+    public async Task<IEnumerable<Student>> GetAllByCourseAsync(Course course)
     {
       if (course == null) return [];
-      return GetAllByCourseId(course.Id);
+      return await GetAllByCourseAsync(course.Id);
     }
 
-    public Student GetById(int id)
+    public async Task<Student> GetByIdAsync(int id)
     {
-      throw new NotImplementedException();
+      Student ret = await Db.Students
+        .FirstOrDefaultAsync(q => q.Id == id)
+        ?? throw new Exceptions.EntityNotFoundException(typeof(Student), id);
+      return ret;
     }
 
     public StudentAnalysisResultDto AnalyseStagExport(string data)
@@ -67,38 +78,79 @@ namespace EngTaskGradingNetBE.Services
       return new(result, errors);
     }
 
-    public async Task<List<Student>> CreateStudentsAsync(List<StudentCreateDto> students)
+    public async Task<List<Student>> CreateAsync(List<Student> students)
     {
       List<Student> createdEntities = [];
       foreach (var dto in students)
       {
-        var existing = Db.Students.FirstOrDefault(s => s.Number == dto.Number);
-        if (existing != null)
+        var existing = await CheckIfAlreadyExists(dto);
+
+        if (existing == null)
         {
-          if (existing.Name != dto.Name || existing.Surname != dto.Surname ||
-            existing.Email != dto.Email || existing.UserName != dto.UserName)
-          {
-            throw new Exception($"Unable to insert student {dto.Name} {dto.Surname} ({dto.Number}). Student already exists with different values!");
-          }
+          await Db.Students.AddAsync(dto);
+          createdEntities.Add(dto);
         }
-
-        var student = new Student
-        {
-          Number = dto.Number,
-          Name = dto.Name,
-          Surname = dto.Surname,
-          Email = dto.Email,
-          UserName = dto.UserName,
-          StudyForm = dto.StudyForm,
-          StudyProgram = dto.StudyProgram
-        };
-
-        await Db.Students.AddAsync(student);
-        createdEntities.Add(student);
+        else
+          createdEntities.Add(existing);
       }
       await Db.SaveChangesAsync();
 
       return createdEntities;
+    }
+
+    public async Task<Student> CreateAsync(Student student, bool mayAlreadyExist = true)
+    {
+      Student? ret = null;
+      if (mayAlreadyExist)
+        ret = await CheckIfAlreadyExists(student);
+      if (ret == null)
+      {
+        await Db.Students.AddAsync(student);
+        await Db.SaveChangesAsync();
+      }
+      return student;
+    }
+
+    private async Task<Student?> CheckIfAlreadyExists(Student student)
+    {
+      var existing = await Db.Students.FirstOrDefaultAsync(s => s.Number == student.Number);
+      if (existing != null)
+      {
+        if (existing.Name != student.Name || existing.Surname != student.Surname ||
+          existing.Email != student.Email || existing.UserName != student.UserName)
+        {
+          throw new Exception($"Unable to insert student {student.Name} {student.Surname} ({student.Number}). Student already exists with different values!");
+        }
+      }
+      return existing;
+    }
+
+    public async Task<Student> UpdateAsync(int id, Student updatedStudent)
+    {
+      var existingStudent = await Db.Students.FirstOrDefaultAsync(q => q.Id == id)
+        ?? throw new Exceptions.EntityNotFoundException(typeof(Student), id);
+
+      existingStudent.Number = updatedStudent.Number;
+      existingStudent.Name = updatedStudent.Name;
+      existingStudent.Surname = updatedStudent.Surname;
+      existingStudent.UserName = updatedStudent.UserName;
+      existingStudent.Email = updatedStudent.Email;
+      existingStudent.StudyProgram = updatedStudent.StudyProgram;
+      existingStudent.StudyForm = updatedStudent.StudyForm;
+
+      await Db.SaveChangesAsync();
+      return existingStudent;
+    }
+
+    public async System.Threading.Tasks.Task DeleteAsync(int id, bool mustExist = false)
+    {
+      var student = await Db.Students.FirstOrDefaultAsync(q => q.Id == id);
+      if (student == null)
+        if (mustExist) throw new Exceptions.EntityNotFoundException(typeof(Student), id);
+        else return;
+      Db.Students.Remove(student);
+      await Db.SaveChangesAsync();
+      return;
     }
   }
 }

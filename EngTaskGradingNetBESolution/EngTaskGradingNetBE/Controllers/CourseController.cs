@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace EngTaskGradingNetBE.Controllers
 {
   [ApiController]
-  [Route("api/[controller]")]
+  [Route("api/v1/[controller]")]
   public class CourseController(CourseService courseService, StudentService studentService) : ControllerBase
   {
     [HttpPost]
@@ -18,17 +18,17 @@ namespace EngTaskGradingNetBE.Controllers
         return BadRequest("Course data is required.");
 
       Course course = EObjectMapper.From(courseCreateDto);
-      var createdCourse = await courseService.CreateCourseAsync(course);
-      var courseDto = EObjectMapper.ToDto(createdCourse);
+      var createdCourse = await courseService.CreateAsync(course);
+      var courseDto = EObjectMapper.To(createdCourse);
       return CreatedAtAction(nameof(CreateCourse), courseDto.Id, courseDto);
     }
 
     [HttpGet]
     public async Task<List<CourseDto>> GetAllCourses()
     {
-      var courses = await courseService.GetAllCoursesAsync();
+      var courses = await courseService.GetAllAsync();
       var courseDtos = courses
-        .Select(EObjectMapper.ToDto)
+        .Select(EObjectMapper.To)
         .OrderBy(c => c.Code)
         .ToList();
       return courseDtos;
@@ -37,18 +37,21 @@ namespace EngTaskGradingNetBE.Controllers
     [HttpGet("{id}")]
     public async Task<CourseDto> GetCourseById(int id)
     {
-      Course course = await courseService.GetCourseByIdAsync(id);
-      var dto = EObjectMapper.ToDto(course);
+      Course course = await courseService.GetByIdAsync(id);
+      var dto = EObjectMapper.To(course);
       return dto;
     }
 
 
-    [HttpPost("{courseId}/import")]
+    [HttpPost("{courseId}/import-students")]
     public async System.Threading.Tasks.Task DoImportAsync([FromBody] List<StudentCreateDto> students, [FromRoute]int courseId)
     {
-      var createdStudents = await studentService.CreateStudentsAsync(students);
+      List<Student> entities = students
+        .Select(EObjectMapper.From)
+        .ToList();
+      var createdStudents = await studentService.CreateAsync(entities);
       var ids = createdStudents.Select(q => q.Id);
-      await courseService.AssignStudentsToCourseAsync(ids, courseId);
+      await courseService.AssignStudentsAsync(ids, courseId);
     }
   }
 }

@@ -49,5 +49,22 @@ namespace EngTaskGradingNetBE.Services
       await Db.SaveChangesAsync();
       return grade;
     }
+
+    public async Task<Grade> CreateAsync(Grade grade)
+    {
+      await Db.Grades.AddAsync(grade);
+      await Db.SaveChangesAsync();
+      return grade;
+    }
+
+    public async void DeleteAsync(int gradeId, bool mustExist = false)
+    {
+      var grade = await Db.Grades.FirstOrDefaultAsync(q => q.Id == gradeId);
+      if (grade == null)
+        if (mustExist) throw new Exceptions.EntityNotFoundException(typeof(Grade), gradeId);
+        else return;
+      Db.Grades.Remove(grade);
+      await Db.SaveChangesAsync();
+    }
   }
 }

@@ -3,7 +3,7 @@ import { useNavigate } from '@tanstack/react-router';
 import { useLogger } from '../../hooks/use-logger';
 import { taskService } from '../../services/task-service';
 import { CreateTaskModal } from '../tasks';
-import type { TaskDto, TaskCreateDto } from '../../model/task-dto';
+import type { TaskDto } from '../../model/task-dto';
 
 interface TasksTabProps {
   courseId: string;
@@ -95,16 +95,18 @@ export function TasksTab({ courseId }: TasksTabProps) {
                 <th className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Min. hodnota
                 </th>
-                <th className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Akce
-                </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {tasks.map((task) => (
                 <tr key={task.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">{task.title}</div>
+                    <button
+                      onClick={() => handleDetailTask(task.id)}
+                      className="text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                    >
+                      {task.title}
+                    </button>
                   </td>
                   <td className="px-6 py-4">
                     <div className="text-sm text-gray-500 max-w-xs truncate">
@@ -118,14 +120,6 @@ export function TasksTab({ courseId }: TasksTabProps) {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {task.minGrade !== null && task.minGrade !== undefined ? task.minGrade : '-'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button
-                      onClick={() => handleDetailTask(task.id)}
-                      className="text-indigo-600 hover:text-indigo-800"
-                    >
-                      Detail
-                    </button>
                   </td>
                 </tr>
               ))}

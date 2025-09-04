@@ -67,9 +67,6 @@ export function StudentsTab({ courseId }: StudentsTabProps) {
       {students && students.length > 0 && (
         <div className="flex justify-between items-end mb-6 gap-4">
           <div className="flex-1 max-w-md">
-            <label htmlFor="student-filter" className="block text-sm font-medium text-gray-700 mb-2">
-              Vyhledat studenta
-            </label>
             <input
               id="student-filter"
               type="text"
@@ -144,9 +141,6 @@ export function StudentsTab({ courseId }: StudentsTabProps) {
                   Příjmení
                 </th>
                 <th className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Uživatelské jméno
-                </th>
-                <th className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Email
                 </th>
                 <th className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -155,25 +149,27 @@ export function StudentsTab({ courseId }: StudentsTabProps) {
                 <th className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Forma studia
                 </th>
-                <th className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Akce
-                </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredStudents.map((student) => (
                 <tr key={student.number} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {student.number}
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <button 
+                      className="text-blue-600 hover:text-blue-800 font-medium"
+                      onClick={() => {
+                        // TODO: Implementovat detail studenta
+                        console.log('Detail studenta:', student.number);
+                      }}
+                    >
+                      {student.number}
+                    </button>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {student.name}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {student.surname}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {student.userName}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {student.email}
@@ -183,11 +179,6 @@ export function StudentsTab({ courseId }: StudentsTabProps) {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {student.studyForm}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button className="text-blue-600 hover:text-blue-800">
-                      Detail
-                    </button>
                   </td>
                 </tr>
               ))}

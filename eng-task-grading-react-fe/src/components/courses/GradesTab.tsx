@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from '@tanstack/react-router';
 import { useLogger } from '../../hooks/use-logger';
 import type { GradeSet, GradeDto } from '../../model/grade-dto';
-import { gradeService } from '../../services/grade-service';
 
 interface GradesTabProps {
   courseId: string;
@@ -9,6 +9,7 @@ interface GradesTabProps {
 
 export function GradesTab({ courseId }: GradesTabProps) {
   const logger = useLogger("GradesTab");
+  const navigate = useNavigate();
   const [gradeSet, setGradeSet] = useState<GradeSet | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [studentFilter, setStudentFilter] = useState<string>("");
@@ -241,6 +242,12 @@ export function GradesTab({ courseId }: GradesTabProps) {
     loadGradeSet();
   }, [courseId]);
 
+  // Funkce pro navigaci na detail úkolu
+  const handleTaskDetail = (taskId: number) => {
+    logger.info("Navigate to task detail", { taskId });
+    navigate({ to: `/tasks/${taskId}` });
+  };
+
   // Funkce pro filtrování studentů
   const filteredStudents = gradeSet?.students.filter(student => {
     if (!studentFilter.trim()) return true;
@@ -410,7 +417,12 @@ export function GradesTab({ courseId }: GradesTabProps) {
                   className="px-2 py-3 border-b border-gray-200 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
                   title={task.description || task.title}
                 >
-                  <div className="break-words hyphens-auto">{task.title}</div>
+                  <button
+                    onClick={() => handleTaskDetail(task.id)}
+                    className="break-words hyphens-auto text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                  >
+                    {task.title}
+                  </button>
                   {task.minGrade !== null && task.minGrade !== undefined && (
                     <div className="text-xs text-gray-400 font-normal">Min: {task.minGrade}</div>
                   )}

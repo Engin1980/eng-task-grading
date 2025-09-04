@@ -52,6 +52,8 @@ namespace EngTaskGradingNetBE.Services
 
     public async Task<Grade> CreateAsync(Grade grade)
     {
+      //TODO UPDATE later when logging is implemented
+      grade.AssignerTeacher = await Db.Teachers.FirstAsync();
       await Db.Grades.AddAsync(grade);
       await Db.SaveChangesAsync();
       return grade;

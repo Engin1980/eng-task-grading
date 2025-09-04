@@ -10,12 +10,12 @@ using System.Threading.Tasks;
 namespace EngTaskGradingNetBE.Controllers
 {
   [ApiController]
-  [Route("api/[controller]")]
+  [Route("api/v1/[controller]")]
   public class GradeController(GradeService gradeService) : ControllerBase
   {
 
     [HttpGet("for-course/{courseId}")]
-    public async Task<GradeSet> GetCourseGradeSet([FromRoute] int courseId)
+    public async Task<GradeSet> GetCourseGradeSetAsync([FromRoute] int courseId)
     {
       var tmp = await gradeService.GetGradesByCourseAsync(courseId);
 
@@ -26,7 +26,7 @@ namespace EngTaskGradingNetBE.Controllers
     }
 
     [HttpGet("for-task/{taskId}")]
-    public async Task<GradeSet> GetTaskGradeSet([FromRoute] int taskId)
+    public async Task<GradeSet> GetTaskGradeSetAsync([FromRoute] int taskId)
     {
       var tmp = await gradeService.GetGradesByTaskAsync(taskId);
 
@@ -35,6 +35,15 @@ namespace EngTaskGradingNetBE.Controllers
         tmp.Students.Select(EObjectMapper.To).OrderBy(q => q.Surname).ThenBy(q => q.Name).ToList(),
         tmp.Grades.Select(EObjectMapper.To).ToList());
       return ret;
+    }
+
+    [HttpPost]
+    public async Task<GradeDto> CreateAsync([FromBody] GradeCreateDto gradeCreateDto)
+    {
+      Grade grade = EObjectMapper.From(gradeCreateDto, DateTime.Now);
+      var createdGrade = await gradeService.CreateAsync(grade);
+      var gradeDto = EObjectMapper.To(createdGrade);
+      return gradeDto;
     }
   }
 }

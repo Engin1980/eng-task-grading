@@ -10,6 +10,7 @@
 
   public record TaskCreateDto(
           string Title,
+          int CourseId,
           string? Keywords,
           string?Description,
           int? MinGrade

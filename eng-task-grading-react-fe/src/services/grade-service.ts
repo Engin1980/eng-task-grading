@@ -1,4 +1,4 @@
-import type { GradeCreateDto, GradeDto, GradeSet } from "../model/grade-dto";
+import type { GradeCreateDto, GradeDto, GradeSet, GradeUpdateDto } from "../model/grade-dto";
 import { apiHttp } from "./api-http"
 import { createLogger } from "./log-service";
 
@@ -22,5 +22,14 @@ export const gradeService = {
   async createGrade(grade: GradeCreateDto): Promise<GradeDto> {
     const { data } = await apiHttp.post<GradeDto>("/v1/grade", grade);
     return data;
+  },
+
+  async updateGrade(gradeId: string, grade: GradeUpdateDto): Promise<GradeDto> {
+    const { data } = await apiHttp.patch<GradeDto>(`/v1/grade/${gradeId}`, grade);
+    return data;
+  },
+
+  async deleteGrade(gradeId: string): Promise<void> {
+    await apiHttp.delete(`/v1/grade/${gradeId}`);
   }
 }

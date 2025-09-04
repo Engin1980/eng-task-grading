@@ -1,4 +1,5 @@
 ﻿using EngTaskGradingNetBE.Models.DbModel;
+using EngTaskGradingNetBE.Models.Dtos;
 using Microsoft.EntityFrameworkCore;
 
 namespace EngTaskGradingNetBE.Services
@@ -59,7 +60,7 @@ namespace EngTaskGradingNetBE.Services
       return grade;
     }
 
-    public async void DeleteAsync(int gradeId, bool mustExist = false)
+    public async System.Threading.Tasks.Task DeleteAsync(int gradeId, bool mustExist = false)
     {
       var grade = await Db.Grades.FirstOrDefaultAsync(q => q.Id == gradeId);
       if (grade == null)
@@ -67,6 +68,18 @@ namespace EngTaskGradingNetBE.Services
         else return;
       Db.Grades.Remove(grade);
       await Db.SaveChangesAsync();
+    }
+
+    public async Task<Grade> UpdateAsync(int id, Grade grade)
+    {
+      var existingGrade = await Db.Grades.FirstOrDefaultAsync(q => q.Id == id)
+        ?? throw new Exceptions.EntityNotFoundException(typeof(Grade), id);
+
+      existingGrade.Value = grade.Value;
+      existingGrade.Comment = grade.Comment;
+
+      await Db.SaveChangesAsync();
+      return existingGrade;
     }
   }
 }

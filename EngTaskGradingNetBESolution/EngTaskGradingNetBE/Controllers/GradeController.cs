@@ -45,5 +45,20 @@ namespace EngTaskGradingNetBE.Controllers
       var gradeDto = EObjectMapper.To(createdGrade);
       return gradeDto;
     }
+
+    [HttpPatch("{id}")]
+    public async Task<GradeDto> UpdateAsync([FromRoute] int id, [FromBody] GradeUpdateDto gradeUpdateDto)
+    {
+      var grade = EObjectMapper.From(gradeUpdateDto);
+      grade = await gradeService.UpdateAsync(id, grade);
+      var ret = EObjectMapper.To(grade);
+      return ret;
+    }
+
+    [HttpDelete("{id}")]
+    public async System.Threading.Tasks.Task DeleteAsync([FromRoute] int id)
+    {
+      await gradeService.DeleteAsync(id);
+    }
   }
 }

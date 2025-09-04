@@ -49,4 +49,13 @@ public static class EObjectMapper
     StudyProgram = studentDto.StudyProgram,
     StudyForm = studentDto.StudyForm
   };
+
+  internal static Grade From(GradeUpdateDto gradeDto)
+  {
+    return new Grade()
+    {
+      Value = gradeDto.Value,
+      Comment = gradeDto.Comment
+    };
+  }
 }

@@ -9,6 +9,7 @@ const TopMenu: React.FC = () => {
             <Link to="/courses" className="mr-4 text-blue-600">Kurzy</Link>
             <Link to="/login" className="mr-4 text-blue-600">Login</Link>
             <Link to="/register" className="text-blue-600">Registrace</Link>
+            <Link to="/logs" className="ml-4 text-blue-600">App-Log</Link>
 
         </nav>
     </>);

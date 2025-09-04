@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as RegisterRouteImport } from './routes/register'
+import { Route as LogsRouteImport } from './routes/logs'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as HomeRouteImport } from './routes/home'
 import { Route as CoursesIndexRouteImport } from './routes/courses/index'
@@ -19,6 +20,11 @@ import { Route as CoursesIdRouteImport } from './routes/courses/$id'
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LogsRoute = LogsRouteImport.update({
+  id: '/logs',
+  path: '/logs',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -50,6 +56,7 @@ const CoursesIdRoute = CoursesIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/home': typeof HomeRoute
   '/login': typeof LoginRoute
+  '/logs': typeof LogsRoute
   '/register': typeof RegisterRoute
   '/courses/$id': typeof CoursesIdRoute
   '/tasks/$id': typeof TasksIdRoute
@@ -58,6 +65,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/home': typeof HomeRoute
   '/login': typeof LoginRoute
+  '/logs': typeof LogsRoute
   '/register': typeof RegisterRoute
   '/courses/$id': typeof CoursesIdRoute
   '/tasks/$id': typeof TasksIdRoute
@@ -67,6 +75,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/home': typeof HomeRoute
   '/login': typeof LoginRoute
+  '/logs': typeof LogsRoute
   '/register': typeof RegisterRoute
   '/courses/$id': typeof CoursesIdRoute
   '/tasks/$id': typeof TasksIdRoute
@@ -77,6 +86,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/home'
     | '/login'
+    | '/logs'
     | '/register'
     | '/courses/$id'
     | '/tasks/$id'
@@ -85,6 +95,7 @@ export interface FileRouteTypes {
   to:
     | '/home'
     | '/login'
+    | '/logs'
     | '/register'
     | '/courses/$id'
     | '/tasks/$id'
@@ -93,6 +104,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/home'
     | '/login'
+    | '/logs'
     | '/register'
     | '/courses/$id'
     | '/tasks/$id'
@@ -102,6 +114,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   HomeRoute: typeof HomeRoute
   LoginRoute: typeof LoginRoute
+  LogsRoute: typeof LogsRoute
   RegisterRoute: typeof RegisterRoute
   CoursesIdRoute: typeof CoursesIdRoute
   TasksIdRoute: typeof TasksIdRoute
@@ -115,6 +128,13 @@ declare module '@tanstack/react-router' {
       path: '/register'
       fullPath: '/register'
       preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/logs': {
+      id: '/logs'
+      path: '/logs'
+      fullPath: '/logs'
+      preLoaderRoute: typeof LogsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -158,6 +178,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   HomeRoute: HomeRoute,
   LoginRoute: LoginRoute,
+  LogsRoute: LogsRoute,
   RegisterRoute: RegisterRoute,
   CoursesIdRoute: CoursesIdRoute,
   TasksIdRoute: TasksIdRoute,

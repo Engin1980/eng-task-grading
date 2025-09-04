@@ -14,6 +14,7 @@ interface CreateTaskModalProps {
 export function CreateTaskModal({ isOpen, onClose, onTaskCreated, courseId }: CreateTaskModalProps) {
   const logger = useLogger("CreateTaskModal");
   const [formData, setFormData] = useState<TaskCreateDto>({
+    courseId: Number(courseId),
     title: '',
     description: '',
     keywords: '',
@@ -30,19 +31,21 @@ export function CreateTaskModal({ isOpen, onClose, onTaskCreated, courseId }: Cr
 
     logger.info("Vytvářím nový úkol", { title: formData.title });
     const newTask: TaskCreateDto = {
+      courseId: Number(courseId),
       title: formData.title,
       description: formData.description,
       keywords: formData.keywords,
       minGrade: formData.minGrade
     };
 
-    const ret = await taskService.create(courseId, newTask);
+    const ret = await taskService.create(newTask);
     onTaskCreated(ret);
     handleClose();
   };
 
   const handleClose = () => {
     setFormData({
+      courseId: Number(courseId),
       title: '',
       description: '',
       keywords: '',

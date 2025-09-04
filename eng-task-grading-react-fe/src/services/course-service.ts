@@ -12,14 +12,14 @@ export const courseService = {
    */
   async getAllCourses(): Promise<CourseDto[]> {
     logger.info("Načítám všechny kurzy z API");
-    const { data } = await apiHttp.get<CourseDto[]>("/course");
+    const { data } = await apiHttp.get<CourseDto[]>("/v1/course");
     logger.info(`Načteno ${data.length} kurzů`, { count: data.length });
     return data;
   },
 
   async createCourse(courseData: CourseCreateDto): Promise<CourseDto> {
     logger.info("Vytvářím nový kurz", courseData);
-    const { data } = await apiHttp.post<CourseDto>("/course", courseData);
+    const { data } = await apiHttp.post<CourseDto>("/v1/course", courseData);
     logger.info("Kurz byl úspěšně vytvořen", { course: data });
     return data;
   },

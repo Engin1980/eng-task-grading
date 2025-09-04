@@ -10,6 +10,13 @@ export interface GradeDto {
   date: Date;
 }
 
+export interface GradeCreateDto {
+  taskId: number;
+  studentId: number;
+  value: number;
+  comment: string | null;
+}
+
 export interface GradeSet {
   tasks: TaskDto[];
   students: StudentDto[];

@@ -5,6 +5,7 @@ import type { StudentDto } from '../../model/student-dto';
 import type { GradeDto, GradeSet } from '../../model/grade-dto';
 import { gradeService } from '../../services/grade-service';
 import { taskService } from '../../services/task-service';
+import { AddGradeModal } from '../../components/tasks';
 
 export const Route = createFileRoute('/tasks/$id')({
   component: RouteComponent,
@@ -25,6 +26,8 @@ function RouteComponent() {
   const [task, setTask] = useState<TaskDto | null>(null);
   const [data, setData] = useState<DataSet>();
   const [filterText, setFilterText] = useState<string>("");
+  const [isAddGradeModalOpen, setIsAddGradeModalOpen] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState<StudentDto | null>(null);
 
   // Funkce pro filtrování studentů
   const filteredStudentData = data?.studentDatas.filter(studentData => {
@@ -58,6 +61,37 @@ function RouteComponent() {
     }));
     return { studentDatas };
   }
+
+  const handleAddGrade = (student: StudentDto) => {
+    console.log('handleAddGrade called with student:', student.name);
+    setSelectedStudent(student);
+    setIsAddGradeModalOpen(true);
+  };
+
+  const handleGradeAdded = (newGrade: GradeDto) => {
+    // Aktualizace dat s novou známkou
+    if (data) {
+      const updatedStudentDatas = data.studentDatas.map(studentData => {
+        if (studentData.student.id === newGrade.studentId) {
+          return {
+            ...studentData,
+            grades: [newGrade, ...studentData.grades].sort((a, b) => {
+              const dateA = new Date(a.date);
+              const dateB = new Date(b.date);
+              return dateB.getTime() - dateA.getTime();
+            })
+          };
+        }
+        return studentData;
+      });
+      setData({ studentDatas: updatedStudentDatas });
+    }
+  };
+
+  const handleCloseModal = () => {
+    setIsAddGradeModalOpen(false);
+    setSelectedStudent(null);
+  };
 
   useEffect(() => {
     loadData();
@@ -134,7 +168,13 @@ function RouteComponent() {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Student
+                    Číslo
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Příjmení
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Jméno
                   </th>
                   <th className="px-3 py-3 text-center">
                     {/* Prázdný sloupec pro tlačítko + */}
@@ -154,27 +194,24 @@ function RouteComponent() {
                 {(filteredStudentData || []).map((studentData) => (
                   studentData.grades.length === 0 ? (
                     <tr key={`student-${studentData.student.id}`} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex flex-col">
-                          <div className="text-sm text-gray-900">
-                            {studentData.student.number}
-                          </div>
-                          <div className="text-sm font-medium text-gray-900">
-                            {studentData.student.surname && studentData.student.name
-                              ? `${studentData.student.surname} ${studentData.student.name}`
-                              : studentData.student.userName || '-'}
-                          </div>
-                        </div>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {studentData.student.number}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        {studentData.student.surname || '-'}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        {studentData.student.name || '-'}
                       </td>
                       <td className="px-3 py-4 text-center">
                         <button 
                           className="inline-flex items-center justify-center w-6 h-6 text-sm font-medium text-white bg-green-600 rounded-full hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                          onClick={() => console.log('Add grade for student', studentData.student.id)}
+                          onClick={() => handleAddGrade(studentData.student)}
                         >
                           +
                         </button>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500" colSpan={3}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500" colSpan={2}>
                         Bez známky
                       </td>
                     </tr>
@@ -182,24 +219,25 @@ function RouteComponent() {
                     studentData.grades.map((grade, gradeIndex) => (
                       <tr key={`student-${studentData.student.id}-grade-${grade.id}`} className="hover:bg-gray-50">
                         {gradeIndex === 0 && (
-                          <td className="px-6 py-4 whitespace-nowrap" rowSpan={studentData.grades.length}>
-                            <div className="flex flex-col">
-                              <div className="text-sm text-gray-900">
-                                {studentData.student.number}
-                              </div>
-                              <div className="text-sm font-medium text-gray-900">
-                                {studentData.student.name && studentData.student.surname
-                                  ? `${studentData.student.name} ${studentData.student.surname}`
-                                  : studentData.student.userName || '-'}
-                              </div>
-                            </div>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900" rowSpan={studentData.grades.length}>
+                            {studentData.student.number}
+                          </td>
+                        )}
+                        {gradeIndex === 0 && (
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900" rowSpan={studentData.grades.length}>
+                            {studentData.student.surname || '-'}
+                          </td>
+                        )}
+                        {gradeIndex === 0 && (
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900" rowSpan={studentData.grades.length}>
+                            {studentData.student.name || '-'}
                           </td>
                         )}
                         {gradeIndex === 0 && (
                           <td className="px-3 py-4 text-center" rowSpan={studentData.grades.length}>
                             <button 
                               className="inline-flex items-center justify-center w-6 h-6 text-sm font-medium text-white bg-green-600 rounded-full hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                              onClick={() => console.log('Add grade for student', studentData.student.id)}
+                              onClick={() => handleAddGrade(studentData.student)}
                             >
                               +
                             </button>
@@ -230,6 +268,15 @@ function RouteComponent() {
           </div>
         </div>
       )}
+
+      {/* Add Grade Modal */}
+      <AddGradeModal
+        isOpen={isAddGradeModalOpen}
+        onClose={handleCloseModal}
+        student={selectedStudent}
+        taskId={id}
+        onGradeAdded={handleGradeAdded}
+      />
     </div>
   );
 }

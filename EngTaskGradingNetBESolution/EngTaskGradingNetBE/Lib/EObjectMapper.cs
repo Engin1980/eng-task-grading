@@ -60,4 +60,33 @@ public static class EObjectMapper
   }
 
   public static AppLogDto To(AppLog log) => new(log.Id, log.Message, log.MessageTemplate, log.Level, log.TimeStamp, log.Exception, log.Properties);
+
+  public static Attendance From(AttendanceCreateDto attendanceDto)
+  {
+    return new Attendance()
+    {
+      Title = attendanceDto.Title
+    };
+  }
+
+  public static AttendanceDto To(Attendance attendance)
+    => new(attendance.Id, attendance.Title, attendance.Days.Select(To).ToList());
+
+  public static AttendanceDay From(AttendanceDayCreateUpdateDto dto)
+  {
+    return new AttendanceDay()
+    {
+      Title = dto.Title
+    };
+  }
+  public static AttendanceDayDto To(AttendanceDay day) =>
+    new(day.Id, day.Title);
+
+  internal static Attendance From(AttendanceDto attendanceDto)
+  {
+    return new Attendance()
+    {
+      Title = attendanceDto.Title
+    };
+  }
 }

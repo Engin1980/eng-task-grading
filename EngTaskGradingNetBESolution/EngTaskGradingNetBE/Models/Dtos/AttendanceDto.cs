@@ -41,3 +41,10 @@ public record AttendanceCreateDto(
 public record AttendanceOverviewDto(
   int AttendanceId,
   Dictionary<StudentDto, double> StudentResults);
+
+public record AttendanceSetItemDto(int AttendanceId, int StudentId, double Value);
+
+public record AttendanceSetDto(
+  List<AttendanceDto> Attendances,
+  List<StudentDto> Students,
+  List<AttendanceSetItemDto> Items);

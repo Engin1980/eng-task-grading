@@ -175,5 +175,18 @@ namespace EngTaskGradingNetBE.Services
         await Db.SaveChangesAsync();
       }
     }
+
+    internal async System.Threading.Tasks.Task<Course> GetCourseAttendanceDataAsync(int courseId)
+    {
+      var course = await Db.Courses
+        .Include(q => q.Students)
+        .Include(q => q.Attendances)
+        .ThenInclude(q=>q.Days)
+        .ThenInclude(q=>q.Records)
+        .FirstOrDefaultAsync(q => q.Id == courseId)
+        ?? throw new Exceptions.EntityNotFoundException(typeof(Course), courseId);
+
+      return course;
+    }
   }
 }

@@ -89,7 +89,7 @@ namespace EngTaskGradingNetBE.Controllers
     }
 
     [HttpGet("days/{dayId}/students")]
-    public async Task<List<StudentDto>> GetStudentsForDayAsync([FromRoute]int dayId)
+    public async Task<List<StudentDto>> GetStudentsForDayAsync([FromRoute] int dayId)
     {
       var tmp = await attendanceService.GetStudentsForDayAsync(dayId);
       var ret = tmp.Select(EObjectMapper.To).ToList();
@@ -97,7 +97,7 @@ namespace EngTaskGradingNetBE.Controllers
     }
 
     [HttpGet("records/for-day/{attendanceDayId}")]
-    public async Task<List<AttendanceRecordDto>> GetRecordsForDayAsync([FromRoute]int attendanceDayId)
+    public async Task<List<AttendanceRecordDto>> GetRecordsForDayAsync([FromRoute] int attendanceDayId)
     {
       var tmp = await attendanceService.GetRecordsForDayAsync(attendanceDayId);
       var ret = tmp.Select(EObjectMapper.To).ToList();
@@ -116,6 +116,45 @@ namespace EngTaskGradingNetBE.Controllers
     public async System.Threading.Tasks.Task DeleteRecord(int id)
     {
       await attendanceService.DeleteRecordAsync(id);
+    }
+
+    [HttpGet("for-course/{courseId}/set")]
+    public async Task<AttendanceSetDto> GetCourseAttendanceSetAsync(int courseId)
+    {
+      //TODO tohle bude pomale, prepsat na urovni DB
+      var courseWithData = await attendanceService.GetCourseAttendanceDataAsync(courseId);
+      var values = await attendanceService.GetValuesAsync();
+
+      List<AttendanceDto> attendances = courseWithData.Attendances
+        .Select(EObjectMapper.To)
+        .OrderBy(q => q.Title)
+        .ToList();
+      List<StudentDto> students = courseWithData.Attendances
+        .SelectMany(q => q.Days)
+        .SelectMany(q => q.Records)
+        .Select(q => q.Student)
+        .Union(courseWithData.Students)
+        .Distinct()
+        .Select(EObjectMapper.To)
+        .OrderBy(q => q.Surname).ThenBy(q => q.Name)
+        .ToList();
+
+      List<AttendanceSetItemDto> items = [];
+      foreach (var attendance in courseWithData.Attendances)
+      {
+        foreach (var student in students)
+        {
+          var totalWeight = attendance.Days
+            .SelectMany(q => q.Records)
+            .Where(q => q.StudentId == student.Id)
+            .Select(q => q.Value.Weight)
+            .Sum();
+          items.Add(new AttendanceSetItemDto(attendance.Id, student.Id, totalWeight));
+        }
+      }
+
+      AttendanceSetDto ret = new(attendances, students, items);
+      return ret;
     }
   }
 }

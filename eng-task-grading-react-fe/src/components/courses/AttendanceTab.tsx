@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from '@tanstack/react-router';
 import { useLogger } from '../../hooks/use-logger';
 import { attendanceService } from '../../services/attendance-service';
 import { CreateAttendanceModal } from '../attendances';
@@ -92,27 +93,22 @@ export function AttendanceTab({ courseId }: AttendanceTabProps) {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Počet zaznamenaných dnů
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Akce
-                </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {attendances.map((attendance) => (
                 <tr key={attendance.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {attendance.title}
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <Link
+                      to="/attendances/$id"
+                      params={{ id: attendance.id.toString() }}
+                      className="text-blue-600 hover:text-blue-900 hover:underline"
+                    >
+                      {attendance.title}
+                    </Link>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {attendance.days.length}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button className="text-blue-600 hover:text-blue-900 mr-4">
-                      Upravit
-                    </button>
-                    <button className="text-red-600 hover:text-red-900">
-                      Smazat
-                    </button>
                   </td>
                 </tr>
               ))}

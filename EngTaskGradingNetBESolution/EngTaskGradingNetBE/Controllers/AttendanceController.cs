@@ -4,6 +4,7 @@ using EngTaskGradingNetBE.Models.Dtos;
 using EngTaskGradingNetBE.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace EngTaskGradingNetBE.Controllers
 {
@@ -28,12 +29,28 @@ namespace EngTaskGradingNetBE.Controllers
       return ret;
     }
 
-    [HttpPut("{id}")]
+    [HttpPatch("{id}")]
     public async Task<AttendanceDto> UpdateAsync(int id, [FromBody] AttendanceDto attendanceDto)
     {
       Attendance att = EObjectMapper.From(attendanceDto);
       var updated = await attendanceService.UpdateAsync(id, att);
       AttendanceDto ret = EObjectMapper.To(updated);
+      return ret;
+    }
+
+    [HttpGet("{id}")]
+    public async Task<AttendanceDto> GetById([FromRoute] int id)
+    {
+      var attendance = await attendanceService.GetByIdAsync(id);
+      var ret = EObjectMapper.To(attendance);
+      return ret;
+    }
+
+    [HttpGet("{id}/overview")]
+    public async Task<AttendanceOverviewDto> GetOverviewByIdAsync([FromRoute] int id)
+    {
+      Dictionary<Student, double> data = await attendanceService.GetOverviewByIdAsync(id);
+      AttendanceOverviewDto ret = EObjectMapper.To(id, data);
       return ret;
     }
 
@@ -43,24 +60,62 @@ namespace EngTaskGradingNetBE.Controllers
       await attendanceService.DeleteAsync(id);
     }
 
-    [HttpPost("{attId}/days")]
-    public async System.Threading.Tasks.Task AddDayAsync(int attId, [FromBody] AttendanceDayCreateUpdateDto dayDto)
+    [HttpPost("days")]
+    public async System.Threading.Tasks.Task AddDayAsync([FromBody] AttendanceDayCreateDto dayDto)
     {
       AttendanceDay day = EObjectMapper.From(dayDto);
-      await attendanceService.AddDayAsync(attId, day);
+      await attendanceService.AddDayAsync(dayDto.AttendanceId, day);
     }
 
-    [HttpPut("{attId}/days/{dayId}")]
-    public async System.Threading.Tasks.Task UpdateDayAsync(int attId, int dayId, [FromBody] AttendanceDayCreateUpdateDto dayDto)
+    [HttpPatch("days/{dayId}")]
+    public async System.Threading.Tasks.Task UpdateDayAsync(int dayId, [FromBody] AttendanceDayUpdateDto dayDto)
     {
       AttendanceDay day = EObjectMapper.From(dayDto);
       await attendanceService.UpdateDayAsync(dayId, day);
     }
 
-    [HttpDelete("{attId}/days/{dayId}")]
-    public async System.Threading.Tasks.Task DeleteDayAsync(int attId, int dayId)
+    [HttpDelete("days/{dayId}")]
+    public async System.Threading.Tasks.Task DeleteDayAsync(int dayId)
     {
       await attendanceService.DeleteDayAsync(dayId);
+    }
+
+    [HttpGet("values")]
+    public async Task<List<AttendanceValueDto>> GetValuesAsync()
+    {
+      var tmp = await attendanceService.GetValuesAsync();
+      List<AttendanceValueDto> ret = tmp.Select(EObjectMapper.To).ToList();
+      return ret;
+    }
+
+    [HttpGet("days/{dayId}/students")]
+    public async Task<List<StudentDto>> GetStudentsForDayAsync([FromRoute]int dayId)
+    {
+      var tmp = await attendanceService.GetStudentsForDayAsync(dayId);
+      var ret = tmp.Select(EObjectMapper.To).ToList();
+      return ret;
+    }
+
+    [HttpGet("records/for-day/{attendanceDayId}")]
+    public async Task<List<AttendanceRecordDto>> GetRecordsForDayAsync([FromRoute]int attendanceDayId)
+    {
+      var tmp = await attendanceService.GetRecordsForDayAsync(attendanceDayId);
+      var ret = tmp.Select(EObjectMapper.To).ToList();
+      return ret;
+    }
+
+    [HttpPost("records")]
+    public async Task<AttendanceRecordDto> CreateOrUpdateRecord(AttendanceRecordDto data)
+    {
+      AttendanceRecord tmp = await attendanceService.CreateOrUpdateRecordAsync(data.AttendanceDayId, data.StudentId, data.AttendanceValueId);
+      AttendanceRecordDto ret = EObjectMapper.To(tmp);
+      return ret;
+    }
+
+    [HttpDelete("records/{id}")]
+    public async System.Threading.Tasks.Task DeleteRecord(int id)
+    {
+      await attendanceService.DeleteRecordAsync(id);
     }
   }
 }

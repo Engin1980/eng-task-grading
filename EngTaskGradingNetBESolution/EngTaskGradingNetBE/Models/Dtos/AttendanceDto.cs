@@ -6,11 +6,11 @@ public record AttendanceValueDto(
   double Weight
 );
 
-public record StudentAttendanceDto(
+public record AttendanceRecordDto(
   int Id,
   int StudentId,
   int AttendanceDayId,
-  AttendanceValueDto Value
+  int AttendanceValueId
 );
 
 public record AttendanceDayDto(
@@ -25,10 +25,19 @@ public record AttendanceDto(
 );
 
 
-public record AttendanceDayCreateUpdateDto(
+public record AttendanceDayCreateDto(
+  int AttendanceId,
+  string Title
+);
+
+public record AttendanceDayUpdateDto(
   string Title
 );
 
 public record AttendanceCreateDto(
   string Title
 );
+
+public record AttendanceOverviewDto(
+  int AttendanceId,
+  Dictionary<StudentDto, double> StudentResults);

@@ -2,6 +2,7 @@
 
 using EngTaskGradingNetBE.Models.DbModel;
 using EngTaskGradingNetBE.Models.Dtos;
+using System.Collections.Generic;
 
 public static class EObjectMapper
 {
@@ -70,9 +71,16 @@ public static class EObjectMapper
   }
 
   public static AttendanceDto To(Attendance attendance)
-    => new(attendance.Id, attendance.Title, attendance.Days.Select(To).ToList());
+    => new(attendance.Id, attendance.Title, attendance.Days.OrderBy(q => q.Title).Select(To).ToList());
 
-  public static AttendanceDay From(AttendanceDayCreateUpdateDto dto)
+  public static AttendanceDay From(AttendanceDayCreateDto dto)
+  {
+    return new AttendanceDay()
+    {
+      Title = dto.Title
+    };
+  }
+  public static AttendanceDay From(AttendanceDayUpdateDto dto)
   {
     return new AttendanceDay()
     {
@@ -89,4 +97,21 @@ public static class EObjectMapper
       Title = attendanceDto.Title
     };
   }
+
+  internal static AttendanceOverviewDto To(int attendanceId, Dictionary<Student, double> data)
+  {
+    AttendanceOverviewDto ret = new(
+      attendanceId,
+      data.Select(
+        q => new KeyValuePair<StudentDto, double>(To(q.Key), q.Value))
+      .ToDictionary());
+    return ret;
+  }
+
+  internal static AttendanceValueDto To(AttendanceValue q)
+  {
+    return new AttendanceValueDto(q.Id, q.Title, q.Weight);
+  }
+
+  public static AttendanceRecordDto To(AttendanceRecord sa) => new AttendanceRecordDto(sa.Id, sa.StudentId, sa.AttendanceDayId, sa.AttendanceValueId);
 }

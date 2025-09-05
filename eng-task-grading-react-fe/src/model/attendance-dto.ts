@@ -3,7 +3,12 @@ export interface AttendanceDayDto {
   title: string;
 }
 
-export interface AttendanceDayCreateUpdateDto {
+export interface AttendanceDayCreateDto {
+  attendanceId: number;
+  title: string;
+}
+
+export interface AttendanceDayUpdateDto {
   title: string;
 }
 
@@ -19,5 +24,19 @@ export interface AttendanceCreateDto {
 }
 
 export interface AttendanceUpdateDto {
+  title: string;
+}
+
+export interface AttendanceRecordDto {
+  id?: number;
+  studentId: number;
+  attendanceDayId: number;
+  attendanceValueId: number;
+}
+
+export interface AttendanceValueDto {
+  id: number;
+  code: string;
+  weight: number;
   title: string;
 }

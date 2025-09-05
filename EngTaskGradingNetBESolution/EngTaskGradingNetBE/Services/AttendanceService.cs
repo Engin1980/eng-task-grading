@@ -1,4 +1,5 @@
 ﻿using EngTaskGradingNetBE.Models.DbModel;
+using EngTaskGradingNetBE.Models.Dtos;
 using Microsoft.EntityFrameworkCore;
 
 namespace EngTaskGradingNetBE.Services
@@ -83,6 +84,96 @@ namespace EngTaskGradingNetBE.Services
           return;
       this.Db.AttendanceDays.Remove(day);
       await this.Db.SaveChangesAsync();
+    }
+
+    internal async Task<Attendance> GetByIdAsync(int attendanceId)
+    {
+      Attendance ret = await Db.Attendances
+        .Include(q => q.Days)
+        .FirstOrDefaultAsync(q => q.Id == attendanceId)
+        ?? throw new Exceptions.EntityNotFoundException(typeof(Attendance), attendanceId);
+      return ret;
+    }
+
+    internal async Task<Dictionary<Student, double>> GetOverviewByIdAsync(int id)
+    {
+      var att = await Db.Attendances
+        .Include(q => q.Days).ThenInclude(q => q.Records).ThenInclude(q => q.Student)
+        .Include(q => q.Course).ThenInclude(q => q.Students)
+        .FirstOrDefaultAsync(q => q.Id == id) ?? throw new Exceptions.EntityNotFoundException(typeof(Attendance), id);
+      var students = att.Days
+        .SelectMany(q => q.Records)
+        .Select(q => q.Student)
+        .Union(att.Course.Students)
+        .Distinct()
+        .ToList();
+      var tmp = await Db.AttendanceValues.ToListAsync();
+      var vals = tmp.ToDictionary(q => q, q => q.Weight);
+
+      Dictionary<Student, double> ret = students.ToDictionary(q => q, q => 0d);
+
+      foreach (AttendanceRecord sa in Db.Attendances.SelectMany(q => q.Days).SelectMany(q => q.Records))
+      {
+        ret[sa.Student] += vals[sa.Value];
+      }
+
+      return ret;
+    }
+
+    internal async Task<List<AttendanceValue>> GetValuesAsync()
+    {
+      return await Db.AttendanceValues.ToListAsync();
+    }
+
+    internal async Task<IEnumerable<Student>> GetStudentsForDayAsync(int attendanceDayId)
+    {
+      var attDay = await Db.AttendanceDays
+        .Include(q => q.Attendance).ThenInclude(q => q.Course).ThenInclude(q => q.Students)
+        .Include(q => q.Records).ThenInclude(q => q.Student)
+        .Where(q => q.Id == attendanceDayId)
+        .FirstOrDefaultAsync()
+        ?? throw new Exceptions.EntityNotFoundException(typeof(AttendanceDay), attendanceDayId);
+      var students = attDay.Attendance.Course.Students.Union(attDay.Records.Select(q => q.Student)).Distinct().ToList();
+      return students;
+    }
+
+    internal async Task<IEnumerable<AttendanceRecord>> GetRecordsForDayAsync(int attendanceDayId)
+    {
+      var attDay = await Db.AttendanceDays
+        .Include(q => q.Records)
+        .FirstOrDefaultAsync(q => q.Id == attendanceDayId)
+                ?? throw new Exceptions.EntityNotFoundException(typeof(AttendanceDay), attendanceDayId);
+      return attDay.Records;
+
+    }
+
+    internal async Task<AttendanceRecord> CreateOrUpdateRecordAsync(int attendanceDayId, int studentId, int attendanceValueId)
+    {
+      var ar = await Db.AttendanceRecords
+        .Where(q => q.AttendanceDayId == attendanceDayId && q.StudentId == studentId)
+        .FirstOrDefaultAsync();
+      if (ar == null)
+      {
+        ar = new AttendanceRecord()
+        {
+          AttendanceDayId = attendanceDayId,
+          StudentId = studentId,
+        };
+        await Db.AttendanceRecords.AddAsync(ar);
+      }
+      ar.AttendanceValueId = attendanceValueId;
+      await Db.SaveChangesAsync();
+      return ar;
+    }
+
+    internal async System.Threading.Tasks.Task DeleteRecordAsync(int id)
+    {
+      var ar = await Db.AttendanceRecords.FindAsync(id);
+      if (ar != null)
+      {
+        Db.AttendanceRecords.Remove(ar);
+        await Db.SaveChangesAsync();
+      }
     }
   }
 }

@@ -10,6 +10,7 @@ namespace EngTaskGradingNetBE.Services
       return await Db.Courses
         .Include(q => q.Tasks)
         .Include(q => q.Students)
+        .Include(q => q.Attendances)
         .ToListAsync();
     }
 

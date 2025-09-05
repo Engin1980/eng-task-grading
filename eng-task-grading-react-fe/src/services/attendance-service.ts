@@ -1,4 +1,5 @@
-import type { AttendanceCreateDto, AttendanceDayCreateUpdateDto, AttendanceDto, AttendanceUpdateDto } from "../model/attendance-dto";
+import type { AttendanceCreateDto, AttendanceDayCreateDto, AttendanceDayUpdateDto, AttendanceDto, AttendanceRecordDto, AttendanceUpdateDto, AttendanceValueDto, StudentAttendanceDto } from "../model/attendance-dto";
+import type { StudentDto } from "../model/student-dto";
 import { apiHttp } from "./api-http";
 
 export const attendanceService = {
@@ -7,30 +8,59 @@ export const attendanceService = {
     return data;
   },
 
-  createAttendance: async (courseId: number, attendance: AttendanceCreateDto) => {
+  getById: async (attendanceId: number) => {
+    const { data } = await apiHttp.get<AttendanceDto>(`/v1/attendance/${attendanceId}`);
+    return data;
+  },
+
+  create: async (courseId: number, attendance: AttendanceCreateDto) => {
     const { data } = await apiHttp.post<AttendanceDto>(`/v1/attendance/for-course/${courseId}`, attendance);
     return data;
   },
 
-  updateAttendance: async (attendanceId: number, attendance: AttendanceUpdateDto) => {
+  update: async (attendanceId: number, attendance: AttendanceUpdateDto) => {
     const { data } = await apiHttp.patch<AttendanceDto>(`/v1/attendance/${attendanceId}`, attendance);
     return data;
   },
 
-  deleteAttendance: async (attendanceId: number) => {
+  delete: async (attendanceId: number) => {
     const { data } = await apiHttp.delete<AttendanceDto>(`/v1/attendance/${attendanceId}`);
     return data;
   },
 
-  createAttendanceDay: async (attendanceId: number, attendanceDay: AttendanceDayCreateUpdateDto) => {
-    await apiHttp.post(`/v1/attendance/${attendanceId}/days`, attendanceDay);
+  createDay: async (attendanceDay: AttendanceDayCreateDto) => {
+    await apiHttp.post(`/v1/attendance/days`, attendanceDay);
   },
 
-  updateAttendanceDay: async (attendanceId: number, attendanceDayId: number, attendanceDay: AttendanceDayCreateUpdateDto) => {
-    await apiHttp.patch(`/v1/attendance/${attendanceId}/days/${attendanceDayId}`, attendanceDay);
+  updateDay: async (attendanceDayId: number, attendanceDay: AttendanceDayUpdateDto) => {
+    await apiHttp.patch(`/v1/attendance/days/${attendanceDayId}`, attendanceDay);
   },
 
-  deleteAttendanceDay: async (attendanceId: number, attendanceDayId: number) => {
-    await apiHttp.delete(`/v1/attendance/${attendanceId}/days/${attendanceDayId}`);
+  deleteDay: async (attendanceDayId: number) => {
+    await apiHttp.delete(`/v1/attendance/days/${attendanceDayId}`);
+  },
+
+  getAttendanceValues: async () => {
+    const { data } = await apiHttp.get<AttendanceValueDto[]>('/v1/attendance/values');
+    return data;
+  },
+
+  getStudentsByDayId: async (attendanceDayId: number) => {
+    const { data } = await apiHttp.get<StudentDto[]>(`/v1/attendance/days/${attendanceDayId}/students`);
+    return data;
+  },
+
+  getRecordsForDay: async (attendanceDayId: string) => {
+    const { data } = await apiHttp.get<AttendanceRecordDto[]>(`/v1/attendance/records/for-day/${attendanceDayId}`, {});
+    return data;
+  },
+
+  setRecord: async (record: AttendanceRecordDto): Promise<AttendanceRecordDto> => {
+    const { data } = await apiHttp.post<AttendanceRecordDto>(`/v1/attendance/records`, record);
+    return data;
+  },
+
+  deleteRecord: async (attendanceRecordId: number) => {
+    await apiHttp.delete(`/v1/attendance/records/${attendanceRecordId}`);
   }
 };

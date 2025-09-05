@@ -18,7 +18,7 @@ public static class EObjectMapper
   };
   public static GradeDto To(Grade grade) => new(grade.Id, grade.TaskId, grade.StudentId, grade.Value, grade.Date, grade.Comment);
 
-  public static CourseDto To(Course course) => new(course.Id, course.Code, course.Name, course.Students?.Count ?? -1, course.Tasks?.Count ?? -1);
+  public static CourseDto To(Course course) => new(course.Id, course.Code, course.Name, course.Students?.Count ?? -1, course.Tasks?.Count ?? -1, course.Attendances?.Count ?? -1);
 
   public static Course From(CourseCreateDto courseDto) => new()
   {

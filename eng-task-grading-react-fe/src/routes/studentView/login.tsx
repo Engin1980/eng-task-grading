@@ -31,7 +31,7 @@ function RouteComponent() {
 
   const form = useForm({
     defaultValues: {
-      personalNumber: '',
+      studentNumber: '',
     },
     onSubmit: async ({ value }) => {
       if (!captchaToken) {
@@ -43,7 +43,7 @@ function RouteComponent() {
       try {
 
         const data: StudentViewLoginDto = {
-          personalNumber: value.personalNumber,
+          studentNumber: value.studentNumber,
           captchaToken: captchaToken
         };
 
@@ -89,16 +89,16 @@ function RouteComponent() {
             className="space-y-6"
           >
             <form.Field
-              name="personalNumber"
+              name="studentNumber"
               validators={{
                 onChange: ({ value }) => {
                   if (!value || value.trim().length === 0) {
                     return 'Osobní číslo je povinné'
                   }
 
-                  const personalNumberRegex = /^[A-Za-z]\d{5}$/
-                  if (!personalNumberRegex.test(value.trim())) {
-                    return 'Osobní číslo musí být ve formátu: jedno písmeno následované 5 číslicemi (např. A12345)'
+                  const studentNumberRegex = /^[A-Za-z]\d{5}$/
+                  if (!studentNumberRegex.test(value.trim())) {
+                    return 'Osobní studentské číslo musí být ve formátu: jedno písmeno následované 5 číslicemi (např. A12345)'
                   }
 
                   return undefined
@@ -107,12 +107,12 @@ function RouteComponent() {
             >
               {(field) => (
                 <div>
-                  <label htmlFor="personalNumber" className="block text-sm font-medium text-gray-700">
-                    Osobní číslo
+                  <label htmlFor="studentNumber" className="block text-sm font-medium text-gray-700">
+                    Osobní studentské číslo
                   </label>
                   <div className="mt-1">
                     <input
-                      id="personalNumber"
+                      id="studentNumber"
                       name={field.name}
                       type="text"
                       value={field.state.value}

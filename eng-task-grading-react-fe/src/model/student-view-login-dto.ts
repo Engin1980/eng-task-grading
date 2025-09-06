@@ -1,4 +1,4 @@
 export interface StudentViewLoginDto{
-  personalNumber: string;
+  studentNumber: string;
   captchaToken?: string; // Přidáno pole pro token z Turnstile
 }

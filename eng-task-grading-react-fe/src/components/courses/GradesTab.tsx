@@ -140,7 +140,6 @@ export function GradesTab({ courseId }: GradesTabProps) {
         }
       }
     });
-
     return { successful, total };
   };
 

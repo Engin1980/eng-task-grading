@@ -68,7 +68,6 @@ namespace EngTaskGradingNetBE.Services
 
       await Db.SaveChangesAsync();
     }
-
     public async System.Threading.Tasks.Task AssignStudent(int courseId, int studentId)
     {
       var course = await Db.Courses

@@ -15,7 +15,10 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as HomeRouteImport } from './routes/home'
 import { Route as CoursesIndexRouteImport } from './routes/courses/index'
 import { Route as TasksIdRouteImport } from './routes/tasks/$id'
+import { Route as StudentViewLoginRouteImport } from './routes/studentView/login'
+import { Route as StudentViewHomeRouteImport } from './routes/studentView/home'
 import { Route as CoursesIdRouteImport } from './routes/courses/$id'
+import { Route as StudentViewVerifyTokenRouteImport } from './routes/studentView/verify/$token'
 
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
@@ -47,9 +50,24 @@ const TasksIdRoute = TasksIdRouteImport.update({
   path: '/tasks/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StudentViewLoginRoute = StudentViewLoginRouteImport.update({
+  id: '/studentView/login',
+  path: '/studentView/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StudentViewHomeRoute = StudentViewHomeRouteImport.update({
+  id: '/studentView/home',
+  path: '/studentView/home',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CoursesIdRoute = CoursesIdRouteImport.update({
   id: '/courses/$id',
   path: '/courses/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StudentViewVerifyTokenRoute = StudentViewVerifyTokenRouteImport.update({
+  id: '/studentView/verify/$token',
+  path: '/studentView/verify/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -59,8 +77,11 @@ export interface FileRoutesByFullPath {
   '/logs': typeof LogsRoute
   '/register': typeof RegisterRoute
   '/courses/$id': typeof CoursesIdRoute
+  '/studentView/home': typeof StudentViewHomeRoute
+  '/studentView/login': typeof StudentViewLoginRoute
   '/tasks/$id': typeof TasksIdRoute
   '/courses': typeof CoursesIndexRoute
+  '/studentView/verify/$token': typeof StudentViewVerifyTokenRoute
 }
 export interface FileRoutesByTo {
   '/home': typeof HomeRoute
@@ -68,8 +89,11 @@ export interface FileRoutesByTo {
   '/logs': typeof LogsRoute
   '/register': typeof RegisterRoute
   '/courses/$id': typeof CoursesIdRoute
+  '/studentView/home': typeof StudentViewHomeRoute
+  '/studentView/login': typeof StudentViewLoginRoute
   '/tasks/$id': typeof TasksIdRoute
   '/courses': typeof CoursesIndexRoute
+  '/studentView/verify/$token': typeof StudentViewVerifyTokenRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -78,8 +102,11 @@ export interface FileRoutesById {
   '/logs': typeof LogsRoute
   '/register': typeof RegisterRoute
   '/courses/$id': typeof CoursesIdRoute
+  '/studentView/home': typeof StudentViewHomeRoute
+  '/studentView/login': typeof StudentViewLoginRoute
   '/tasks/$id': typeof TasksIdRoute
   '/courses/': typeof CoursesIndexRoute
+  '/studentView/verify/$token': typeof StudentViewVerifyTokenRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -89,8 +116,11 @@ export interface FileRouteTypes {
     | '/logs'
     | '/register'
     | '/courses/$id'
+    | '/studentView/home'
+    | '/studentView/login'
     | '/tasks/$id'
     | '/courses'
+    | '/studentView/verify/$token'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/home'
@@ -98,8 +128,11 @@ export interface FileRouteTypes {
     | '/logs'
     | '/register'
     | '/courses/$id'
+    | '/studentView/home'
+    | '/studentView/login'
     | '/tasks/$id'
     | '/courses'
+    | '/studentView/verify/$token'
   id:
     | '__root__'
     | '/home'
@@ -107,8 +140,11 @@ export interface FileRouteTypes {
     | '/logs'
     | '/register'
     | '/courses/$id'
+    | '/studentView/home'
+    | '/studentView/login'
     | '/tasks/$id'
     | '/courses/'
+    | '/studentView/verify/$token'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -117,8 +153,11 @@ export interface RootRouteChildren {
   LogsRoute: typeof LogsRoute
   RegisterRoute: typeof RegisterRoute
   CoursesIdRoute: typeof CoursesIdRoute
+  StudentViewHomeRoute: typeof StudentViewHomeRoute
+  StudentViewLoginRoute: typeof StudentViewLoginRoute
   TasksIdRoute: typeof TasksIdRoute
   CoursesIndexRoute: typeof CoursesIndexRoute
+  StudentViewVerifyTokenRoute: typeof StudentViewVerifyTokenRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -165,11 +204,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TasksIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/studentView/login': {
+      id: '/studentView/login'
+      path: '/studentView/login'
+      fullPath: '/studentView/login'
+      preLoaderRoute: typeof StudentViewLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/studentView/home': {
+      id: '/studentView/home'
+      path: '/studentView/home'
+      fullPath: '/studentView/home'
+      preLoaderRoute: typeof StudentViewHomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/courses/$id': {
       id: '/courses/$id'
       path: '/courses/$id'
       fullPath: '/courses/$id'
       preLoaderRoute: typeof CoursesIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/studentView/verify/$token': {
+      id: '/studentView/verify/$token'
+      path: '/studentView/verify/$token'
+      fullPath: '/studentView/verify/$token'
+      preLoaderRoute: typeof StudentViewVerifyTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -181,8 +241,11 @@ const rootRouteChildren: RootRouteChildren = {
   LogsRoute: LogsRoute,
   RegisterRoute: RegisterRoute,
   CoursesIdRoute: CoursesIdRoute,
+  StudentViewHomeRoute: StudentViewHomeRoute,
+  StudentViewLoginRoute: StudentViewLoginRoute,
   TasksIdRoute: TasksIdRoute,
   CoursesIndexRoute: CoursesIndexRoute,
+  StudentViewVerifyTokenRoute: StudentViewVerifyTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

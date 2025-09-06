@@ -15,6 +15,7 @@ export function AddGradeModal({ isOpen, onClose, student, taskId, onGradeAdded }
   const [value, setValue] = useState<string>('');
   const [comment, setComment] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+const quickSelectValues:number[] = [0, 5, 25, 35, 45, 55, 60, 65, 70, 75, 80, 85, 90, 95, 98, 100];
 
   console.log('AddGradeModal render:', { isOpen, student: student?.name, taskId });
 
@@ -103,6 +104,24 @@ export function AddGradeModal({ isOpen, onClose, student, taskId, onGradeAdded }
                 required
                 autoFocus
               />
+              
+              {/* Quick select buttons */}
+              <div className="mt-2 flex flex-wrap gap-2">
+                {quickSelectValues.map((quickValue) => (
+                  <button
+                    key={quickValue}
+                    type="button"
+                    onClick={() => setValue(quickValue.toString())}
+                    className={`px-2 py-1 text-xs font-medium rounded border transition-colors ${
+                      value === quickValue.toString()
+                        ? 'bg-blue-100 text-blue-800 border-blue-300'
+                        : 'bg-gray-50 text-gray-700 border-gray-300 hover:bg-gray-100'
+                    }`}
+                  >
+                    {quickValue}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Comment */}

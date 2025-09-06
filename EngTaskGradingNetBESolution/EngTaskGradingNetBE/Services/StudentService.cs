@@ -83,6 +83,7 @@ namespace EngTaskGradingNetBE.Services
       List<Student> createdEntities = [];
       foreach (var dto in students)
       {
+        dto.Number = dto.Number.ToUpper();
         var existing = await CheckIfAlreadyExists(dto);
 
         if (existing == null)
@@ -101,6 +102,7 @@ namespace EngTaskGradingNetBE.Services
     public async Task<Student> CreateAsync(Student student, bool mayAlreadyExist = true)
     {
       Student? ret = null;
+      student.Number = student.Number.ToUpper();
       if (mayAlreadyExist)
         ret = await CheckIfAlreadyExists(student);
       if (ret == null)

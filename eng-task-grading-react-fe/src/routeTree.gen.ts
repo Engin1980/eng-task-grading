@@ -19,6 +19,7 @@ import { Route as StudentViewLoginRouteImport } from './routes/studentView/login
 import { Route as StudentViewHomeRouteImport } from './routes/studentView/home'
 import { Route as CoursesIdRouteImport } from './routes/courses/$id'
 import { Route as StudentViewVerifyTokenRouteImport } from './routes/studentView/verify/$token'
+import { Route as StudentViewLoginTokenRouteImport } from './routes/studentView/login/$token'
 
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
@@ -70,6 +71,11 @@ const StudentViewVerifyTokenRoute = StudentViewVerifyTokenRouteImport.update({
   path: '/studentView/verify/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StudentViewLoginTokenRoute = StudentViewLoginTokenRouteImport.update({
+  id: '/$token',
+  path: '/$token',
+  getParentRoute: () => StudentViewLoginRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/home': typeof HomeRoute
@@ -78,9 +84,10 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/courses/$id': typeof CoursesIdRoute
   '/studentView/home': typeof StudentViewHomeRoute
-  '/studentView/login': typeof StudentViewLoginRoute
+  '/studentView/login': typeof StudentViewLoginRouteWithChildren
   '/tasks/$id': typeof TasksIdRoute
   '/courses': typeof CoursesIndexRoute
+  '/studentView/login/$token': typeof StudentViewLoginTokenRoute
   '/studentView/verify/$token': typeof StudentViewVerifyTokenRoute
 }
 export interface FileRoutesByTo {
@@ -90,9 +97,10 @@ export interface FileRoutesByTo {
   '/register': typeof RegisterRoute
   '/courses/$id': typeof CoursesIdRoute
   '/studentView/home': typeof StudentViewHomeRoute
-  '/studentView/login': typeof StudentViewLoginRoute
+  '/studentView/login': typeof StudentViewLoginRouteWithChildren
   '/tasks/$id': typeof TasksIdRoute
   '/courses': typeof CoursesIndexRoute
+  '/studentView/login/$token': typeof StudentViewLoginTokenRoute
   '/studentView/verify/$token': typeof StudentViewVerifyTokenRoute
 }
 export interface FileRoutesById {
@@ -103,9 +111,10 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/courses/$id': typeof CoursesIdRoute
   '/studentView/home': typeof StudentViewHomeRoute
-  '/studentView/login': typeof StudentViewLoginRoute
+  '/studentView/login': typeof StudentViewLoginRouteWithChildren
   '/tasks/$id': typeof TasksIdRoute
   '/courses/': typeof CoursesIndexRoute
+  '/studentView/login/$token': typeof StudentViewLoginTokenRoute
   '/studentView/verify/$token': typeof StudentViewVerifyTokenRoute
 }
 export interface FileRouteTypes {
@@ -120,6 +129,7 @@ export interface FileRouteTypes {
     | '/studentView/login'
     | '/tasks/$id'
     | '/courses'
+    | '/studentView/login/$token'
     | '/studentView/verify/$token'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -132,6 +142,7 @@ export interface FileRouteTypes {
     | '/studentView/login'
     | '/tasks/$id'
     | '/courses'
+    | '/studentView/login/$token'
     | '/studentView/verify/$token'
   id:
     | '__root__'
@@ -144,6 +155,7 @@ export interface FileRouteTypes {
     | '/studentView/login'
     | '/tasks/$id'
     | '/courses/'
+    | '/studentView/login/$token'
     | '/studentView/verify/$token'
   fileRoutesById: FileRoutesById
 }
@@ -154,7 +166,7 @@ export interface RootRouteChildren {
   RegisterRoute: typeof RegisterRoute
   CoursesIdRoute: typeof CoursesIdRoute
   StudentViewHomeRoute: typeof StudentViewHomeRoute
-  StudentViewLoginRoute: typeof StudentViewLoginRoute
+  StudentViewLoginRoute: typeof StudentViewLoginRouteWithChildren
   TasksIdRoute: typeof TasksIdRoute
   CoursesIndexRoute: typeof CoursesIndexRoute
   StudentViewVerifyTokenRoute: typeof StudentViewVerifyTokenRoute
@@ -232,8 +244,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StudentViewVerifyTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/studentView/login/$token': {
+      id: '/studentView/login/$token'
+      path: '/$token'
+      fullPath: '/studentView/login/$token'
+      preLoaderRoute: typeof StudentViewLoginTokenRouteImport
+      parentRoute: typeof StudentViewLoginRoute
+    }
   }
 }
+
+interface StudentViewLoginRouteChildren {
+  StudentViewLoginTokenRoute: typeof StudentViewLoginTokenRoute
+}
+
+const StudentViewLoginRouteChildren: StudentViewLoginRouteChildren = {
+  StudentViewLoginTokenRoute: StudentViewLoginTokenRoute,
+}
+
+const StudentViewLoginRouteWithChildren =
+  StudentViewLoginRoute._addFileChildren(StudentViewLoginRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   HomeRoute: HomeRoute,
@@ -242,7 +272,7 @@ const rootRouteChildren: RootRouteChildren = {
   RegisterRoute: RegisterRoute,
   CoursesIdRoute: CoursesIdRoute,
   StudentViewHomeRoute: StudentViewHomeRoute,
-  StudentViewLoginRoute: StudentViewLoginRoute,
+  StudentViewLoginRoute: StudentViewLoginRouteWithChildren,
   TasksIdRoute: TasksIdRoute,
   CoursesIndexRoute: CoursesIndexRoute,
   StudentViewVerifyTokenRoute: StudentViewVerifyTokenRoute,

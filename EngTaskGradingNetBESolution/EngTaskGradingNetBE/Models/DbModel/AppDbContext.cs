@@ -10,7 +10,7 @@ namespace EngTaskGradingNetBE.Models.DbModel
     public DbSet<Task> Tasks => Set<Task>();
     public DbSet<Grade> Grades => Set<Grade>();
     public DbSet<TeacherToken> TeacherTokens => Set<TeacherToken>();
-    public DbSet<StudentToken> StudentTokens => Set<StudentToken>();
+    public DbSet<StudentViewToken> StudentViewTokens => Set<StudentViewToken>();
     public DbSet<AppLog> AppLog => Set<AppLog>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -43,6 +43,12 @@ namespace EngTaskGradingNetBE.Models.DbModel
           .OnDelete(DeleteBehavior.Cascade);
 
         e.HasIndex(c => c.Code).IsUnique();
+      });
+
+      modelBuilder.Entity<StudentViewToken>(e =>
+      {
+        e.HasIndex(t => new { t.StudentId, t.ExpiresAt }).IsUnique();
+        e.HasIndex(t => t.Token);
       });
     }
   }

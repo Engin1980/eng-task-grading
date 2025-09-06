@@ -1,5 +1,6 @@
 ﻿using EngTaskGradingNetBE.Middleware;
 using EngTaskGradingNetBE.Models.DbModel;
+using EngTaskGradingNetBE.Models.Config;
 using EngTaskGradingNetBE.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -54,6 +55,10 @@ app.Run();
 
 static void BuildServices(WebApplicationBuilder builder)
 {
+  // Configure settings
+  builder.Services.Configure<TokenSettings>(
+    builder.Configuration.GetSection(TokenSettings.SectionName));
+  
   builder.Services.AddTransient<AppLogService>();
   builder.Services.AddTransient<AuthService>();
   builder.Services.AddTransient<TeacherService>();
@@ -61,6 +66,10 @@ static void BuildServices(WebApplicationBuilder builder)
   builder.Services.AddTransient<StudentService>();
   builder.Services.AddTransient<TaskService>();
   builder.Services.AddTransient<GradeService>();
+  builder.Services.AddTransient<CloudflareTurnistilleService>();
+  builder.Services.AddTransient<StudentViewService>();
+  builder.Services.AddTransient<IEmailService, MockEmailService>();
+  builder.Services.AddTransient<AppSettingsService>();
   builder.Services.AddHttpClient<KeyCloakService>(); // http client for KeyCloakService
   builder.Services.AddTransient<KeyCloakService>();
   builder.Services.AddControllers();

@@ -181,12 +181,30 @@ namespace EngTaskGradingNetBE.Services
       var course = await Db.Courses
         .Include(q => q.Students)
         .Include(q => q.Attendances)
-        .ThenInclude(q=>q.Days)
-        .ThenInclude(q=>q.Records)
+        .ThenInclude(q => q.Days)
+        .ThenInclude(q => q.Records)
         .FirstOrDefaultAsync(q => q.Id == courseId)
         ?? throw new Exceptions.EntityNotFoundException(typeof(Course), courseId);
 
       return course;
+    }
+
+    public record AttendanceData(List<Student> Students, List<AttendanceDay> Days);
+    internal async System.Threading.Tasks.Task<AttendanceData> GetAttendanceDataAsync(int attendanceId)
+    {
+      var att = await Db.Attendances
+        .Include(q => q.Days).ThenInclude(q => q.Records).ThenInclude(q => q.Value)
+        .Include(q => q.Course).ThenInclude(q => q.Students)
+        .FirstOrDefaultAsync(q => q.Id == attendanceId)
+        ?? throw new Exceptions.EntityNotFoundException(typeof(Attendance), attendanceId);
+
+      var xa = att.Days.SelectMany(q => q.Records);
+
+      AttendanceData ret = new AttendanceData(
+        att.Course.Students.Union(att.Days.SelectMany(q => q.Records).Select(q => q.Student)).Distinct().ToList(),
+        att.Days.ToList()
+        );
+      return ret;
     }
   }
 }

@@ -14,5 +14,7 @@ public class Attendance
   [Required]
   public string Title { set; get; } = null!;
 
+  public double? MinWeight { get; set; }
+
   public ICollection<AttendanceDay> Days { set; get; } = new List<AttendanceDay>();
 }

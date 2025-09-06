@@ -66,12 +66,13 @@ public static class EObjectMapper
   {
     return new Attendance()
     {
-      Title = attendanceDto.Title
+      Title = attendanceDto.Title,
+      MinWeight = attendanceDto.MinWeight
     };
   }
 
   public static AttendanceDto To(Attendance attendance)
-    => new(attendance.Id, attendance.Title, attendance.Days.OrderBy(q => q.Title).Select(To).ToList());
+    => new(attendance.Id, attendance.Title, attendance.MinWeight, attendance.Days.OrderBy(q => q.Title).Select(To).ToList());
 
   public static AttendanceDay From(AttendanceDayCreateDto dto)
   {
@@ -94,7 +95,8 @@ public static class EObjectMapper
   {
     return new Attendance()
     {
-      Title = attendanceDto.Title
+      Title = attendanceDto.Title,
+      MinWeight = attendanceDto.MinWeight
     };
   }
 

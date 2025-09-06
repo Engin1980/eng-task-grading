@@ -3,6 +3,7 @@ using EngTaskGradingNetBE.Models.DbModel;
 using EngTaskGradingNetBE.Models.Dtos;
 using EngTaskGradingNetBE.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Identity.Client;
 using Microsoft.IdentityModel.Tokens;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -154,6 +155,24 @@ namespace EngTaskGradingNetBE.Controllers
       }
 
       AttendanceSetDto ret = new(attendances, students, items);
+      return ret;
+    }
+
+    [HttpGet("{attendanceId}/set")]
+    public async Task<AttendanceDaySetDto> GetAttendanceSetAsync(int attendanceId)
+    {
+      var data = await attendanceService.GetAttendanceDataAsync(attendanceId);
+
+      List<AttendanceDaySetRecordDto> items = data.Days
+        .SelectMany(q => q.Records)
+        .Select(q => new AttendanceDaySetRecordDto(q.Id, q.StudentId, q.AttendanceDayId, q.Value.Title, q.Value.Weight))
+        .ToList();
+
+      AttendanceDaySetDto ret = new(
+        data.Students.Select(EObjectMapper.To).OrderBy(q => q.Surname).ThenBy(q => q.Name).ToList(),
+        data.Days.Select(EObjectMapper.To).OrderBy(q => q.Title).ToList(),
+        items
+        );
       return ret;
     }
   }

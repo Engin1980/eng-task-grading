@@ -21,6 +21,7 @@ public record AttendanceDayDto(
 public record AttendanceDto(
   int Id,
   string Title,
+  double? MinWeight,
   ICollection<AttendanceDayDto> Days
 );
 
@@ -35,7 +36,8 @@ public record AttendanceDayUpdateDto(
 );
 
 public record AttendanceCreateDto(
-  string Title
+  string Title,
+  double? MinWeight
 );
 
 public record AttendanceOverviewDto(
@@ -48,3 +50,18 @@ public record AttendanceSetDto(
   List<AttendanceDto> Attendances,
   List<StudentDto> Students,
   List<AttendanceSetItemDto> Items);
+
+public record AttendanceDaySetDto(
+  List<StudentDto> Students,
+  List<AttendanceDayDto> AttendanceDays,
+  List<AttendanceDaySetRecordDto> Items
+);
+
+public record AttendanceDaySetRecordDto(
+  int? Id,
+  int StudentId,
+  int AttendanceDayId,
+  string AttendanceValueTitle,
+  double AttendanceValueWeight
+);
+

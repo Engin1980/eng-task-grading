@@ -36,7 +36,7 @@ export function AttendanceTab({ courseId }: AttendanceTabProps) {
 
   const handleCreateAttendance = async (attendance: AttendanceCreateDto) => {
     try {
-      await attendanceService.createAttendance(parseInt(courseId), attendance);
+      await attendanceService.create(parseInt(courseId), attendance);
       await loadAttendances(); // Refresh the list
     } catch (err) {
       logger.error('Error creating attendance:', err);
@@ -91,6 +91,9 @@ export function AttendanceTab({ courseId }: AttendanceTabProps) {
                   Název
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Minimální váha
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Počet zaznamenaných dnů
                 </th>
               </tr>
@@ -106,6 +109,13 @@ export function AttendanceTab({ courseId }: AttendanceTabProps) {
                     >
                       {attendance.title}
                     </Link>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {attendance.minWeight !== undefined && attendance.minWeight !== null ? (
+                      attendance.minWeight
+                    ) : (
+                      <span className="text-gray-400">—</span>
+                    )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {attendance.days.length}

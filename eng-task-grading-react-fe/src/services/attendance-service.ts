@@ -1,4 +1,4 @@
-import type { AttendanceCreateDto, AttendanceDayCreateDto, AttendanceDayUpdateDto, AttendanceDto, AttendanceRecordDto, AttendanceSetDto, AttendanceUpdateDto, AttendanceValueDto, StudentAttendanceDto } from "../model/attendance-dto";
+import type { AttendanceCreateDto, AttendanceDayCreateDto, AttendanceDaySetDto, AttendanceDayUpdateDto, AttendanceDto, AttendanceRecordDto, AttendanceSetDto, AttendanceUpdateDto, AttendanceValueDto, StudentAttendanceDto } from "../model/attendance-dto";
 import type { StudentDto } from "../model/student-dto";
 import { apiHttp } from "./api-http";
 
@@ -66,6 +66,11 @@ export const attendanceService = {
 
   getCourseSet: async (courseId: number) => {
     const { data } = await apiHttp.get<AttendanceSetDto>(`/v1/attendance/for-course/${courseId}/set`);
+    return data;
+  },
+
+  getAttendanceSet: async (attendanceId: number) => {
+    const { data } = await apiHttp.get<AttendanceDaySetDto>(`/v1/attendance/${attendanceId}/set`);
     return data;
   }
 }

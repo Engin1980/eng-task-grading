@@ -17,16 +17,19 @@ export interface AttendanceDayUpdateDto {
 export interface AttendanceDto {
   id: number;
   title: string;
+  minWeight?: number;
   days: AttendanceDayDto[];
 }
 
 export interface AttendanceCreateDto {
   title: string;
+  minWeight?: number;
   days: AttendanceDayDto[];
 }
 
 export interface AttendanceUpdateDto {
   title: string;
+  minWeight?: number;
 }
 
 export interface AttendanceRecordDto {
@@ -43,14 +46,28 @@ export interface AttendanceValueDto {
   title: string;
 }
 
-export interface AttendanceSetItemDto{
+export interface AttendanceSetItemDto {
   attendanceId: number;
   studentId: number;
   value: number;
 }
 
-export interface AttendanceSetDto{
+export interface AttendanceSetDto {
   attendances: AttendanceDto[];
   students: StudentDto[];
   items: AttendanceSetItemDto[];
+}
+
+export interface AttendanceDaySetDto {
+  students: StudentDto[];
+  attendanceDays: AttendanceDayDto[];
+  items: AttendanceDaySetRecordDto[];
+}
+
+export interface AttendanceDaySetRecordDto {
+  id?: number;
+  studentId: number;
+  attendanceDayId: number;
+  attendanceValueTitle: string;
+  attendanceValueWeight: number;
 }

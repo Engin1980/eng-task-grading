@@ -10,6 +10,7 @@ interface CreateAttendanceModalProps {
 
 export function CreateAttendanceModal({ isOpen, onClose, onSubmit }: CreateAttendanceModalProps) {
   const [title, setTitle] = useState('');
+  const [minWeight, setMinWeight] = useState<number | ''>('');
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -18,11 +19,19 @@ export function CreateAttendanceModal({ isOpen, onClose, onSubmit }: CreateAtten
 
     setSubmitting(true);
     try {
-      await onSubmit({
+      const attendanceData: AttendanceCreateDto = {
         title: title.trim(),
-        days: [] // Zatím vytváříme prázdné attendance bez dnů
-      });
+        days: [], // Zatím vytváříme prázdné attendance bez dnů
+      };
+      
+      // Přidej minWeight pouze pokud je zadaná
+      if (minWeight !== '' && minWeight !== null) {
+        attendanceData.minWeight = Number(minWeight);
+      }
+      
+      await onSubmit(attendanceData);
       setTitle('');
+      setMinWeight('');
       onClose();
     } catch (error) {
       console.error('Error creating attendance:', error);
@@ -34,6 +43,7 @@ export function CreateAttendanceModal({ isOpen, onClose, onSubmit }: CreateAtten
   const handleClose = () => {
     if (!submitting) {
       setTitle('');
+      setMinWeight('');
       onClose();
     }
   };
@@ -76,6 +86,25 @@ export function CreateAttendanceModal({ isOpen, onClose, onSubmit }: CreateAtten
                 disabled={submitting}
                 required
               />
+            </div>
+
+            <div className="mb-4">
+              <label htmlFor="minWeight" className="block text-sm font-medium text-gray-700 mb-2">
+                Minimální váha (nepovinné)
+              </label>
+              <input
+                type="number"
+                id="minWeight"
+                value={minWeight}
+                onChange={(e) => setMinWeight(e.target.value === '' ? '' : Number(e.target.value))}
+                placeholder="Zadejte minimální váhu..."
+                step="0.01"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                disabled={submitting}
+              />
+              <p className="mt-1 text-xs text-gray-500">
+                Volitelná minimální váha pro úspěšnou docházku
+              </p>
             </div>
 
             <div className="flex justify-end space-x-3">

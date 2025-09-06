@@ -12,7 +12,7 @@ namespace EngTaskGradingNetBE.Controllers
   public class CourseController(CourseService courseService, StudentService studentService) : ControllerBase
   {
     [HttpPost]
-    public async Task<ActionResult<Course>> CreateCourse([FromBody] CourseCreateDto courseCreateDto)
+    public async Task<ActionResult<Course>> CreateCourseAsync([FromBody] CourseCreateDto courseCreateDto)
     {
       if (courseCreateDto == null)
         return BadRequest("Course data is required.");
@@ -20,11 +20,11 @@ namespace EngTaskGradingNetBE.Controllers
       Course course = EObjectMapper.From(courseCreateDto);
       var createdCourse = await courseService.CreateAsync(course);
       var courseDto = EObjectMapper.To(createdCourse);
-      return CreatedAtAction(nameof(CreateCourse), courseDto.Id, courseDto);
+      return CreatedAtAction(nameof(CreateCourseAsync), courseDto.Id, courseDto);
     }
 
     [HttpGet]
-    public async Task<List<CourseDto>> GetAllCourses()
+    public async Task<List<CourseDto>> GetAllCoursesAsync()
     {
       var courses = await courseService.GetAllAsync();
       var courseDtos = courses
@@ -35,7 +35,7 @@ namespace EngTaskGradingNetBE.Controllers
     }
 
     [HttpGet("{id}")]
-    public async Task<CourseDto> GetCourseById(int id)
+    public async Task<CourseDto> GetCourseByIdAsync(int id)
     {
       Course course = await courseService.GetByIdAsync(id);
       var dto = EObjectMapper.To(course);

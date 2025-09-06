@@ -17,11 +17,10 @@ export const courseService = {
     return data;
   },
 
-  async createCourse(courseData: CourseCreateDto): Promise<CourseDto> {
+  async createCourse(courseData: CourseCreateDto): Promise<void> {
     logger.info("Vytvářím nový kurz", courseData);
     const { data } = await apiHttp.post<CourseDto>("/v1/course", courseData);
     logger.info("Kurz byl úspěšně vytvořen", { course: data });
-    return data;
   },
 
   async importStudentsToCourse(courseId: string, students: StudentCreateDto[]): Promise<void> {

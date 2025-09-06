@@ -19,14 +19,12 @@ export const gradeService = {
     return data;
   },
 
-  async createGrade(grade: GradeCreateDto): Promise<GradeDto> {
-    const { data } = await apiHttp.post<GradeDto>("/v1/grade", grade);
-    return data;
+  async createGrade(grade: GradeCreateDto): Promise<void> {
+    await apiHttp.post<GradeDto>("/v1/grade", grade);
   },
 
-  async updateGrade(gradeId: string, grade: GradeUpdateDto): Promise<GradeDto> {
-    const { data } = await apiHttp.patch<GradeDto>(`/v1/grade/${gradeId}`, grade);
-    return data;
+  async updateGrade(gradeId: string, grade: GradeUpdateDto): Promise<void> {
+    await apiHttp.patch<GradeDto>(`/v1/grade/${gradeId}`, grade);
   },
 
   async deleteGrade(gradeId: string): Promise<void> {

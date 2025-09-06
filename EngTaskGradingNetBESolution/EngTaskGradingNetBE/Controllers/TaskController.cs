@@ -30,7 +30,7 @@ namespace EngTaskGradingNetBE.Controllers
     }
 
     [HttpGet("{id}")]
-    public async Task<TaskDto> GetAsync([FromRoute] int id)
+    public async Task<TaskDto> GetByIdAsync([FromRoute] int id)
     {
       var task = await taskService.GetByIdAsync(id);
       var taskDto = EObjectMapper.To(task);

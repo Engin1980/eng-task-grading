@@ -29,7 +29,7 @@ namespace EngTaskGradingNetBE.Controllers
     }
 
     [HttpGet]
-    public async Task<IEnumerable<TeacherDto>> GetAllTeachers()
+    public async Task<IEnumerable<TeacherDto>> GetAllTeachersAsync()
     {
       // add security
       var teachers = await teacherService.GetAllTeachersAsync();
@@ -39,7 +39,7 @@ namespace EngTaskGradingNetBE.Controllers
     }
 
     [HttpGet("{id}")]
-    public async Task<TeacherDto> GetById(int id)
+    public async Task<TeacherDto> GetByIdAsync(int id)
     {
       var teacher = await teacherService.GetAsync(id);
       return EObjectMapper.To(teacher);

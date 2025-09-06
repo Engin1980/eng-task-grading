@@ -6,16 +6,17 @@ namespace EngTaskGradingNetBE.Middleware
 {
   public class GlobalExceptionHandler
   {
-
     private record ErrorData(HttpStatusCode StatusCode, string Error);
     private readonly RequestDelegate _next;
+    private readonly ILogger<GlobalExceptionHandler> _logger;
 
-    public GlobalExceptionHandler(RequestDelegate next)
+    public GlobalExceptionHandler(RequestDelegate next, ILogger<GlobalExceptionHandler> logger)
     {
       _next = next;
+      _logger = logger;
     }
 
-    public async Task InvokeAsync(HttpContext context)
+    public async System.Threading.Tasks.Task InvokeAsync(HttpContext context)
     {
       try
       {
@@ -23,15 +24,15 @@ namespace EngTaskGradingNetBE.Middleware
       }
       catch (Exception ex)
       {
+        _logger.LogError(ex, "An unhandled exception occurred while processing the request");
         await HandleExceptionAsync(context, ex);
       }
     }
 
-    private static Task HandleExceptionAsync(HttpContext context, Exception ex)
+    private static System.Threading.Tasks.Task HandleExceptionAsync(HttpContext context, Exception ex)
     {
       var response = context.Response;
       response.ContentType = "application/json";
-
 
       // Customize status codes depending on exception type
       ErrorData errorData = ex switch
@@ -45,10 +46,17 @@ namespace EngTaskGradingNetBE.Middleware
         _ => HandleInternalServerError(ex)
       };
 
+      // ✅ Nastavit HTTP status code
+      response.StatusCode = (int)errorData.StatusCode;
+
       var result = JsonSerializer.Serialize(new
       {
         error = errorData.Error,
         statusCode = (int)errorData.StatusCode,
+        timestamp = DateTime.UtcNow
+      }, new JsonSerializerOptions 
+      { 
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase 
       });
 
       return response.WriteAsync(result);

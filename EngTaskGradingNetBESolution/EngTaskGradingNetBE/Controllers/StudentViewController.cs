@@ -5,14 +5,18 @@ namespace EngTaskGradingNetBE.Controllers;
 
 [ApiController]
 [Route("api/v1/[controller]")]
-public class StudentViewController(StudentViewService studentViewService, CloudflareTurnistilleService cloudflareTurnistilleService) : ControllerBase
+public class StudentViewController(
+  AppSettingsService appSettingsService,
+  StudentViewService studentViewService, 
+  CloudflareTurnistilleService cloudflareTurnistilleService) : ControllerBase
 {
   [HttpPost("login")]
   public async System.Threading.Tasks.Task LoginAsync(StudentViewLoginDto data)
   {
     try
     {
-      await cloudflareTurnistilleService.VerifyAsync(data.CaptchaToken);
+      if (appSettingsService.GetSettings().CloudFlare.Enabled)
+        await cloudflareTurnistilleService.VerifyAsync(data.CaptchaToken);
       await studentViewService.SendInvitationAsync(data.StudentNumber);
     }
     catch (Exception ex)

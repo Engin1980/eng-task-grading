@@ -12,7 +12,7 @@ namespace EngTaskGradingNetBE.Services
     IEmailService emailService,
     IOptions<AppSettings> appSettings) : DbContextBaseService(context)
   {
-    private readonly TokenSettings tokenSettings = appSettings.Value.TokenSettings;
+    private readonly TokenSettings tokenSettings = appSettings.Value.Token;
 
     internal async System.Threading.Tasks.Task SendInvitationAsync(string studentNumber)
     {
@@ -39,7 +39,7 @@ namespace EngTaskGradingNetBE.Services
         <p>Dobrý den,</p>
         <p>pro vaše osobní číslo byla přijata žádost o přístup na přehled známek do systému EngTaskGrading.</p>
         <p>Pokud jste o tento přístup požádali, klikněte na následující odkaz. Odkaz je platný {tokenSettings.StudentLoginTokenExpiryMinutes} minut od obdržení tohoto e-mailu.</p>
-        <p><a href="{feUrl}/student-view/login?token={token}">Přihlásit se do systému známek EngTaskGrading</a></p>
+        <p><a href="{feUrl}/studentView/verify/{token}">Přihlásit se do systému známek EngTaskGrading</a></p>
         <p>Pokud jste o tento přístup nepožádali, tento e-mail ignorujte, nikdo nebude mít přístup k vašim známkám.</p>
         <p>V případě dotazů prosím kontaktuje vyučujícího daného předmětu.</p>
         <p>Hezký den přeje tým EngTaskGrading.</p>

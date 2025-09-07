@@ -2,6 +2,8 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useForm } from '@tanstack/react-form'
 import { useState, useCallback, useEffect } from 'react'
 import { Turnstile } from '../../components/turnstille'
+import { SuccessModal } from '../../components/studentView/SuccessModal'
+import AppSettings from '../../config/app-settings'
 import toast from 'react-hot-toast'
 import type { StudentViewLoginDto } from '../../model/student-view-login-dto'
 import { studentViewService } from '../../services/student-view-service'
@@ -13,16 +15,18 @@ export const Route = createFileRoute('/studentView/login')({
 function RouteComponent() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [captchaToken, setCaptchaToken] = useState<string | null>(null)
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
 
-  // Get Cloudflare site key from environment variables
-  const TURNSTILE_SITE_KEY = import.meta.env.VITE_CLOUDFLARE_SITE_KEY
+  // Cloudflare konfigurace z AppSettings
+  const isCloudflareEnabled = AppSettings.cloudflare.enabled
+  const TURNSTILE_SITE_KEY = AppSettings.cloudflare.siteKey
 
-  // Toast upozornění pokud chybí site key
+  // Toast upozornění pokud chybí site key (pouze pokud je Cloudflare enabled)
   useEffect(() => {
-    if (!TURNSTILE_SITE_KEY) {
+    if (isCloudflareEnabled && !TURNSTILE_SITE_KEY) {
       toast.error('Chyba: VITE_CLOUDFLARE_SITE_KEY není nastaven v .env.local');
     }
-  }, [TURNSTILE_SITE_KEY]);
+  }, [isCloudflareEnabled, TURNSTILE_SITE_KEY]);
 
   // Stabilní callback pro captcha aby se neměnil při každém re-renderu
   const handleCaptchaVerify = useCallback((token: string) => {
@@ -34,7 +38,8 @@ function RouteComponent() {
       studentNumber: '',
     },
     onSubmit: async ({ value }) => {
-      if (!captchaToken) {
+      // Kontrola captcha pouze pokud je Cloudflare enabled
+      if (isCloudflareEnabled && !captchaToken) {
         toast.error('Prosím dokončete ověření captcha')
         return
       }
@@ -44,11 +49,11 @@ function RouteComponent() {
 
         const data: StudentViewLoginDto = {
           studentNumber: value.studentNumber,
-          captchaToken: captchaToken
+          captchaToken: isCloudflareEnabled ? (captchaToken || undefined) : undefined
         };
 
         await studentViewService.login(data);
-        toast.success('Ověřovací odkaz byl odeslán na Váš email. POkračujte dle instrukcí v emailu.')
+        setShowSuccessModal(true)
         form.reset()
         setCaptchaToken(null) // Reset captcha token po úspěšném odeslání
 
@@ -136,32 +141,30 @@ function RouteComponent() {
             </form.Field>
 
             {/* Turnstile Captcha */}
-            <div>
-              {TURNSTILE_SITE_KEY ? (
-                <Turnstile
-                  siteKey={TURNSTILE_SITE_KEY}
-                  onVerify={handleCaptchaVerify}
-                />
-              ) : (
-                <div className="text-red-600 text-sm text-center py-4">
-                  Chyba: VITE_CLOUDFLARE_SITE_KEY není nastaven v .env.local
-                </div>
-              )}
-            </div>
+            {isCloudflareEnabled && (
+              <div>
+                {TURNSTILE_SITE_KEY ? (
+                  <Turnstile
+                    siteKey={TURNSTILE_SITE_KEY}
+                    onVerify={handleCaptchaVerify}
+                  />
+                ) : (
+                  <div className="text-red-600 text-sm text-center py-4">
+                    Chyba: VITE_CLOUDFLARE_SITE_KEY není nastaven v .env.local
+                  </div>
+                )}
+              </div>
+            )}
 
             <div>
               <button
                 type="submit"
-                disabled={isSubmitting || !form.state.canSubmit || !captchaToken}
+                disabled={
+                  isSubmitting || 
+                  !form.state.canSubmit || 
+                  (isCloudflareEnabled && !captchaToken)
+                }
                 className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                onClick={() => {
-                  console.log('Button debug info:');
-                  console.log('isSubmitting:', isSubmitting);
-                  console.log('form.state.canSubmit:', form.state.canSubmit);
-                  console.log('captchaToken:', captchaToken);
-                  console.log('TURNSTILE_SITE_KEY:', TURNSTILE_SITE_KEY);
-                  console.log('Button disabled condition:', isSubmitting || !form.state.canSubmit || !captchaToken);
-                }}
               >
                 {isSubmitting ? 'Přihlašuji...' : 'Přihlásit se'}
               </button>
@@ -169,6 +172,14 @@ function RouteComponent() {
           </form>
         </div>
       </div>
+
+      {/* Success Modal */}
+      <SuccessModal
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        title="Úspěšně odesláno!"
+        message="Ověřovací odkaz byl odeslán na Váš email. Pokračujte dle instrukcí v emailu."
+      />
     </div>
   )
 }

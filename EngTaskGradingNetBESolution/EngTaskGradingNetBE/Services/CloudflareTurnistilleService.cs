@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using EngTaskGradingNetBE.Models.Config;
+using Microsoft.AspNetCore.Mvc;
 using System.Net.Http;
 
 namespace EngTaskGradingNetBE.Services
 {
-  public class CloudflareTurnistilleService(IConfiguration config, IHttpClientFactory httpClientFactory)
+  public class CloudflareTurnistilleService(AppSettingsService appSettingsService, IHttpClientFactory httpClientFactory)
   {
     public record TurnstileResponse(
         bool Success,
@@ -14,11 +15,14 @@ namespace EngTaskGradingNetBE.Services
 
     public async System.Threading.Tasks.Task VerifyAsync(string? token)
     {
+      AppSettings settings = appSettingsService.GetSettings();
+
+      if (settings.CloudFlare.Enabled == false)
+        throw new ApplicationException(typeof(CloudflareTurnistilleService).Name + " is disabled in config.");
       if (string.IsNullOrWhiteSpace(token))
         throw new Exceptions.CloudflareTurnistilleException($"Cloudflare Token is null or empty");
 
-
-      string secret = config["CloudFlare:Turnstille:SecretKey"] // get from configuration
+      string secret = appSettingsService.GetKey("CloudFlare:Turnstille:SecretKey")
         ?? throw new ApplicationException("CloudFlare SecretKey not found in config.");
       var client = httpClientFactory.CreateClient();
 

@@ -16,7 +16,8 @@ namespace EngTaskGradingNetBE.Services
 
     internal async System.Threading.Tasks.Task SendInvitationAsync(string studentNumber)
     {
-      var student = await Db.Students.FirstOrDefaultAsync(q => q.Number.Equals(studentNumber, StringComparison.CurrentCultureIgnoreCase));
+      studentNumber = studentNumber.ToUpper().Trim();
+      var student = await Db.Students.FirstOrDefaultAsync(q => q.Number == studentNumber);
       if (student == null)
       {
         logger.LogWarning("Requested access for student {StudentNumber}, but not in the database. Aborted.", studentNumber);

@@ -48,6 +48,9 @@ function RouteComponent() {
         };
 
         await studentViewService.login(data);
+        toast.success('Ověřovací odkaz byl odeslán na Váš email. POkračujte dle instrukcí v emailu.')
+        form.reset()
+        setCaptchaToken(null) // Reset captcha token po úspěšném odeslání
 
       } catch (error) {
         console.error('Login error:', error)

@@ -3,7 +3,7 @@ import { apiHttp } from "./api-http";
 
 export const studentViewService = {
   login: async (data: StudentViewLoginDto) => {
-    await apiHttp.post('/student-view/login', data);
+    await apiHttp.post('/v1/studentView/login', data);
     return Promise.resolve();
   }
 }

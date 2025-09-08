@@ -27,23 +27,7 @@ function getStudentNumberFromJWT(): string | null {
   }
 }
 
-// Helper function to extract student ID from JWT token
-function getStudentIdFromJWT(): string | null {
-  try {
-    const token = localStorage.getItem('studentViewAccessJWT');
-    if (!token) return null;
 
-    // Decode JWT payload (base64url decode)  
-    const payload = token.split('.')[1];
-    if (!payload) return null;
-
-    const decodedPayload = JSON.parse(atob(payload));
-    return decodedPayload.studentId || decodedPayload.id || null;
-  } catch (error) {
-    console.error('Error decoding JWT:', error);
-    return null;
-  }
-}
 
 function RouteComponent() {
   const { id } = Route.useParams()
@@ -181,7 +165,6 @@ function RouteComponent() {
               <AttendanceTab 
                 attendances={courseData.attendances} 
                 attendanceRecords={courseData.attendanceRecords}
-                studentId={parseInt(getStudentIdFromJWT() || '0')}
               />
             )}
           </div>

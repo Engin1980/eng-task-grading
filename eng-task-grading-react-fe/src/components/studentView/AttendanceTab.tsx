@@ -4,7 +4,6 @@ import type { AttendanceDaySetRecordDto } from '../../model/attendance-dto';
 interface AttendanceTabProps {
   attendances: AttendanceDto[];
   attendanceRecords: AttendanceDaySetRecordDto[];
-  studentId: number;
 }
 
 interface AttendanceDay {
@@ -19,17 +18,14 @@ interface AttendanceSet {
   days: AttendanceDay[];
 }
 
-export function AttendanceTab({ attendances, attendanceRecords, studentId }: AttendanceTabProps) {
-  // Filter records for current student and group by attendance set
-  const studentRecords = attendanceRecords.filter(record => record.studentId === studentId);
-  
+export function AttendanceTab({ attendances, attendanceRecords }: AttendanceTabProps) {
   // Transform attendance data to match component structure
   const attendanceSets: AttendanceSet[] = attendances.map(attendance => {
     const days: AttendanceDay[] = attendance.days.map(day => {
-      const record = studentRecords.find(r => r.attendanceDayId === day.id);
+      const record = attendanceRecords.find(r => r.attendanceDayId === day.id);
       return {
         title: day.title,
-        recordTitle: record ? record.attendanceValueTitle : "Neúčastnil se",
+        recordTitle: record ? record.attendanceValueTitle : "Žádný záznam",
         weight: record?.attendanceValueWeight
       };
     });

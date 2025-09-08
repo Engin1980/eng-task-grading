@@ -3,6 +3,9 @@ import { useNavigate } from '@tanstack/react-router';
 import { useLogger } from '../../hooks/use-logger';
 import type { GradeSet, GradeDto } from '../../model/grade-dto';
 import { gradeService } from '../../services/grade-service';
+import type { AttendanceSetDto } from '../../model/attendance-dto';
+import { attendanceService } from '../../services/attendance-service';
+import type { StudentDto } from '../../model/student-dto';
 
 interface GradesTabProps {
   courseId: string;
@@ -12,6 +15,8 @@ export function GradesTab({ courseId }: GradesTabProps) {
   const logger = useLogger("GradesTab");
   const navigate = useNavigate();
   const [gradeSet, setGradeSet] = useState<GradeSet | null>(null);
+  const [attendanceSet, setAttendanceSet] = useState<AttendanceSetDto | null>(null);
+  const [unitedStudents, setUnitedStudents] = useState<StudentDto[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [studentFilter, setStudentFilter] = useState<string>("");
   const [taskFilter, setTaskFilter] = useState<string>("");
@@ -21,6 +26,16 @@ export function GradesTab({ courseId }: GradesTabProps) {
       setLoading(true);
       const data = await gradeService.getGradesByCourse(courseId);
       setGradeSet(data);
+      const dota = await attendanceService.getCourseSet(+courseId);
+      setAttendanceSet(dota);
+
+      // prunik studentu:
+      const allStudents = [
+        ...(gradeSet?.students ?? []),
+        ...(dota?.students ?? [])
+      ];
+      const uniqueStudentIds = new Set(allStudents.map(student => student.id));
+      setUnitedStudents(allStudents.filter(student => uniqueStudentIds.has(student.id)));
     } catch (error) {
       logger.error('Error loading grades:', error);
     } finally {
@@ -38,8 +53,8 @@ export function GradesTab({ courseId }: GradesTabProps) {
     navigate({ to: `/tasks/${taskId}` });
   };
 
-  // Funkce pro filtrování studentů
-  const filteredStudents = gradeSet?.students.filter(student => {
+  // Funkce pro filtrování studentů z unitedStudents
+  const filteredStudents = unitedStudents.filter(student => {
     if (!studentFilter.trim()) return true;
 
     const searchText = studentFilter.toLowerCase();
@@ -84,13 +99,38 @@ export function GradesTab({ courseId }: GradesTabProps) {
     }
   };
 
+  // Funkce pro barevné označení attendance podle minWeight
+  const getAttendanceColor = (value: number, minWeight?: number) => {
+    if (minWeight === undefined || minWeight === null) {
+      // Pokud není minWeight nastavena, použij neutrální modrou barvu
+      return 'bg-blue-100 text-blue-800';
+    }
+
+    if (value >= minWeight) {
+      return 'bg-green-100 text-green-800 border border-green-200';
+    } else {
+      return 'bg-red-100 text-red-800 border border-red-200';
+    }
+  };
+
+  // Funkce pro získání attendance hodnoty pro studenta
+  const getAttendanceValueForStudent = (studentId: number, attendanceId: number): number | null => {
+    if (!attendanceSet) return null;
+
+    const item = attendanceSet.items.find(
+      item => item.studentId === studentId && item.attendanceId === attendanceId
+    );
+
+    return item ? item.value : null;
+  };
+
   // Funkce pro výpočet statistik úspěšných úkolů
   const getStudentStats = (studentId: number) => {
     if (!filteredTasks) return { successful: 0, total: 0 };
-    
+
     let successful = 0;
     const total = filteredTasks.length;
-    
+
     filteredTasks.forEach(task => {
       const allGrades = getGradesForStudentAndTask(studentId, task.id);
       if (allGrades.length > 0) {
@@ -100,7 +140,6 @@ export function GradesTab({ courseId }: GradesTabProps) {
         }
       }
     });
-    
     return { successful, total };
   };
 
@@ -198,9 +237,25 @@ export function GradesTab({ courseId }: GradesTabProps) {
               <th className="px-4 py-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky left-0 bg-gray-50 z-10 w-48">
                 Student
               </th>
-              <th className="px-3 py-3 border-b border-gray-200 text-center text-xs font-medium text-gray-500 uppercase tracking-wider sticky left-0 bg-gray-50 z-10 w-24" style={{left: '192px'}}>
+              <th className="px-3 py-3 border-b border-gray-200 text-center text-xs font-medium text-gray-500 uppercase tracking-wider sticky left-0 bg-gray-50 z-10 w-24" style={{ left: '192px' }}>
                 Úspěšnost
               </th>
+              {/* Sloupce pro attendances */}
+              {attendanceSet?.attendances.map((attendance) => (
+                <th
+                  key={`attendance-${attendance.id}`}
+                  className="min-w-24 max-w-48 px-2 py-3 border-b border-gray-200 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  title={`Attendance: ${attendance.title}`}
+                >
+                  <button
+                    onClick={() => navigate({ to: `/attendances/${attendance.id}` })}
+                    className="break-words hyphens-auto text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                  >
+                    {attendance.title}
+                  </button>
+                  <div className="text-xs text-gray-400 font-normal">Min: {attendance.minWeight ?? "-"}</div>
+                </th>
+              ))}
               {filteredTasks?.map((task) => (
                 <th
                   key={task.id}
@@ -213,9 +268,7 @@ export function GradesTab({ courseId }: GradesTabProps) {
                   >
                     {task.title}
                   </button>
-                  {task.minGrade !== null && task.minGrade !== undefined && (
-                    <div className="text-xs text-gray-400 font-normal">Min: {task.minGrade}</div>
-                  )}
+                  <div className="text-xs text-gray-400 font-normal">Min: {task.minGrade ?? "-"}</div>
                 </th>
               ))}
             </tr>
@@ -229,7 +282,7 @@ export function GradesTab({ courseId }: GradesTabProps) {
                     <div className="text-xs text-gray-500">{student.number}</div>
                   </div>
                 </td>
-                <td className="px-3 py-4 whitespace-nowrap text-sm text-center sticky left-0 bg-white z-10" style={{left: '192px'}}>
+                <td className="px-3 py-4 whitespace-nowrap text-sm text-center sticky left-0 bg-white z-10" style={{ left: '192px' }}>
                   {(() => {
                     const stats = getStudentStats(student.id);
                     return (
@@ -237,6 +290,25 @@ export function GradesTab({ courseId }: GradesTabProps) {
                     );
                   })()}
                 </td>
+                {/* Buňky pro attendance values */}
+                {attendanceSet?.attendances.map((attendance) => {
+                  const attendanceValue = getAttendanceValueForStudent(student.id, attendance.id);
+
+                  return (
+                    <td
+                      key={`${student.id}-attendance-${attendance.id}`}
+                      className="px-2 py-4 text-center text-sm"
+                    >
+                      {attendanceValue !== null ? (
+                        <span className={`inline-flex px-4 py-2 text-xs font-semibold rounded-full ${getAttendanceColor(attendanceValue, attendance.minWeight)}`}>
+                          {attendanceValue.toFixed(2)}
+                        </span>
+                      ) : (
+                        <span className="text-gray-400 text-xs">—</span>
+                      )}
+                    </td>
+                  );
+                })}
                 {filteredTasks?.map((task) => {
                   const allGrades = getGradesForStudentAndTask(student.id, task.id);
                   const mainGrade = allGrades.length > 0 ? allGrades[allGrades.length - 1] : null; // Poslední podle data

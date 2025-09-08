@@ -10,6 +10,7 @@ namespace EngTaskGradingNetBE.Services
       return await Db.Courses
         .Include(q => q.Tasks)
         .Include(q => q.Students)
+        .Include(q => q.Attendances)
         .ToListAsync();
     }
 
@@ -19,6 +20,7 @@ namespace EngTaskGradingNetBE.Services
         .Where(q => q.Id == courseId)
         .Include(q => q.Tasks)
         .Include(q => q.Students)
+        .Include(q => q.Attendances)
         .FirstOrDefaultAsync()
         ?? throw new Exceptions.EntityNotFoundException(typeof(Course), courseId);
     }
@@ -66,18 +68,17 @@ namespace EngTaskGradingNetBE.Services
 
       await Db.SaveChangesAsync();
     }
-    
     public async System.Threading.Tasks.Task AssignStudent(int courseId, int studentId)
     {
       var course = await Db.Courses
           .Include(c => c.Students)
-          .FirstOrDefaultAsync(c => c.Id == courseId) 
+          .FirstOrDefaultAsync(c => c.Id == courseId)
           ?? throw new Exceptions.EntityNotFoundException(typeof(Course), courseId);
-      var student = await Db.Students.FindAsync(studentId) 
+      var student = await Db.Students.FindAsync(studentId)
         ?? throw new Exceptions.EntityNotFoundException(typeof(Student), studentId);
 
       if (course.Students.Any(s => s.Id == student.Id) == false)
-        {
+      {
         course.Students.Add(student);
         await Db.SaveChangesAsync();
       }
@@ -87,9 +88,9 @@ namespace EngTaskGradingNetBE.Services
     {
       var course = await Db.Courses
           .Include(c => c.Students)
-          .FirstOrDefaultAsync(c => c.Id == courseId) 
+          .FirstOrDefaultAsync(c => c.Id == courseId)
           ?? throw new Exceptions.EntityNotFoundException(typeof(Course), courseId);
-      var student = await Db.Students.FindAsync(studentId) 
+      var student = await Db.Students.FindAsync(studentId)
         ?? throw new Exceptions.EntityNotFoundException(typeof(Student), studentId);
       if (course.Students.Any(s => s.Id == student.Id))
       {

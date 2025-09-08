@@ -18,4 +18,5 @@ public class Course
   public ICollection<Student> Students { get; set; } = [];
   public ICollection<Teacher> Teachers { get; set; } = [];
   public ICollection<Task> Tasks { get; set; } = [];
+  public ICollection<Attendance> Attendances { get; set; } = [];
 }

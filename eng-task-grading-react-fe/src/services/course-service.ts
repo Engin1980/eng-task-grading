@@ -27,5 +27,12 @@ export const courseService = {
     logger.info("Importuji studenty do kurzu", { courseId });
     await apiHttp.post(`/course/${courseId}/import`, students);
     logger.info("Studenti byli úspěšně importováni do kurzu", { courseId });
+  },
+
+  async get(courseId: string): Promise<CourseDto> {
+    logger.info("Stahuji kurz " + courseId);
+    const { data } = await apiHttp.get<CourseDto>(`/v1/course/${courseId}`);
+    logger.info("Kurz stažen", { courseId });
+    return data;
   }
 };

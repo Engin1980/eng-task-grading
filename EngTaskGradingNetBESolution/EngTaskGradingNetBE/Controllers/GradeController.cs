@@ -15,23 +15,23 @@ namespace EngTaskGradingNetBE.Controllers
   {
 
     [HttpGet("for-course/{courseId}")]
-    public async Task<GradeSet> GetCourseGradeSetAsync([FromRoute] int courseId)
+    public async Task<GradeSetDto> GetCourseGradeSetAsync([FromRoute] int courseId)
     {
       var tmp = await gradeService.GetGradesByCourseAsync(courseId);
 
-      GradeSet ret = new GradeSet(tmp.Tasks.Select(EObjectMapper.To).ToList(),
+      GradeSetDto ret = new GradeSetDto(tmp.Tasks.Select(EObjectMapper.To).ToList(),
         tmp.Students.Select(EObjectMapper.To).OrderBy(q => q.Surname).ThenBy(q => q.Name).ToList(),
         tmp.Grades.Select(EObjectMapper.To).ToList());
       return ret;
     }
 
     [HttpGet("for-task/{taskId}")]
-    public async Task<GradeSet> GetTaskGradeSetAsync([FromRoute] int taskId)
+    public async Task<GradeSetDto> GetTaskGradeSetAsync([FromRoute] int taskId)
     {
       var tmp = await gradeService.GetGradesByTaskAsync(taskId);
 
       List<Models.DbModel.Task> tasks = [tmp.Task];
-      GradeSet ret = new GradeSet(tasks.Select(EObjectMapper.To).ToList(),
+      GradeSetDto ret = new GradeSetDto(tasks.Select(EObjectMapper.To).ToList(),
         tmp.Students.Select(EObjectMapper.To).OrderBy(q => q.Surname).ThenBy(q => q.Name).ToList(),
         tmp.Grades.Select(EObjectMapper.To).ToList());
       return ret;

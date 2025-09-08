@@ -2,6 +2,7 @@
 
 using EngTaskGradingNetBE.Models.DbModel;
 using EngTaskGradingNetBE.Models.Dtos;
+using System.Collections.Generic;
 
 public static class EObjectMapper
 {
@@ -18,7 +19,7 @@ public static class EObjectMapper
   };
   public static GradeDto To(Grade grade) => new(grade.Id, grade.TaskId, grade.StudentId, grade.Value, grade.Date, grade.Comment);
 
-  public static CourseDto To(Course course) => new(course.Id, course.Code, course.Name, course.Students?.Count ?? -1, course.Tasks?.Count ?? -1);
+  public static CourseDto To(Course course) => new(course.Id, course.Code, course.Name, course.Students?.Count ?? -1, course.Tasks?.Count ?? -1, course.Attendances?.Count ?? -1);
 
   public static Course From(CourseCreateDto courseDto) => new()
   {
@@ -60,4 +61,59 @@ public static class EObjectMapper
   }
 
   public static AppLogDto To(AppLog log) => new(log.Id, log.Message, log.MessageTemplate, log.Level, log.TimeStamp, log.Exception, log.Properties);
+
+  public static Attendance From(AttendanceCreateDto attendanceDto)
+  {
+    return new Attendance()
+    {
+      Title = attendanceDto.Title,
+      MinWeight = attendanceDto.MinWeight
+    };
+  }
+
+  public static AttendanceDto To(Attendance attendance)
+    => new(attendance.Id, attendance.Title, attendance.MinWeight, attendance.Days.OrderBy(q => q.Title).Select(To).ToList());
+
+  public static AttendanceDay From(AttendanceDayCreateDto dto)
+  {
+    return new AttendanceDay()
+    {
+      Title = dto.Title
+    };
+  }
+  public static AttendanceDay From(AttendanceDayUpdateDto dto)
+  {
+    return new AttendanceDay()
+    {
+      Title = dto.Title
+    };
+  }
+  public static AttendanceDayDto To(AttendanceDay day) =>
+    new(day.Id, day.Title);
+
+  internal static Attendance From(AttendanceDto attendanceDto)
+  {
+    return new Attendance()
+    {
+      Title = attendanceDto.Title,
+      MinWeight = attendanceDto.MinWeight
+    };
+  }
+
+  internal static AttendanceOverviewDto To(int attendanceId, Dictionary<Student, double> data)
+  {
+    AttendanceOverviewDto ret = new(
+      attendanceId,
+      data.Select(
+        q => new KeyValuePair<StudentDto, double>(To(q.Key), q.Value))
+      .ToDictionary());
+    return ret;
+  }
+
+  internal static AttendanceValueDto To(AttendanceValue q)
+  {
+    return new AttendanceValueDto(q.Id, q.Title, q.Weight);
+  }
+
+  public static AttendanceRecordDto To(AttendanceRecord sa) => new AttendanceRecordDto(sa.Id, sa.StudentId, sa.AttendanceDayId, sa.AttendanceValueId);
 }

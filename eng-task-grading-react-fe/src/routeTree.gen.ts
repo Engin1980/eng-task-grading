@@ -16,6 +16,8 @@ import { Route as HomeRouteImport } from './routes/home'
 import { Route as CoursesIndexRouteImport } from './routes/courses/index'
 import { Route as TasksIdRouteImport } from './routes/tasks/$id'
 import { Route as CoursesIdRouteImport } from './routes/courses/$id'
+import { Route as AttendancesIdRouteImport } from './routes/attendances/$id'
+import { Route as AttendanceDaysIdRouteImport } from './routes/attendanceDays/$id'
 
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
@@ -52,12 +54,24 @@ const CoursesIdRoute = CoursesIdRouteImport.update({
   path: '/courses/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AttendancesIdRoute = AttendancesIdRouteImport.update({
+  id: '/attendances/$id',
+  path: '/attendances/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AttendanceDaysIdRoute = AttendanceDaysIdRouteImport.update({
+  id: '/attendanceDays/$id',
+  path: '/attendanceDays/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/home': typeof HomeRoute
   '/login': typeof LoginRoute
   '/logs': typeof LogsRoute
   '/register': typeof RegisterRoute
+  '/attendanceDays/$id': typeof AttendanceDaysIdRoute
+  '/attendances/$id': typeof AttendancesIdRoute
   '/courses/$id': typeof CoursesIdRoute
   '/tasks/$id': typeof TasksIdRoute
   '/courses': typeof CoursesIndexRoute
@@ -67,6 +81,8 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/logs': typeof LogsRoute
   '/register': typeof RegisterRoute
+  '/attendanceDays/$id': typeof AttendanceDaysIdRoute
+  '/attendances/$id': typeof AttendancesIdRoute
   '/courses/$id': typeof CoursesIdRoute
   '/tasks/$id': typeof TasksIdRoute
   '/courses': typeof CoursesIndexRoute
@@ -77,6 +93,8 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/logs': typeof LogsRoute
   '/register': typeof RegisterRoute
+  '/attendanceDays/$id': typeof AttendanceDaysIdRoute
+  '/attendances/$id': typeof AttendancesIdRoute
   '/courses/$id': typeof CoursesIdRoute
   '/tasks/$id': typeof TasksIdRoute
   '/courses/': typeof CoursesIndexRoute
@@ -88,6 +106,8 @@ export interface FileRouteTypes {
     | '/login'
     | '/logs'
     | '/register'
+    | '/attendanceDays/$id'
+    | '/attendances/$id'
     | '/courses/$id'
     | '/tasks/$id'
     | '/courses'
@@ -97,6 +117,8 @@ export interface FileRouteTypes {
     | '/login'
     | '/logs'
     | '/register'
+    | '/attendanceDays/$id'
+    | '/attendances/$id'
     | '/courses/$id'
     | '/tasks/$id'
     | '/courses'
@@ -106,6 +128,8 @@ export interface FileRouteTypes {
     | '/login'
     | '/logs'
     | '/register'
+    | '/attendanceDays/$id'
+    | '/attendances/$id'
     | '/courses/$id'
     | '/tasks/$id'
     | '/courses/'
@@ -116,6 +140,8 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   LogsRoute: typeof LogsRoute
   RegisterRoute: typeof RegisterRoute
+  AttendanceDaysIdRoute: typeof AttendanceDaysIdRoute
+  AttendancesIdRoute: typeof AttendancesIdRoute
   CoursesIdRoute: typeof CoursesIdRoute
   TasksIdRoute: typeof TasksIdRoute
   CoursesIndexRoute: typeof CoursesIndexRoute
@@ -172,6 +198,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CoursesIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/attendances/$id': {
+      id: '/attendances/$id'
+      path: '/attendances/$id'
+      fullPath: '/attendances/$id'
+      preLoaderRoute: typeof AttendancesIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/attendanceDays/$id': {
+      id: '/attendanceDays/$id'
+      path: '/attendanceDays/$id'
+      fullPath: '/attendanceDays/$id'
+      preLoaderRoute: typeof AttendanceDaysIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -180,6 +220,8 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   LogsRoute: LogsRoute,
   RegisterRoute: RegisterRoute,
+  AttendanceDaysIdRoute: AttendanceDaysIdRoute,
+  AttendancesIdRoute: AttendancesIdRoute,
   CoursesIdRoute: CoursesIdRoute,
   TasksIdRoute: TasksIdRoute,
   CoursesIndexRoute: CoursesIndexRoute,

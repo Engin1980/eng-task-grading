@@ -4,6 +4,7 @@ using EngTaskGradingNetBE.Models.DbModel;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EngGradesBE.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250905162047_RenameStudentAttendanceToAttendanceRecord")]
+    partial class RenameStudentAttendanceToAttendanceRecord
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -94,9 +97,6 @@ namespace EngGradesBE.Migrations
                     b.Property<int>("CourseId")
                         .HasColumnType("int");
 
-                    b.Property<double?>("MinWeight")
-                        .HasColumnType("float");
-
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -149,14 +149,13 @@ namespace EngGradesBE.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("AttendanceDayId");
+
                     b.HasIndex("AttendanceValueId");
 
                     b.HasIndex("StudentId");
 
-                    b.HasIndex("AttendanceDayId", "StudentId")
-                        .IsUnique();
-
-                    b.ToTable("AttendanceRecords");
+                    b.ToTable("AttendanceRecord");
                 });
 
             modelBuilder.Entity("EngTaskGradingNetBE.Models.DbModel.AttendanceValue", b =>

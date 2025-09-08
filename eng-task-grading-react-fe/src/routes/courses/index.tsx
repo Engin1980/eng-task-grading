@@ -92,6 +92,7 @@ function CoursesPage() {
               <div className="text-gray-600 mb-4">
                 <p>Studenti: {course.studentsCount}</p>
                 <p>Úkoly: {course.tasksCount}</p>
+                <p>Účasti: {course.attendancesCount}</p>
               </div>
               <Link
                 to="/courses/$id"     // 💡 tady musí být stejný název jako v souboru ($courseId.tsx)

@@ -13,6 +13,12 @@ namespace EngTaskGradingNetBE.Models.DbModel
     public DbSet<StudentToken> StudentTokens => Set<StudentToken>();
     public DbSet<AppLog> AppLog => Set<AppLog>();
 
+    public DbSet<Attendance> Attendances => Set<Attendance>();
+    public DbSet<AttendanceValue> AttendanceValues => Set<AttendanceValue>();
+    public DbSet<AttendanceDay> AttendanceDays => Set<AttendanceDay>();
+    public DbSet<AttendanceRecord> AttendanceRecords => Set<AttendanceRecord>();
+
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
       modelBuilder.Entity<Student>(e =>
@@ -44,6 +50,10 @@ namespace EngTaskGradingNetBE.Models.DbModel
 
         e.HasIndex(c => c.Code).IsUnique();
       });
+
+      modelBuilder.Entity<AttendanceRecord>()
+       .HasIndex(ar => new { ar.AttendanceDayId, ar.StudentId })
+       .IsUnique();
     }
   }
 }

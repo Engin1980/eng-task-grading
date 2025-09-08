@@ -12,7 +12,7 @@
           string Title,
           int CourseId,
           string? Keywords,
-          string?Description,
+          string? Description,
           int? MinGrade
       );
 }

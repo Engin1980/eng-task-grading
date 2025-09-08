@@ -9,4 +9,5 @@ export interface CourseDto {
   name?: string;
   studentsCount: number;
   tasksCount: number;
+attendancesCount: number;
 }

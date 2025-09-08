@@ -68,8 +68,10 @@ static void BuildServices(WebApplicationBuilder builder)
   builder.Services.AddTransient<GradeService>();
   builder.Services.AddTransient<CloudflareTurnistilleService>();
   builder.Services.AddTransient<StudentViewService>();
-  builder.Services.AddTransient<IEmailService, MockEmailService>();
+  builder.Services.AddTransient<IEmailService, EmailService>();
   builder.Services.AddTransient<AppSettingsService>();
+  builder.Services.AddSingleton<BackgroundTaskQueue>();
+  builder.Services.AddHostedService<BackgroundTaskManagerService>();
   builder.Services.AddHttpClient<KeyCloakService>(); // http client for KeyCloakService
   builder.Services.AddTransient<KeyCloakService>();
   builder.Services.AddControllers();

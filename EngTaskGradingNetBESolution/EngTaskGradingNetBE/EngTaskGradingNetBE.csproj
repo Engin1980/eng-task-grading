@@ -6,13 +6,14 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>a2cc72dd-1235-4dff-8958-422ef2f7b046</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-    <AssemblyVersion>1.0.0.127</AssemblyVersion>
-    <FileVersion>1.0.0.114</FileVersion>
+    <AssemblyVersion>1.0.0.144</AssemblyVersion>
+    <FileVersion>1.0.0.131</FileVersion>
     <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+    <PackageReference Include="MailKit" Version="4.13.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.19" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.19" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.19">

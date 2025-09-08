@@ -28,7 +28,7 @@ namespace EngTaskGradingNetBE.Services
       string token = GenerateSecureToken();
       await SaveAccessTokenToDatabaseAsync(student, token);
       await SendEmailAsync(student, token);
-      logger.LogInformation("Requested access token for student {StudentNumber} generated & sent.", studentNumber);
+      logger.LogInformation("Requested access token for student {StudentNumber} generated & sending requested.", studentNumber);
     }
 
     private async System.Threading.Tasks.Task SendEmailAsync(Student student, string token)
@@ -44,7 +44,16 @@ namespace EngTaskGradingNetBE.Services
         <p>V případě dotazů prosím kontaktuje vyučujícího daného předmětu.</p>
         <p>Hezký den přeje tým EngTaskGrading.</p>
         """;
-      await emailService.SendEmailAsync(student.Email, title, body);
+      try
+      {
+        logger.LogInformation("Enqueueing student-view invitation email for {Email}", student.Email);
+        emailService.SendEmailInBackground(student.Email, title, body);
+        logger.LogInformation("Student-view invitation email enqueued for {Email}", student.Email);
+      }
+      catch (Exception ex)
+      {
+        logger.LogError(ex, "Failed to enqueue student-view invitation email for {Email}", student.Email);
+      }
     }
 
     private async System.Threading.Tasks.Task SaveAccessTokenToDatabaseAsync(Student student, string token)

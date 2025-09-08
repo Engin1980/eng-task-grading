@@ -12,17 +12,14 @@ export const studentViewService = {
   verify: async (token: string, durationSeconds: number) => {
     const request = {
       token: token,
-      duration: durationSeconds
+      durationSeconds: durationSeconds
     };
     const { data } = await apiHttp.post<StudentViewTokenDto>('/v1/studentView/verify', request);
     return data;
   },
 
   refresh: async (refreshToken: string) => {
-    const request = {
-      refreshToken: refreshToken
-    };
-    const { data } = await apiHttp.post<StudentViewTokenDto>('/v1/studentView/refresh', request);
+    const { data } = await apiHttp.post<string>('/v1/studentView/refresh', refreshToken);
     return data;
   },
 
@@ -50,13 +47,14 @@ export const studentViewService = {
             throw new Error('No refresh token found');
           }
 
-          const tokenData = await studentViewService.refresh(refreshToken);
-          
+          const newAccessToken = await studentViewService.refresh(refreshToken);
+          console.log("HERE new token data:", newAccessToken);
+
           // Save new access token
-          localStorage.setItem('studentViewAccessJWT', tokenData.accessToken);
+          localStorage.setItem('studentViewAccessJWT', newAccessToken);
 
           // Retry the original request with new token
-          return await makeRequest(tokenData.accessToken);
+          return await makeRequest(newAccessToken);
         } catch (refreshError) {
           // If refresh fails, clear tokens and rethrow original error
           //localStorage.removeItem('studentViewAccessJWT');
@@ -64,7 +62,7 @@ export const studentViewService = {
           throw error;
         }
       }
-      
+
       // If it's not a 401 error, just rethrow
       throw error;
     }

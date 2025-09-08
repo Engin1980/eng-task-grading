@@ -6,28 +6,28 @@ interface TasksTabProps {
   grades: GradeDto[];
 }
 
-interface TaskWithGrade {
+interface TaskWithGrades {
   id: number;
   title: string;
-  grade?: {
+  grades: {
     date: string;
     rating: number | null;
     comment: string | null;
-  };
+  }[];
 }
 
 export function TasksTab({ tasks, grades }: TasksTabProps) {
-  // Combine tasks with their grades
-  const tasksWithGrades: TaskWithGrade[] = tasks.map(task => {
-    const grade = grades.find(g => g.taskId === task.id);
+  // Combine tasks with all their grades
+  const tasksWithGrades: TaskWithGrades[] = tasks.map(task => {
+    const taskGrades = grades.filter(g => g.taskId === task.id);
     return {
       id: task.id,
       title: task.title,
-      grade: grade ? {
+      grades: taskGrades.map(grade => ({
         date: grade.date.toString(),
         rating: grade.value,
         comment: grade.comment
-      } : undefined
+      }))
     };
   });
 
@@ -55,7 +55,7 @@ export function TasksTab({ tasks, grades }: TasksTabProps) {
                 Název úkolu
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Hodnocení
+                Záznamy Hodnocení
               </th>
             </tr>
           </thead>
@@ -68,49 +68,50 @@ export function TasksTab({ tasks, grades }: TasksTabProps) {
                   </div>
                 </td>
                 <td className="px-6 py-4">
-                  {task.grade ? (
-                    <div className="grid grid-cols-3 gap-4">
-                      {/* Datum */}
-                      <div>
-                        <div className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">
-                          Datum
-                        </div>
-                        <div className="text-sm text-gray-900">
-                          {new Date(task.grade.date).toLocaleDateString('cs-CZ')}
-                        </div>
-                      </div>
-                      
-                      {/* Hodnocení */}
-                      <div>
-                        <div className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">
-                          Hodnocení
-                        </div>
-                        <div className="text-sm">
-                          {task.grade.rating !== null ? (
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                              task.grade.rating >= 90 ? 'bg-green-100 text-green-800' :
-                              task.grade.rating >= 70 ? 'bg-yellow-100 text-yellow-800' :
-                              'bg-red-100 text-red-800'
-                            }`}>
-                              {task.grade.rating}%
-                            </span>
-                          ) : (
-                            <span className="text-gray-400">Neohodnoceno</span>
-                          )}
-                        </div>
-                      </div>
-                      
-                      {/* Komentář */}
-                      <div>
-                        <div className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">
-                          Komentář
-                        </div>
-                        <div className="text-sm text-gray-900">
-                          {task.grade.comment || (
-                            <span className="text-gray-400 italic">Bez komentáře</span>
-                          )}
-                        </div>
-                      </div>
+                  {task.grades.length > 0 ? (
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Datum
+                            </th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Hodnocení
+                            </th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Komentář
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {task.grades.map((grade, index) => (
+                            <tr key={index} className="hover:bg-gray-50">
+                              <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
+                                {new Date(grade.date).toLocaleDateString('cs-CZ')}
+                              </td>
+                              <td className="px-4 py-2 whitespace-nowrap text-sm">
+                                {grade.rating !== null ? (
+                                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                                    grade.rating >= 90 ? 'bg-green-100 text-green-800' :
+                                    grade.rating >= 70 ? 'bg-yellow-100 text-yellow-800' :
+                                    'bg-red-100 text-red-800'
+                                  }`}>
+                                    {grade.rating}%
+                                  </span>
+                                ) : (
+                                  <span className="text-gray-400">Neohodnoceno</span>
+                                )}
+                              </td>
+                              <td className="px-4 py-2 text-sm text-gray-900">
+                                {grade.comment || (
+                                  <span className="text-gray-400 italic">Bez komentáře</span>
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
                     </div>
                   ) : (
                     <div className="text-sm text-gray-400 italic">

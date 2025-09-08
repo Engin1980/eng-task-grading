@@ -1,7 +1,8 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import { studentViewService } from '../../../services/student-view-service'
-import type { StudentTokenDto } from '../../../model/student-dto'
+import type { StudentViewTokenDto } from '../../../model/student-view-dto'
+import toast from 'react-hot-toast'
 
 export const Route = createFileRoute('/studentView/verify/$token')({
   component: RouteComponent,
@@ -45,7 +46,7 @@ function RouteComponent() {
   const confirmTokenAndDuration = async (token: string, duration: string) => {
     const durationSeconds = convertDurationToSeconds(duration)
 
-    const tokens:StudentTokenDto = await studentViewService.verify(token, durationSeconds);
+    const tokens:StudentViewTokenDto = await studentViewService.verify(token, durationSeconds);
     
     // Store JWT to localStorage for subsequent requests
     localStorage.setItem('studentViewAccessJWT', tokens.accessToken)
@@ -63,6 +64,15 @@ function RouteComponent() {
       await confirmTokenAndDuration(token, selectedDuration)
     } catch (error) {
       console.error('Error confirming token:', error)
+      
+      // Check if it's a 401 Unauthorized error
+      if (error instanceof Error && error.message.includes('401')) {
+        toast.error('Token je neplatný nebo vypršel. Požádejte o nový odkaz pro ověření.')
+      } else if (error instanceof Response && error.status === 401) {
+        toast.error('Token je neplatný nebo vypršel. Požádejte o nový odkaz pro ověření.')
+      } else {
+        toast.error('Došlo k chybě při ověřování. Zkuste to prosím znovu.')
+      }
     } finally {
       setIsLoading(false)
     }

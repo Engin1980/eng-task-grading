@@ -20,7 +20,7 @@ namespace EngTaskGradingNetBE.Models.Config
 
     public int StudentLoginTokenLengthBytes { get; set; } = 32;
     public int StudentLoginTokenExpiryMinutes { get; set; } = 15;
-    public int StudentAccessTokenExpiryMinutes { get; set; } = 15;
+    public int StudentAccessJwtTokenExpiryMinutes { get; set; } = 5;
   }
 
   public class EmailSettings

@@ -1,5 +1,5 @@
 import type { CourseDto } from "../model/course-dto";
-import type { StudentViewTokenDto } from "../model/student-view-dto";
+import type { StudentViewCourseDto, StudentViewTokenDto } from "../model/student-view-dto";
 import type { StudentViewLoginDto } from "../model/student-view-dto";
 import { apiHttp } from "./api-http";
 
@@ -21,6 +21,49 @@ export const studentViewService = {
   refresh: async (refreshToken: string) => {
     const { data } = await apiHttp.post<string>('/v1/studentView/refresh', refreshToken);
     return data;
+  },
+
+  getCourse: async (courseId: number): Promise<StudentViewCourseDto> => {
+    const makeRequest = async (accessToken: string) => {
+      const headers = { Authorization: `Bearer ${accessToken}` };
+      const { data } = await apiHttp.get<StudentViewCourseDto>(`/v1/studentView/courses/${courseId}`, { headers });
+console.log(data);
+      return data;
+    };
+
+    try {
+      const token = localStorage.getItem('studentViewAccessJWT');
+      if (!token) {
+        throw new Error('No access token found');
+      }
+
+      return await makeRequest(token);
+    } catch (error: any) {
+      // Check if it's a 401 error
+      if (error?.response?.status === 401 || error?.status === 401) {
+        try {
+          // Try to refresh the token
+          const refreshToken = localStorage.getItem('studentViewRefreshJWT');
+          if (!refreshToken) {
+            throw new Error('No refresh token found');
+          }
+
+          const newAccessToken = await studentViewService.refresh(refreshToken);
+
+          // Save new access token
+          localStorage.setItem('studentViewAccessJWT', newAccessToken);
+
+          // Retry the original request with new token
+          return await makeRequest(newAccessToken);
+        } catch (refreshError) {
+          // If refresh fails, clear tokens and rethrow original error
+          throw error;
+        }
+      }
+      
+      // If it's not a 401 error, just rethrow
+      throw error;
+    }
   },
 
   getCourses: async (): Promise<CourseDto[]> => {

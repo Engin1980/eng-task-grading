@@ -163,5 +163,31 @@ namespace EngTaskGradingNetBE.Services
         .ToList();
       return ret;
     }
+
+    public record StudentCourseDetailResult(Student Student, Course Course, List<Grade> Grades, List<AttendanceRecord> AttendanceRecords
+      );
+    internal async System.Threading.Tasks.Task<StudentCourseDetailResult> GetStudentCourseDetailAsync(string studyNumber, int courseId)
+    {
+      var student = await Db.Students
+        .FirstOrDefaultAsync(q => q.Number == studyNumber)
+        ?? throw new Exceptions.EntityNotFoundException(typeof(Student), $"StudyNumber == {studyNumber}");
+
+      var courseWithTasks = await Db.Courses
+        .Include(q => q.Tasks)
+        .Include(q => q.Attendances).ThenInclude(q => q.Days)
+        .FirstOrDefaultAsync(q => q.Id == courseId)
+        ?? throw new Exceptions.EntityNotFoundException(typeof(Course), courseId);
+      var grades = await Db.Grades
+        .Where(q => q.StudentId == student.Id)
+        .ToListAsync();
+
+      var attendanceRecords = await Db.AttendanceRecords
+        .Include(q => q.Value)
+        .Where(q => q.StudentId == student.Id)
+        .ToListAsync();
+
+      StudentCourseDetailResult ret = new StudentCourseDetailResult(student, courseWithTasks, grades, attendanceRecords);
+      return ret;
+    }
   }
 };

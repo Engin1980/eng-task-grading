@@ -1,10 +1,10 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { studentViewService } from '../../services/student-view-service'
-import type { CourseDto } from '../../model/course-dto';
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { studentViewService } from '../../../services/student-view-service'
+import type { CourseDto } from '../../../model/course-dto';
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast'
 
-export const Route = createFileRoute('/studentView/courses')({
+export const Route = createFileRoute('/studentView/courses/')({
   component: RouteComponent,
 })
 
@@ -27,6 +27,7 @@ function getStudentNumberFromJWT(): string | null {
 }
 
 function RouteComponent() {
+  const navigate = useNavigate();
   const [courses, setCourses] = useState<CourseDto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const studentNumber = getStudentNumberFromJWT();
@@ -111,8 +112,7 @@ function RouteComponent() {
                         <button
                           className="text-left w-full"
                           onClick={() => {
-                            // Navigate to course detail - will be implemented later
-                            console.log('Navigate to course:', course.id);
+                            navigate({ to: `/studentView/courses/${course.id}` });
                           }}
                         >
                           <div className="text-sm font-medium text-blue-600 hover:text-blue-900 transition-colors">

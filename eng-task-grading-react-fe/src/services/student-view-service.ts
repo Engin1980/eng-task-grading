@@ -18,11 +18,55 @@ export const studentViewService = {
     return data;
   },
 
-  getCourses: async (): Promise<CourseDto[]> => {
-    const token = localStorage.getItem('studentViewAccessJWT');
-    const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    
-    const { data } = await apiHttp.get<CourseDto[]>('/v1/studentView/courses', { headers });
+  refresh: async (refreshToken: string) => {
+    const request = {
+      refreshToken: refreshToken
+    };
+    const { data } = await apiHttp.post<StudentViewTokenDto>('/v1/studentView/refresh', request);
     return data;
+  },
+
+  getCourses: async (): Promise<CourseDto[]> => {
+    const makeRequest = async (accessToken: string) => {
+      const headers = { Authorization: `Bearer ${accessToken}` };
+      const { data } = await apiHttp.get<CourseDto[]>('/v1/studentView/courses', { headers });
+      return data;
+    };
+
+    try {
+      const token = localStorage.getItem('studentViewAccessJWT');
+      if (!token) {
+        throw new Error('No access token found');
+      }
+
+      return await makeRequest(token);
+    } catch (error: any) {
+      // Check if it's a 401 error
+      if (error?.response?.status === 401 || error?.status === 401) {
+        try {
+          // Try to refresh the token
+          const refreshToken = localStorage.getItem('studentViewRefreshJWT');
+          if (!refreshToken) {
+            throw new Error('No refresh token found');
+          }
+
+          const tokenData = await studentViewService.refresh(refreshToken);
+          
+          // Save new access token
+          localStorage.setItem('studentViewAccessJWT', tokenData.accessToken);
+
+          // Retry the original request with new token
+          return await makeRequest(tokenData.accessToken);
+        } catch (refreshError) {
+          // If refresh fails, clear tokens and rethrow original error
+          //localStorage.removeItem('studentViewAccessJWT');
+          //localStorage.removeItem('studentViewRefreshJWT');
+          throw error;
+        }
+      }
+      
+      // If it's not a 401 error, just rethrow
+      throw error;
+    }
   }
 }

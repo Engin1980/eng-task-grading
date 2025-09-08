@@ -23,6 +23,48 @@ export const studentViewService = {
     return data;
   },
 
+  getCourse: async (courseId: number): Promise<CourseDto> => {
+    const makeRequest = async (accessToken: string) => {
+      const headers = { Authorization: `Bearer ${accessToken}` };
+      const { data } = await apiHttp.get<CourseDto>(`/v1/studentView/course/${courseId}`, { headers });
+      return data;
+    };
+
+    try {
+      const token = localStorage.getItem('studentViewAccessJWT');
+      if (!token) {
+        throw new Error('No access token found');
+      }
+
+      return await makeRequest(token);
+    } catch (error: any) {
+      // Check if it's a 401 error
+      if (error?.response?.status === 401 || error?.status === 401) {
+        try {
+          // Try to refresh the token
+          const refreshToken = localStorage.getItem('studentViewRefreshJWT');
+          if (!refreshToken) {
+            throw new Error('No refresh token found');
+          }
+
+          const newAccessToken = await studentViewService.refresh(refreshToken);
+
+          // Save new access token
+          localStorage.setItem('studentViewAccessJWT', newAccessToken);
+
+          // Retry the original request with new token
+          return await makeRequest(newAccessToken);
+        } catch (refreshError) {
+          // If refresh fails, clear tokens and rethrow original error
+          throw error;
+        }
+      }
+      
+      // If it's not a 401 error, just rethrow
+      throw error;
+    }
+  },
+
   getCourses: async (): Promise<CourseDto[]> => {
     const makeRequest = async (accessToken: string) => {
       const headers = { Authorization: `Bearer ${accessToken}` };

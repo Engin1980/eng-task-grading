@@ -1,10 +1,10 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { studentViewService } from '../../services/student-view-service'
-import type { CourseDto } from '../../model/course-dto';
+import { studentViewService } from '../../../services/student-view-service'
+import type { CourseDto } from '../../../model/course-dto';
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast'
 
-export const Route = createFileRoute('/studentView/courses')({
+export const Route = createFileRoute('/studentView/courses/')({
   component: RouteComponent,
 })
 

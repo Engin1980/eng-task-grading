@@ -9,6 +9,7 @@ interface TasksTabProps {
 interface TaskWithGrades {
   id: number;
   title: string;
+  minGrade: number | null;
   grades: {
     date: string;
     rating: number | null;
@@ -23,6 +24,7 @@ export function TasksTab({ tasks, grades }: TasksTabProps) {
     return {
       id: task.id,
       title: task.title,
+      minGrade: task.minGrade,
       grades: taskGrades.map(grade => ({
         date: grade.date.toString(),
         rating: grade.value,
@@ -66,6 +68,11 @@ export function TasksTab({ tasks, grades }: TasksTabProps) {
                   <div className="text-sm font-medium text-gray-900">
                     {task.title}
                   </div>
+                  {task.minGrade !== null && (
+                    <div className="text-xs text-gray-500 mt-1">
+                      Min body: {task.minGrade}
+                    </div>
+                  )}
                 </td>
                 <td className="px-6 py-4">
                   {task.grades.length > 0 ? (

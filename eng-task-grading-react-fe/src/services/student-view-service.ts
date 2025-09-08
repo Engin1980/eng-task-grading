@@ -27,6 +27,7 @@ export const studentViewService = {
     const makeRequest = async (accessToken: string) => {
       const headers = { Authorization: `Bearer ${accessToken}` };
       const { data } = await apiHttp.get<StudentViewCourseDto>(`/v1/studentView/courses/${courseId}`, { headers });
+console.log(data);
       return data;
     };
 

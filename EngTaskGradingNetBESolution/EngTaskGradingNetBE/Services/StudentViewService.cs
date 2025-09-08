@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using System.Security.Cryptography;
 using EngTaskGradingNetBE.Models.Config;
 using EngTaskGradingNetBE.Models.DbModel;
+using EngTaskGradingNetBE.Models.Dtos;
 
 namespace EngTaskGradingNetBE.Services
 {
@@ -89,6 +90,38 @@ namespace EngTaskGradingNetBE.Services
         .Replace('+', '-')
         .Replace('/', '_')
         .TrimEnd('=');
+    }
+
+    internal async Task<StudentViewTokenDto> Verify(string token, int durationSeconds)
+    {
+      var tokenEntity = await Db.StudentViewTokens.FirstOrDefaultAsync(q => q.Token == token && q.Type == StudentViewTokenType.Login);
+      if (tokenEntity == null)
+        throw new Exceptions.StudentTokenInvalidException("Illegal token.");
+
+      Db.StudentViewTokens.Remove(tokenEntity);
+      await Db.SaveChangesAsync();
+      if (tokenEntity.ExpiresAt < DateTime.Now)
+      {
+        throw new Exceptions.StudentTokenInvalidException("Expired token.");
+      }
+
+      int studentId = tokenEntity.StudentId;
+      tokenEntity = new StudentViewToken()
+      {
+        CreatedAt = DateTime.Now,
+        ExpiresAt = DateTime.Now.AddSeconds(durationSeconds),
+        StudentId = studentId,
+        Token = GenerateSecureToken(),
+        Type = StudentViewTokenType.Access
+      };
+      await Db.StudentViewTokens.AddAsync(tokenEntity);
+      await Db.SaveChangesAsync();
+
+      StudentViewTokenDto ret = new(
+        null,
+        tokenEntity.Token);
+
+      return ret;
     }
   }
 }

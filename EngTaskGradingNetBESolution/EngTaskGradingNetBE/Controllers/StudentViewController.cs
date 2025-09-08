@@ -1,5 +1,7 @@
-﻿using EngTaskGradingNetBE.Services;
+﻿using EngTaskGradingNetBE.Models.Dtos;
+using EngTaskGradingNetBE.Services;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Linq;
 
 namespace EngTaskGradingNetBE.Controllers;
 
@@ -8,7 +10,8 @@ namespace EngTaskGradingNetBE.Controllers;
 public class StudentViewController(
   AppSettingsService appSettingsService,
   StudentViewService studentViewService, 
-  CloudflareTurnistilleService cloudflareTurnistilleService) : ControllerBase
+  CloudflareTurnistilleService cloudflareTurnistilleService,
+  ILogger<StudentViewController> logger) : ControllerBase
 {
   [HttpPost("login")]
   public async System.Threading.Tasks.Task LoginAsync(StudentViewLoginDto data)
@@ -24,6 +27,22 @@ public class StudentViewController(
       // Log exception details if necessary
       throw new ApplicationException("Failed to process student-view-login.", ex);
     }
+  }
+
+  public record VerifyRequest(string Token, int DurationSeconds);
+  [HttpPost("verify")]
+  public async Task<StudentViewTokenDto> Verify(VerifyRequest request)
+  {
+    StudentViewTokenDto ret;
+    try
+    {
+      ret = await studentViewService.Verify(request.Token, request.DurationSeconds);
+    }catch(Exception ex)
+    {
+      logger.LogError(ex, $"Failed to complete verification for {request.Token}.");
+      throw;
+    }
+    return ret;
   }
 
   public record StudentViewLoginDto(

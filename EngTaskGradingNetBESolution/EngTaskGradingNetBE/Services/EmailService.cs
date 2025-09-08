@@ -54,7 +54,7 @@ namespace EngTaskGradingNetBE.Services
 
     private string AdjustDebugRecipientIfRequired(string recipient)
     {
-      var debugRecipient = appSettingsService.GetSettings().Email.DebugReplacementReceiver;
+      var debugRecipient = appSettingsService.GetSettings().Email.DebugEmailRecipient;
       if (!string.IsNullOrEmpty(debugRecipient))
       {
         logger.LogInformation($"Debug mode enabled in config: Redirecting email from {recipient} to {debugRecipient}");

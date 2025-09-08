@@ -17,6 +17,7 @@ import { Route as CoursesIndexRouteImport } from './routes/courses/index'
 import { Route as TasksIdRouteImport } from './routes/tasks/$id'
 import { Route as StudentViewLoginRouteImport } from './routes/studentView/login'
 import { Route as StudentViewHomeRouteImport } from './routes/studentView/home'
+import { Route as StudentViewCoursesRouteImport } from './routes/studentView/courses'
 import { Route as CoursesIdRouteImport } from './routes/courses/$id'
 import { Route as StudentViewVerifyTokenRouteImport } from './routes/studentView/verify/$token'
 import { Route as StudentViewLoginTokenRouteImport } from './routes/studentView/login/$token'
@@ -61,6 +62,11 @@ const StudentViewHomeRoute = StudentViewHomeRouteImport.update({
   path: '/studentView/home',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StudentViewCoursesRoute = StudentViewCoursesRouteImport.update({
+  id: '/studentView/courses',
+  path: '/studentView/courses',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CoursesIdRoute = CoursesIdRouteImport.update({
   id: '/courses/$id',
   path: '/courses/$id',
@@ -83,6 +89,7 @@ export interface FileRoutesByFullPath {
   '/logs': typeof LogsRoute
   '/register': typeof RegisterRoute
   '/courses/$id': typeof CoursesIdRoute
+  '/studentView/courses': typeof StudentViewCoursesRoute
   '/studentView/home': typeof StudentViewHomeRoute
   '/studentView/login': typeof StudentViewLoginRouteWithChildren
   '/tasks/$id': typeof TasksIdRoute
@@ -96,6 +103,7 @@ export interface FileRoutesByTo {
   '/logs': typeof LogsRoute
   '/register': typeof RegisterRoute
   '/courses/$id': typeof CoursesIdRoute
+  '/studentView/courses': typeof StudentViewCoursesRoute
   '/studentView/home': typeof StudentViewHomeRoute
   '/studentView/login': typeof StudentViewLoginRouteWithChildren
   '/tasks/$id': typeof TasksIdRoute
@@ -110,6 +118,7 @@ export interface FileRoutesById {
   '/logs': typeof LogsRoute
   '/register': typeof RegisterRoute
   '/courses/$id': typeof CoursesIdRoute
+  '/studentView/courses': typeof StudentViewCoursesRoute
   '/studentView/home': typeof StudentViewHomeRoute
   '/studentView/login': typeof StudentViewLoginRouteWithChildren
   '/tasks/$id': typeof TasksIdRoute
@@ -125,6 +134,7 @@ export interface FileRouteTypes {
     | '/logs'
     | '/register'
     | '/courses/$id'
+    | '/studentView/courses'
     | '/studentView/home'
     | '/studentView/login'
     | '/tasks/$id'
@@ -138,6 +148,7 @@ export interface FileRouteTypes {
     | '/logs'
     | '/register'
     | '/courses/$id'
+    | '/studentView/courses'
     | '/studentView/home'
     | '/studentView/login'
     | '/tasks/$id'
@@ -151,6 +162,7 @@ export interface FileRouteTypes {
     | '/logs'
     | '/register'
     | '/courses/$id'
+    | '/studentView/courses'
     | '/studentView/home'
     | '/studentView/login'
     | '/tasks/$id'
@@ -165,6 +177,7 @@ export interface RootRouteChildren {
   LogsRoute: typeof LogsRoute
   RegisterRoute: typeof RegisterRoute
   CoursesIdRoute: typeof CoursesIdRoute
+  StudentViewCoursesRoute: typeof StudentViewCoursesRoute
   StudentViewHomeRoute: typeof StudentViewHomeRoute
   StudentViewLoginRoute: typeof StudentViewLoginRouteWithChildren
   TasksIdRoute: typeof TasksIdRoute
@@ -230,6 +243,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StudentViewHomeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/studentView/courses': {
+      id: '/studentView/courses'
+      path: '/studentView/courses'
+      fullPath: '/studentView/courses'
+      preLoaderRoute: typeof StudentViewCoursesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/courses/$id': {
       id: '/courses/$id'
       path: '/courses/$id'
@@ -271,6 +291,7 @@ const rootRouteChildren: RootRouteChildren = {
   LogsRoute: LogsRoute,
   RegisterRoute: RegisterRoute,
   CoursesIdRoute: CoursesIdRoute,
+  StudentViewCoursesRoute: StudentViewCoursesRoute,
   StudentViewHomeRoute: StudentViewHomeRoute,
   StudentViewLoginRoute: StudentViewLoginRouteWithChildren,
   TasksIdRoute: TasksIdRoute,

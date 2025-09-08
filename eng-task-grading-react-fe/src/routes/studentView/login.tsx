@@ -5,7 +5,7 @@ import { Turnstile } from '../../components/turnstille'
 import { SuccessModal } from '../../components/studentView/SuccessModal'
 import AppSettings from '../../config/app-settings'
 import toast from 'react-hot-toast'
-import type { StudentViewLoginDto } from '../../model/student-view-login-dto'
+import type { StudentViewLoginDto } from '../../model/student-view-dto'
 import { studentViewService } from '../../services/student-view-service'
 
 export const Route = createFileRoute('/studentView/login')({

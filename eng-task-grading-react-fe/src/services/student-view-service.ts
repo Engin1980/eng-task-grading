@@ -1,5 +1,5 @@
 import type { CourseDto } from "../model/course-dto";
-import type { StudentViewTokenDto } from "../model/student-view-dto";
+import type { StudentViewCourseDto, StudentViewTokenDto } from "../model/student-view-dto";
 import type { StudentViewLoginDto } from "../model/student-view-dto";
 import { apiHttp } from "./api-http";
 
@@ -23,10 +23,10 @@ export const studentViewService = {
     return data;
   },
 
-  getCourse: async (courseId: number): Promise<CourseDto> => {
+  getCourse: async (courseId: number): Promise<StudentViewCourseDto> => {
     const makeRequest = async (accessToken: string) => {
       const headers = { Authorization: `Bearer ${accessToken}` };
-      const { data } = await apiHttp.get<CourseDto>(`/v1/studentView/course/${courseId}`, { headers });
+      const { data } = await apiHttp.get<StudentViewCourseDto>(`/v1/studentView/courses/${courseId}`, { headers });
       return data;
     };
 

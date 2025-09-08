@@ -78,19 +78,31 @@ public class StudentViewController(
     return courseDtos;
   }
 
-  //[HttpGet("courses/{id}")]
-  //public async Task<List<StudentViewGradingDto>> GetGrading([FromRoute] int id)
-  //{
-  //  string studyNumber;
-  //  try
-  //  {
-  //    studyNumber = ValidateTokenAndGetStudyNumber();
-  //  }
-  //  catch (Exception ex)
-  //  {
-  //    throw new UnauthorizedAccessException(ex.Message);
-  //  }
-  //}
+  [HttpGet("courses/{id}")]
+  public async Task<StudentViewCourseDto> GetGrading([FromRoute] int id)
+  {
+    string studyNumber;
+    try
+    {
+      studyNumber = ValidateTokenAndGetStudyNumber();
+    }
+    catch (Exception ex)
+    {
+      throw new UnauthorizedAccessException(ex.Message);
+    }
+
+    StudentViewService.StudentCourseDetailResult courseData = await studentViewService.GetStudentCourseDetailAsync(studyNumber, id);
+
+    StudentViewCourseDto ret = new(
+      EObjectMapper.To(courseData.Course),
+      courseData.Course.Tasks.Select(EObjectMapper.To).ToList(),
+      courseData.Course.Attendances.Select(EObjectMapper.To).ToList(),
+      courseData.Grades.Select(EObjectMapper.To).ToList(),
+      courseData.AttendanceRecords.Select(q => new AttendanceDaySetRecordDto(q.Id, q.StudentId, q.AttendanceDayId, q.Value.Title, q.Value.Weight))
+      .ToList());
+
+    return ret;
+  }
 
   private string ValidateTokenAndGetStudyNumber()
   {

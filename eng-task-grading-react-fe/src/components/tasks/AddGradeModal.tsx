@@ -17,8 +17,6 @@ export function AddGradeModal({ isOpen, onClose, student, taskId, onGradeAdded }
   const [isSubmitting, setIsSubmitting] = useState(false);
 const quickSelectValues:number[] = [0, 5, 25, 35, 45, 55, 60, 65, 70, 75, 80, 85, 90, 95, 98, 100];
 
-  console.log('AddGradeModal render:', { isOpen, student: student?.name, taskId });
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 

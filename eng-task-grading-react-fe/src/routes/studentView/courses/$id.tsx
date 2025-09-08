@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { studentViewService } from '../../../services/student-view-service'
 import toast from 'react-hot-toast'
 import type { StudentViewCourseDto } from '../../../model/student-view-dto'
-import { TasksTab, AttendanceTab } from '../../../components/studentView'
+import { TasksTab, AttendanceTab, StudentInfo } from '../../../components/studentView'
 
 export const Route = createFileRoute('/studentView/courses/$id')({
   component: RouteComponent,
@@ -105,12 +105,7 @@ function RouteComponent() {
                   )}
                 </div>
               </div>
-              {studentNumber && (
-                <div className="text-right">
-                  <p className="text-sm text-gray-500">Studijní číslo</p>
-                  <p className="text-lg font-semibold text-gray-900">{studentNumber}</p>
-                </div>
-              )}
+              <StudentInfo studentNumber={studentNumber} />
             </div>
           </div>
         </div>

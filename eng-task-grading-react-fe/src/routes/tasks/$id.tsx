@@ -65,7 +65,6 @@ function RouteComponent() {
   }
 
   const handleAddGrade = (student: StudentDto) => {
-    console.log('handleAddGrade called with student:', student.name);
     setSelectedStudent(student);
     setIsAddGradeModalOpen(true);
   };
@@ -96,7 +95,6 @@ function RouteComponent() {
   };
 
   const handleEditGrade = (student: StudentDto, grade: GradeDto) => {
-    console.log('handleEditGrade called with:', student.name, grade.value);
     setSelectedStudent(student);
     setSelectedGrade(grade);
     setIsEditGradeModalOpen(true);

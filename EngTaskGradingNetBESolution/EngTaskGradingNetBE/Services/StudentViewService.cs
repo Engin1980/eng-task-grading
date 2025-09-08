@@ -189,5 +189,17 @@ namespace EngTaskGradingNetBE.Services
       StudentCourseDetailResult ret = new StudentCourseDetailResult(student, courseWithTasks, grades, attendanceRecords);
       return ret;
     }
+
+    internal async System.Threading.Tasks.Task ForgetRefreshTokenAsync(string refreshToken)
+    {
+      var tokenEntity = await Db.StudentViewTokens
+        .Include(q => q.Student)
+        .FirstOrDefaultAsync(q => q.Token == refreshToken && q.Type == StudentViewTokenType.Access);
+      if (tokenEntity != null)
+      {
+        Db.StudentViewTokens.Remove(tokenEntity);
+        await Db.SaveChangesAsync();
+      }
+    }
   }
 };

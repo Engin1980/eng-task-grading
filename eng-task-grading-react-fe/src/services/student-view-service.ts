@@ -23,11 +23,15 @@ export const studentViewService = {
     return data;
   },
 
+  forget: async (refreshToken: string) => {
+    await apiHttp.post('/v1/studentView/forget', refreshToken);
+    return Promise.resolve();
+  },
+
   getCourse: async (courseId: number): Promise<StudentViewCourseDto> => {
     const makeRequest = async (accessToken: string) => {
       const headers = { Authorization: `Bearer ${accessToken}` };
       const { data } = await apiHttp.get<StudentViewCourseDto>(`/v1/studentView/courses/${courseId}`, { headers });
-console.log(data);
       return data;
     };
 
@@ -60,7 +64,7 @@ console.log(data);
           throw error;
         }
       }
-      
+
       // If it's not a 401 error, just rethrow
       throw error;
     }
@@ -91,9 +95,6 @@ console.log(data);
           }
 
           const newAccessToken = await studentViewService.refresh(refreshToken);
-          console.log("HERE new token data:", newAccessToken);
-
-          // Save new access token
           localStorage.setItem('studentViewAccessJWT', newAccessToken);
 
           // Retry the original request with new token

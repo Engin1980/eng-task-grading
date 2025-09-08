@@ -59,6 +59,12 @@ public class StudentViewController(
     return accessToken;
   }
 
+  [HttpPost("forget")]
+  public async System.Threading.Tasks.Task ForgetToken([FromBody] string token)
+  {
+    await studentViewService.ForgetRefreshTokenAsync(token);
+  }
+
   [HttpGet("courses")]
   public async Task<List<CourseDto>> GetCourses()
   {

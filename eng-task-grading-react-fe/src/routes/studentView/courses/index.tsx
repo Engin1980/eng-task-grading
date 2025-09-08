@@ -3,6 +3,7 @@ import { studentViewService } from '../../../services/student-view-service'
 import type { CourseDto } from '../../../model/course-dto';
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast'
+import { StudentInfo } from '../../../components/studentView'
 
 export const Route = createFileRoute('/studentView/courses/')({
   component: RouteComponent,
@@ -70,12 +71,7 @@ function RouteComponent() {
                 <h1 className="text-2xl font-bold text-gray-900">Moje kurzy</h1>
                 <p className="text-gray-600 mt-1">Přehled kurzů, do kterých jste zapsáni</p>
               </div>
-              {studentNumber && (
-                <div className="text-right">
-                  <p className="text-sm text-gray-500">Studijní číslo</p>
-                  <p className="text-lg font-semibold text-gray-900">{studentNumber}</p>
-                </div>
-              )}
+              <StudentInfo studentNumber={studentNumber} />
             </div>
           </div>
 

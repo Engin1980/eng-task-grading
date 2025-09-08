@@ -43,6 +43,7 @@ namespace EngTaskGradingNetBE.Middleware
         EntityNotFoundException => new ErrorData(HttpStatusCode.NotFound, $"Not Found - {ex.Message}"),
         UnauthorizedAccessException => new ErrorData(HttpStatusCode.Unauthorized, "Unauthorized"),
         BadDataException => new ErrorData(HttpStatusCode.BadRequest, $"Bad Request - {ex.Message}"),
+        StudentTokenInvalidException => new ErrorData(HttpStatusCode.Unauthorized, $"Unauthorized - {ex.Message}"),
         _ => HandleInternalServerError(ex)
       };
 

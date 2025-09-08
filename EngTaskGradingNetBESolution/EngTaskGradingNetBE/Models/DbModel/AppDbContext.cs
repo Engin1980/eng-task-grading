@@ -10,7 +10,7 @@ namespace EngTaskGradingNetBE.Models.DbModel
     public DbSet<Task> Tasks => Set<Task>();
     public DbSet<Grade> Grades => Set<Grade>();
     public DbSet<TeacherToken> TeacherTokens => Set<TeacherToken>();
-    public DbSet<StudentToken> StudentTokens => Set<StudentToken>();
+    public DbSet<StudentViewToken> StudentViewTokens => Set<StudentViewToken>();
     public DbSet<AppLog> AppLog => Set<AppLog>();
 
     public DbSet<Attendance> Attendances => Set<Attendance>();
@@ -54,6 +54,11 @@ namespace EngTaskGradingNetBE.Models.DbModel
       modelBuilder.Entity<AttendanceRecord>()
        .HasIndex(ar => new { ar.AttendanceDayId, ar.StudentId })
        .IsUnique();
+      modelBuilder.Entity<StudentViewToken>(e =>
+      {
+        e.HasIndex(t => new { t.StudentId, t.ExpiresAt }).IsUnique();
+        e.HasIndex(t => t.Token);
+      });
     }
   }
 }

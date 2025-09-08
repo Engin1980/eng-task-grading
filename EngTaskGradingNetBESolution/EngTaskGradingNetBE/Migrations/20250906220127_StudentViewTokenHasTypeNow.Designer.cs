@@ -4,6 +4,7 @@ using EngTaskGradingNetBE.Models.DbModel;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EngGradesBE.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250906220127_StudentViewTokenHasTypeNow")]
+    partial class StudentViewTokenHasTypeNow
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -81,102 +84,6 @@ namespace EngGradesBE.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("AppLog");
-                });
-
-            modelBuilder.Entity("EngTaskGradingNetBE.Models.DbModel.Attendance", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CourseId")
-                        .HasColumnType("int");
-
-                    b.Property<double?>("MinWeight")
-                        .HasColumnType("float");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CourseId");
-
-                    b.ToTable("Attendances");
-                });
-
-            modelBuilder.Entity("EngTaskGradingNetBE.Models.DbModel.AttendanceDay", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("AttendanceId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AttendanceId");
-
-                    b.ToTable("AttendanceDays");
-                });
-
-            modelBuilder.Entity("EngTaskGradingNetBE.Models.DbModel.AttendanceRecord", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("AttendanceDayId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("AttendanceValueId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("StudentId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AttendanceValueId");
-
-                    b.HasIndex("StudentId");
-
-                    b.HasIndex("AttendanceDayId", "StudentId")
-                        .IsUnique();
-
-                    b.ToTable("AttendanceRecords");
-                });
-
-            modelBuilder.Entity("EngTaskGradingNetBE.Models.DbModel.AttendanceValue", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<double>("Weight")
-                        .HasColumnType("float");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("AttendanceValues");
                 });
 
             modelBuilder.Entity("EngTaskGradingNetBE.Models.DbModel.Course", b =>
@@ -300,17 +207,14 @@ namespace EngGradesBE.Migrations
 
                     b.Property<string>("Token")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Type")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Token");
-
-                    b.HasIndex("StudentId", "ExpiresAt")
-                        .IsUnique();
+                    b.HasIndex("StudentId");
 
                     b.ToTable("StudentViewTokens");
                 });
@@ -427,55 +331,6 @@ namespace EngGradesBE.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("EngTaskGradingNetBE.Models.DbModel.Attendance", b =>
-                {
-                    b.HasOne("EngTaskGradingNetBE.Models.DbModel.Course", "Course")
-                        .WithMany("Attendances")
-                        .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Course");
-                });
-
-            modelBuilder.Entity("EngTaskGradingNetBE.Models.DbModel.AttendanceDay", b =>
-                {
-                    b.HasOne("EngTaskGradingNetBE.Models.DbModel.Attendance", "Attendance")
-                        .WithMany("Days")
-                        .HasForeignKey("AttendanceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Attendance");
-                });
-
-            modelBuilder.Entity("EngTaskGradingNetBE.Models.DbModel.AttendanceRecord", b =>
-                {
-                    b.HasOne("EngTaskGradingNetBE.Models.DbModel.AttendanceDay", "AttendanceDay")
-                        .WithMany("Records")
-                        .HasForeignKey("AttendanceDayId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("EngTaskGradingNetBE.Models.DbModel.AttendanceValue", "Value")
-                        .WithMany()
-                        .HasForeignKey("AttendanceValueId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("EngTaskGradingNetBE.Models.DbModel.Student", "Student")
-                        .WithMany()
-                        .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("AttendanceDay");
-
-                    b.Navigation("Student");
-
-                    b.Navigation("Value");
-                });
-
             modelBuilder.Entity("EngTaskGradingNetBE.Models.DbModel.Grade", b =>
                 {
                     b.HasOne("EngTaskGradingNetBE.Models.DbModel.Teacher", "AssignerTeacher")
@@ -536,20 +391,8 @@ namespace EngGradesBE.Migrations
                     b.Navigation("Teacher");
                 });
 
-            modelBuilder.Entity("EngTaskGradingNetBE.Models.DbModel.Attendance", b =>
-                {
-                    b.Navigation("Days");
-                });
-
-            modelBuilder.Entity("EngTaskGradingNetBE.Models.DbModel.AttendanceDay", b =>
-                {
-                    b.Navigation("Records");
-                });
-
             modelBuilder.Entity("EngTaskGradingNetBE.Models.DbModel.Course", b =>
                 {
-                    b.Navigation("Attendances");
-
                     b.Navigation("Tasks");
                 });
 

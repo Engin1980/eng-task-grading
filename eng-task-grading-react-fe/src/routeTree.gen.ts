@@ -15,9 +15,12 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as HomeRouteImport } from './routes/home'
 import { Route as CoursesIndexRouteImport } from './routes/courses/index'
 import { Route as TasksIdRouteImport } from './routes/tasks/$id'
+import { Route as StudentViewLoginRouteImport } from './routes/studentView/login'
+import { Route as StudentViewHomeRouteImport } from './routes/studentView/home'
+import { Route as StudentViewCoursesRouteImport } from './routes/studentView/courses'
 import { Route as CoursesIdRouteImport } from './routes/courses/$id'
-import { Route as AttendancesIdRouteImport } from './routes/attendances/$id'
-import { Route as AttendanceDaysIdRouteImport } from './routes/attendanceDays/$id'
+import { Route as StudentViewVerifyTokenRouteImport } from './routes/studentView/verify/$token'
+import { Route as StudentViewLoginTokenRouteImport } from './routes/studentView/login/$token'
 
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
@@ -49,6 +52,21 @@ const TasksIdRoute = TasksIdRouteImport.update({
   path: '/tasks/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StudentViewLoginRoute = StudentViewLoginRouteImport.update({
+  id: '/studentView/login',
+  path: '/studentView/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StudentViewHomeRoute = StudentViewHomeRouteImport.update({
+  id: '/studentView/home',
+  path: '/studentView/home',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StudentViewCoursesRoute = StudentViewCoursesRouteImport.update({
+  id: '/studentView/courses',
+  path: '/studentView/courses',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CoursesIdRoute = CoursesIdRouteImport.update({
   id: '/courses/$id',
   path: '/courses/$id',
@@ -64,6 +82,16 @@ const AttendanceDaysIdRoute = AttendanceDaysIdRouteImport.update({
   path: '/attendanceDays/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StudentViewVerifyTokenRoute = StudentViewVerifyTokenRouteImport.update({
+  id: '/studentView/verify/$token',
+  path: '/studentView/verify/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StudentViewLoginTokenRoute = StudentViewLoginTokenRouteImport.update({
+  id: '/$token',
+  path: '/$token',
+  getParentRoute: () => StudentViewLoginRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/home': typeof HomeRoute
@@ -73,8 +101,13 @@ export interface FileRoutesByFullPath {
   '/attendanceDays/$id': typeof AttendanceDaysIdRoute
   '/attendances/$id': typeof AttendancesIdRoute
   '/courses/$id': typeof CoursesIdRoute
+  '/studentView/courses': typeof StudentViewCoursesRoute
+  '/studentView/home': typeof StudentViewHomeRoute
+  '/studentView/login': typeof StudentViewLoginRouteWithChildren
   '/tasks/$id': typeof TasksIdRoute
   '/courses': typeof CoursesIndexRoute
+  '/studentView/login/$token': typeof StudentViewLoginTokenRoute
+  '/studentView/verify/$token': typeof StudentViewVerifyTokenRoute
 }
 export interface FileRoutesByTo {
   '/home': typeof HomeRoute
@@ -84,8 +117,13 @@ export interface FileRoutesByTo {
   '/attendanceDays/$id': typeof AttendanceDaysIdRoute
   '/attendances/$id': typeof AttendancesIdRoute
   '/courses/$id': typeof CoursesIdRoute
+  '/studentView/courses': typeof StudentViewCoursesRoute
+  '/studentView/home': typeof StudentViewHomeRoute
+  '/studentView/login': typeof StudentViewLoginRouteWithChildren
   '/tasks/$id': typeof TasksIdRoute
   '/courses': typeof CoursesIndexRoute
+  '/studentView/login/$token': typeof StudentViewLoginTokenRoute
+  '/studentView/verify/$token': typeof StudentViewVerifyTokenRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -96,8 +134,13 @@ export interface FileRoutesById {
   '/attendanceDays/$id': typeof AttendanceDaysIdRoute
   '/attendances/$id': typeof AttendancesIdRoute
   '/courses/$id': typeof CoursesIdRoute
+  '/studentView/courses': typeof StudentViewCoursesRoute
+  '/studentView/home': typeof StudentViewHomeRoute
+  '/studentView/login': typeof StudentViewLoginRouteWithChildren
   '/tasks/$id': typeof TasksIdRoute
   '/courses/': typeof CoursesIndexRoute
+  '/studentView/login/$token': typeof StudentViewLoginTokenRoute
+  '/studentView/verify/$token': typeof StudentViewVerifyTokenRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -109,8 +152,13 @@ export interface FileRouteTypes {
     | '/attendanceDays/$id'
     | '/attendances/$id'
     | '/courses/$id'
+    | '/studentView/courses'
+    | '/studentView/home'
+    | '/studentView/login'
     | '/tasks/$id'
     | '/courses'
+    | '/studentView/login/$token'
+    | '/studentView/verify/$token'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/home'
@@ -120,8 +168,13 @@ export interface FileRouteTypes {
     | '/attendanceDays/$id'
     | '/attendances/$id'
     | '/courses/$id'
+    | '/studentView/courses'
+    | '/studentView/home'
+    | '/studentView/login'
     | '/tasks/$id'
     | '/courses'
+    | '/studentView/login/$token'
+    | '/studentView/verify/$token'
   id:
     | '__root__'
     | '/home'
@@ -131,8 +184,13 @@ export interface FileRouteTypes {
     | '/attendanceDays/$id'
     | '/attendances/$id'
     | '/courses/$id'
+    | '/studentView/courses'
+    | '/studentView/home'
+    | '/studentView/login'
     | '/tasks/$id'
     | '/courses/'
+    | '/studentView/login/$token'
+    | '/studentView/verify/$token'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -143,8 +201,12 @@ export interface RootRouteChildren {
   AttendanceDaysIdRoute: typeof AttendanceDaysIdRoute
   AttendancesIdRoute: typeof AttendancesIdRoute
   CoursesIdRoute: typeof CoursesIdRoute
+  StudentViewCoursesRoute: typeof StudentViewCoursesRoute
+  StudentViewHomeRoute: typeof StudentViewHomeRoute
+  StudentViewLoginRoute: typeof StudentViewLoginRouteWithChildren
   TasksIdRoute: typeof TasksIdRoute
   CoursesIndexRoute: typeof CoursesIndexRoute
+  StudentViewVerifyTokenRoute: typeof StudentViewVerifyTokenRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -191,6 +253,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TasksIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/studentView/login': {
+      id: '/studentView/login'
+      path: '/studentView/login'
+      fullPath: '/studentView/login'
+      preLoaderRoute: typeof StudentViewLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/studentView/home': {
+      id: '/studentView/home'
+      path: '/studentView/home'
+      fullPath: '/studentView/home'
+      preLoaderRoute: typeof StudentViewHomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/studentView/courses': {
+      id: '/studentView/courses'
+      path: '/studentView/courses'
+      fullPath: '/studentView/courses'
+      preLoaderRoute: typeof StudentViewCoursesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/courses/$id': {
       id: '/courses/$id'
       path: '/courses/$id'
@@ -211,9 +294,33 @@ declare module '@tanstack/react-router' {
       fullPath: '/attendanceDays/$id'
       preLoaderRoute: typeof AttendanceDaysIdRouteImport
       parentRoute: typeof rootRouteImport
+    '/studentView/verify/$token': {
+      id: '/studentView/verify/$token'
+      path: '/studentView/verify/$token'
+      fullPath: '/studentView/verify/$token'
+      preLoaderRoute: typeof StudentViewVerifyTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/studentView/login/$token': {
+      id: '/studentView/login/$token'
+      path: '/$token'
+      fullPath: '/studentView/login/$token'
+      preLoaderRoute: typeof StudentViewLoginTokenRouteImport
+      parentRoute: typeof StudentViewLoginRoute
     }
   }
 }
+
+interface StudentViewLoginRouteChildren {
+  StudentViewLoginTokenRoute: typeof StudentViewLoginTokenRoute
+}
+
+const StudentViewLoginRouteChildren: StudentViewLoginRouteChildren = {
+  StudentViewLoginTokenRoute: StudentViewLoginTokenRoute,
+}
+
+const StudentViewLoginRouteWithChildren =
+  StudentViewLoginRoute._addFileChildren(StudentViewLoginRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   HomeRoute: HomeRoute,
@@ -223,8 +330,12 @@ const rootRouteChildren: RootRouteChildren = {
   AttendanceDaysIdRoute: AttendanceDaysIdRoute,
   AttendancesIdRoute: AttendancesIdRoute,
   CoursesIdRoute: CoursesIdRoute,
+  StudentViewCoursesRoute: StudentViewCoursesRoute,
+  StudentViewHomeRoute: StudentViewHomeRoute,
+  StudentViewLoginRoute: StudentViewLoginRouteWithChildren,
   TasksIdRoute: TasksIdRoute,
   CoursesIndexRoute: CoursesIndexRoute,
+  StudentViewVerifyTokenRoute: StudentViewVerifyTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

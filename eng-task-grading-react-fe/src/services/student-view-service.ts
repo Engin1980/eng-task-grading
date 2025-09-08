@@ -1,3 +1,4 @@
+import type { CourseDto } from "../model/course-dto";
 import type { StudentViewTokenDto } from "../model/student-view-dto";
 import type { StudentViewLoginDto } from "../model/student-view-dto";
 import { apiHttp } from "./api-http";
@@ -14,6 +15,14 @@ export const studentViewService = {
       duration: durationSeconds
     };
     const { data } = await apiHttp.post<StudentViewTokenDto>('/v1/studentView/verify', request);
+    return data;
+  },
+
+  getCourses: async (): Promise<CourseDto[]> => {
+    const token = localStorage.getItem('studentViewAccessJWT');
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    
+    const { data } = await apiHttp.get<CourseDto[]>('/v1/studentView/courses', { headers });
     return data;
   }
 }

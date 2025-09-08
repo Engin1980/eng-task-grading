@@ -91,6 +91,8 @@ public class StudentViewController(
 
     // Validate JWT token with signature and expiration
     var tokenHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
+    tokenHandler.InboundClaimTypeMap.Clear();
+    tokenHandler.OutboundClaimTypeMap.Clear();
 
     // Get the secret key used for signing
     var jwtKey = appSettingsService.GetKey("AppSettings:Token:JwtSecretKey");
@@ -104,17 +106,26 @@ public class StudentViewController(
     {
       ValidateIssuerSigningKey = true,
       IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(key),
-      ValidateIssuer = false, // Set to true if you want to validate issuer
-      ValidateAudience = false, // Set to true if you want to validate audience
-      ValidateLifetime = true, // This validates expiration
-      ClockSkew = TimeSpan.Zero // Remove clock skew tolerance
+      ValidateIssuer = false,
+      ValidateAudience = false,
+      ValidateLifetime = true,
+      ClockSkew = TimeSpan.Zero
     };
 
-    // Validate token - this will throw if invalid, expired, or signature doesn't match
     System.Security.Claims.ClaimsPrincipal principal;
+    Microsoft.IdentityModel.Tokens.SecurityToken validatedToken;
     try
     {
-      principal = tokenHandler.ValidateToken(token, validationParameters, out var validatedToken);
+      principal = tokenHandler.ValidateToken(token, validationParameters, out validatedToken);
+
+      // Log NBF and EXP values to console
+      if (validatedToken is System.IdentityModel.Tokens.Jwt.JwtSecurityToken jwtToken)
+      {
+        var nbf = jwtToken.ValidFrom;
+        var exp = jwtToken.ValidTo;
+        Console.WriteLine($"Token NBF (Not Before): {nbf:yyyy-MM-dd HH:mm:ss} UTC");
+        Console.WriteLine($"Token EXP (Expires): {exp:yyyy-MM-dd HH:mm:ss} UTC");
+      }
     }
     catch (Exception ex)
     {
@@ -145,6 +156,8 @@ public class StudentViewController(
     if (string.IsNullOrEmpty(jwtKey))
       throw new InvalidOperationException("JWT secret key is not configured.");
     var key = System.Text.Encoding.ASCII.GetBytes(jwtKey);
+    var nowUtc = DateTime.UtcNow;
+    var expiryUtc = nowUtc.AddMinutes(appSettingsService.GetSettings().Token.StudentAccessJwtTokenExpiryMinutes);
     var tokenDescriptor = new Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor
     {
       Subject = new System.Security.Claims.ClaimsIdentity(new[]
@@ -152,12 +165,16 @@ public class StudentViewController(
             new System.Security.Claims.Claim("sub", studyNumber),
             new System.Security.Claims.Claim("type", "student_access")
         }),
-      Expires = DateTime.UtcNow.AddMinutes(appSettingsService.GetSettings().Token.StudentAccessJwtTokenExpiryMinutes),
+      Issuer = "EngTaskGradingNetBE",
+      Expires = expiryUtc,
+      NotBefore = nowUtc,
+      IssuedAt = nowUtc,
       SigningCredentials = new Microsoft.IdentityModel.Tokens.SigningCredentials(
             new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(key),
             Microsoft.IdentityModel.Tokens.SecurityAlgorithms.HmacSha256Signature)
     };
     var token = tokenHandler.CreateToken(tokenDescriptor);
+    Console.WriteLine("JWT " + token);
     return tokenHandler.WriteToken(token);
   }
 

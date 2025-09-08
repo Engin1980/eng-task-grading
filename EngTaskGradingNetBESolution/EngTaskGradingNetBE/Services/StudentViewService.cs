@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using EngTaskGradingNetBE.Models.Config;
 using EngTaskGradingNetBE.Models.DbModel;
 using EngTaskGradingNetBE.Models.Dtos;
+using System.Linq;
 
 namespace EngTaskGradingNetBE.Services
 {
@@ -150,8 +151,16 @@ namespace EngTaskGradingNetBE.Services
         .Include(q => q.Task).ThenInclude(q => q.Course)
         .Where(q => q.StudentId == student.Id)
         .ToListAsync();
+      var courses = await Db.Courses
+        .Where(q => q.Students.Contains(student))
+        .ToListAsync(); ;
 
-      var ret = grades.Select(q => q.Task).Select(q => q.Course).Distinct().ToList();
+      var ret = grades
+        .Select(q => q.Task)
+        .Select(q => q.Course)
+        .Union(courses)
+        .Distinct()
+        .ToList();
       return ret;
     }
   }

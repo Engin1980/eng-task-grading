@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import { attendanceService } from '../../services/attendance-service';
 import { CreateAttendanceDayModal } from './CreateAttendanceDayModal';
-import type { AttendanceDto, AttendanceDayCreateUpdateDto } from '../../model/attendance-dto';
+import { type AttendanceDto, type AttendanceDayCreateDto } from '../../model/attendance-dto';
 
 interface AttendanceDaysProps {
   attendanceId: string;
@@ -32,9 +32,13 @@ export function AttendanceDays({ attendanceId }: AttendanceDaysProps) {
     loadAttendance();
   }, [attendanceId]);
 
-  const handleCreateAttendanceDay = async (attendanceDay: AttendanceDayCreateUpdateDto) => {
+  const handleCreateAttendanceDay = async (attendanceDay: AttendanceDayCreateDto) => {
     try {
-      await attendanceService.createAttendanceDay(parseInt(attendanceId), attendanceDay);
+      const attendanceDayWithId = {
+        ...attendanceDay,
+        attendanceId: parseInt(attendanceId)
+      };
+      await attendanceService.createDay(attendanceDayWithId);
       await loadAttendance(); // Refresh the data
     } catch (err) {
       console.error('Error creating attendance day:', err);
@@ -59,7 +63,7 @@ export function AttendanceDays({ attendanceId }: AttendanceDaysProps) {
         <h2 className="text-2xl font-bold text-gray-900 mb-4">Zaznamenané dny</h2>
         <div className="text-center py-8">
           <p className="text-red-500">{error}</p>
-          <button 
+          <button
             onClick={loadAttendance}
             className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
           >

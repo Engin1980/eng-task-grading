@@ -1,4 +1,4 @@
-import type { AttendanceCreateDto, AttendanceDayCreateDto, AttendanceDaySetDto, AttendanceDayUpdateDto, AttendanceDto, AttendanceRecordDto, AttendanceSetDto, AttendanceUpdateDto, AttendanceValueDto, StudentAttendanceDto } from "../model/attendance-dto";
+import type { AttendanceCreateDto, AttendanceDayCreateDto, AttendanceDaySetDto, AttendanceDayUpdateDto, AttendanceDto, AttendanceRecordDto, AttendanceSetDto, AttendanceUpdateDto, AttendanceValueDto } from "../model/attendance-dto";
 import type { StudentDto } from "../model/student-dto";
 import { apiHttp } from "./api-http";
 

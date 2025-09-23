@@ -4,6 +4,7 @@ using EngTaskGradingNetBE.Models.DbModel;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EngGradesBE.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250923100803_AddAttendanceDayHasNowSelfAssignKey")]
+    partial class AddAttendanceDayHasNowSelfAssignKey
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -108,6 +111,35 @@ namespace EngGradesBE.Migrations
                     b.ToTable("Attendances");
                 });
 
+            modelBuilder.Entity("EngTaskGradingNetBE.Models.DbModel.AttendanceByStudent", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AttendanceDayId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreationDateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("IP")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("StudyNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AttendanceDayId");
+
+                    b.ToTable("AttendanceDaySelfSign");
+                });
+
             modelBuilder.Entity("EngTaskGradingNetBE.Models.DbModel.AttendanceDay", b =>
                 {
                     b.Property<int>("Id")
@@ -131,36 +163,6 @@ namespace EngGradesBE.Migrations
                     b.HasIndex("AttendanceId");
 
                     b.ToTable("AttendanceDays");
-                });
-
-            modelBuilder.Entity("EngTaskGradingNetBE.Models.DbModel.AttendanceDaySelfSign", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("AttendanceDayId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreationDateTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("IP")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("StudentId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AttendanceDayId");
-
-                    b.HasIndex("StudentId");
-
-                    b.ToTable("AttendanceDaySelfSign");
                 });
 
             modelBuilder.Entity("EngTaskGradingNetBE.Models.DbModel.AttendanceRecord", b =>
@@ -471,6 +473,17 @@ namespace EngGradesBE.Migrations
                     b.Navigation("Course");
                 });
 
+            modelBuilder.Entity("EngTaskGradingNetBE.Models.DbModel.AttendanceByStudent", b =>
+                {
+                    b.HasOne("EngTaskGradingNetBE.Models.DbModel.AttendanceDay", "AttendanceDay")
+                        .WithMany()
+                        .HasForeignKey("AttendanceDayId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AttendanceDay");
+                });
+
             modelBuilder.Entity("EngTaskGradingNetBE.Models.DbModel.AttendanceDay", b =>
                 {
                     b.HasOne("EngTaskGradingNetBE.Models.DbModel.Attendance", "Attendance")
@@ -480,25 +493,6 @@ namespace EngGradesBE.Migrations
                         .IsRequired();
 
                     b.Navigation("Attendance");
-                });
-
-            modelBuilder.Entity("EngTaskGradingNetBE.Models.DbModel.AttendanceDaySelfSign", b =>
-                {
-                    b.HasOne("EngTaskGradingNetBE.Models.DbModel.AttendanceDay", "AttendanceDay")
-                        .WithMany("SelfSigns")
-                        .HasForeignKey("AttendanceDayId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("EngTaskGradingNetBE.Models.DbModel.Student", "Student")
-                        .WithMany()
-                        .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("AttendanceDay");
-
-                    b.Navigation("Student");
                 });
 
             modelBuilder.Entity("EngTaskGradingNetBE.Models.DbModel.AttendanceRecord", b =>
@@ -596,8 +590,6 @@ namespace EngGradesBE.Migrations
             modelBuilder.Entity("EngTaskGradingNetBE.Models.DbModel.AttendanceDay", b =>
                 {
                     b.Navigation("Records");
-
-                    b.Navigation("SelfSigns");
                 });
 
             modelBuilder.Entity("EngTaskGradingNetBE.Models.DbModel.Course", b =>

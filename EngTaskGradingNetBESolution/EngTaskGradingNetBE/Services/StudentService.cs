@@ -154,5 +154,13 @@ namespace EngTaskGradingNetBE.Services
       await Db.SaveChangesAsync();
       return;
     }
+
+    internal async Task<Student> GetByStudyNumberAsync(string studyNumber)
+    {
+      Student ret = await Db.Students
+        .FirstOrDefaultAsync(q => q.Number == studyNumber.ToUpper())
+        ?? throw new Exceptions.EntityNotFoundException(typeof(Student), "StudyNumber ==" + studyNumber);
+      return ret;
+    }
   }
 }

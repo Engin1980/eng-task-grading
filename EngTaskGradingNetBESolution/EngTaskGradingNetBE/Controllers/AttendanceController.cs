@@ -1,4 +1,5 @@
-﻿using EngTaskGradingNetBE.Lib;
+﻿using EngTaskGradingNetBE.Exceptions;
+using EngTaskGradingNetBE.Lib;
 using EngTaskGradingNetBE.Models.DbModel;
 using EngTaskGradingNetBE.Models.Dtos;
 using EngTaskGradingNetBE.Services;
@@ -11,7 +12,7 @@ namespace EngTaskGradingNetBE.Controllers
 {
   [ApiController]
   [Route("api/v1/[controller]")]
-  public class AttendanceController(AttendanceService attendanceService) : ControllerBase
+  public class AttendanceController(AttendanceService attendanceService, StudentService studentService) : ControllerBase
   {
     [HttpGet("for-course/{courseId}")]
     public async Task<IEnumerable<AttendanceDto>> GetAll(int courseId)
@@ -174,6 +175,64 @@ namespace EngTaskGradingNetBE.Controllers
         items
         );
       return ret;
+    }
+
+    [HttpPatch("days/{dayId}/key")]
+    public async System.Threading.Tasks.Task SetSelfAssignKey([FromRoute] int dayId, [FromBody] string key)
+    {
+      await attendanceService.SetSelfAssignKeyAsync(dayId, key);
+    }
+
+    [HttpDelete("days/{dayId}/key")]
+    public async System.Threading.Tasks.Task DeleteSelfAssignKey([FromRoute] int dayId)
+    {
+      await attendanceService.SetSelfAssignKeyAsync(dayId, null);
+    }
+
+    [HttpGet("self/for-day/{dayId}")]
+    public async System.Threading.Tasks.Task<AttendanceDaySelfSignSetDto> GetSelfSignSet([FromRoute] int dayId)
+    {
+      AttendanceDay atd = await attendanceService.GetDayByIdAsync(dayId, true);
+      List<AttendanceDaySelfSign> selfSigns = await attendanceService.GetSelfSignsForDayAsync(dayId);
+
+      List<AttendanceDaySelfSignDto> dtos = selfSigns
+        .Select(EObjectMapper.To)
+        .ToList();
+
+      AttendanceDaySelfSignSetDto ret = new(
+        dayId,
+        atd.SelfAssignKey,
+        dtos
+        );
+      return ret;
+    }
+
+    [HttpPost("self/for-day/{dayId}")]
+    public async System.Threading.Tasks.Task SelfAssignStudentToDay([FromRoute] int dayId, AttendanceDaySelfSignCreateDto data)
+    {
+      AttendanceDay atd = await attendanceService.GetDayByIdAsync(dayId, false);
+      if (atd.SelfAssignKey == null || atd.SelfAssignKey.Length == 0 || atd.SelfAssignKey != data.Key)
+      {
+        //TODO implement fully
+        throw new BadDataException("Attendance is not opened for self-assing or the key is invalid.");
+      }
+      Student student = await studentService.GetByStudyNumberAsync(data.StudyNumber);
+
+      AttendanceDaySelfSign entity = new()
+      {
+        AttendanceDayId = dayId,
+        Student = student,
+        CreationDateTime = DateTime.Now,
+        IP = Request.Headers["X-Forwarded-For"].FirstOrDefault() ?? Request.HttpContext.Connection.RemoteIpAddress?.ToString() ?? ""
+      };
+
+      await attendanceService.AddAttendanceDaySelfSignAsync(entity);
+    }
+
+    [HttpPost("self/{selfSignId}")]
+    public async System.Threading.Tasks.Task ResolveSelfSigns([FromRoute] int selfSignId, [FromBody] int attendanceValueId)
+    {
+      await attendanceService.ResolveSelfSignsAsync(selfSignId, attendanceValueId);
     }
   }
 }

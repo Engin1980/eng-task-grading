@@ -89,7 +89,7 @@ public static class EObjectMapper
     };
   }
   public static AttendanceDayDto To(AttendanceDay day) =>
-    new(day.Id, day.Title);
+    new(day.Id, day.Title, day.SelfAssignKey);
 
   internal static Attendance From(AttendanceDto attendanceDto)
   {
@@ -116,4 +116,6 @@ public static class EObjectMapper
   }
 
   public static AttendanceRecordDto To(AttendanceRecord sa) => new AttendanceRecordDto(sa.Id, sa.StudentId, sa.AttendanceDayId, sa.AttendanceValueId);
+
+  public static AttendanceDaySelfSignDto To(AttendanceDaySelfSign s) => new(s.Id, EObjectMapper.To(s.Student), s.CreationDateTime, s.IP);
 }

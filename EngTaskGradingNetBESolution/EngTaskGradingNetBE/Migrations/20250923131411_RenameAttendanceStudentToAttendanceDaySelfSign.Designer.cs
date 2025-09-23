@@ -4,6 +4,7 @@ using EngTaskGradingNetBE.Models.DbModel;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EngGradesBE.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250923131411_RenameAttendanceStudentToAttendanceDaySelfSign")]
+    partial class RenameAttendanceStudentToAttendanceDaySelfSign
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -151,14 +154,13 @@ namespace EngGradesBE.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("StudentId")
-                        .HasColumnType("int");
+                    b.Property<string>("StudyNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("AttendanceDayId");
-
-                    b.HasIndex("StudentId");
 
                     b.ToTable("AttendanceDaySelfSign");
                 });
@@ -490,15 +492,7 @@ namespace EngGradesBE.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("EngTaskGradingNetBE.Models.DbModel.Student", "Student")
-                        .WithMany()
-                        .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("AttendanceDay");
-
-                    b.Navigation("Student");
                 });
 
             modelBuilder.Entity("EngTaskGradingNetBE.Models.DbModel.AttendanceRecord", b =>

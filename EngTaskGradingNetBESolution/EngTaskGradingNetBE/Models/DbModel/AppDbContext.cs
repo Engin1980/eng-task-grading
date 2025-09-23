@@ -18,6 +18,8 @@ namespace EngTaskGradingNetBE.Models.DbModel
     public DbSet<AttendanceDay> AttendanceDays => Set<AttendanceDay>();
     public DbSet<AttendanceRecord> AttendanceRecords => Set<AttendanceRecord>();
 
+    public DbSet<AttendanceDaySelfSign> AttendanceDaySelfSign => Set<AttendanceDaySelfSign>();
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

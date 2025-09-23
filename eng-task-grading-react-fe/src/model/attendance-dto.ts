@@ -3,6 +3,7 @@ import type { StudentDto } from "./student-dto";
 export interface AttendanceDayDto {
   id: number;
   title: string;
+  selfAssignKey?: string;
 }
 
 export interface AttendanceDayCreateDto {
@@ -71,3 +72,22 @@ export interface AttendanceDaySetRecordDto {
   attendanceValueTitle: string;
   attendanceValueWeight: number;
 }
+
+export interface AttendanceDaySelfSignCreateDto {
+  studyNumber: string;
+  key: string;
+}
+
+export interface AttendanceDaySelfSignSetDto {
+  attendanceDayId: number;
+  key: string | null;
+  selfSigns: AttendanceDaySelfSignDto[];
+}
+
+export interface AttendanceDaySelfSignDto {
+  id: number;
+  student: StudentDto;
+  creationDateTime: Date;
+  ip: string;
+}
+

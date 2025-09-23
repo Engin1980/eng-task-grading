@@ -1,4 +1,5 @@
-﻿using EngTaskGradingNetBE.Models.DbModel;
+﻿using EngTaskGradingNetBE.Exceptions;
+using EngTaskGradingNetBE.Models.DbModel;
 using EngTaskGradingNetBE.Models.Dtos;
 using Microsoft.EntityFrameworkCore;
 
@@ -204,6 +205,67 @@ namespace EngTaskGradingNetBE.Services
         att.Course.Students.Union(att.Days.SelectMany(q => q.Records).Select(q => q.Student)).Distinct().ToList(),
         att.Days.ToList()
         );
+      return ret;
+    }
+
+    internal async System.Threading.Tasks.Task AddAttendanceDaySelfSignAsync(AttendanceDaySelfSign entity)
+    {
+      await Db.AttendanceDaySelfSign.AddAsync(entity);
+      await Db.SaveChangesAsync();
+    }
+
+    internal async Task<AttendanceDay> GetDayByIdAsync(int attendanceDayId, bool includeSelfSigns)
+    {
+      IQueryable<AttendanceDay> tmp = Db.AttendanceDays;
+      if (includeSelfSigns)
+        tmp = tmp.Include(q => q.SelfSigns);
+      AttendanceDay ret =
+        await tmp
+        .FirstOrDefaultAsync(q => q.Id == attendanceDayId)
+        ?? throw new Exceptions.EntityNotFoundException(typeof(AttendanceDay), attendanceDayId);
+
+      return ret;
+    }
+
+    internal async System.Threading.Tasks.Task SetSelfAssignKeyAsync(int dayId, string? key)
+    {
+      AttendanceDay attDay = await Db.AttendanceDays
+        .FirstOrDefaultAsync(q => q.Id == dayId)
+        ?? throw new Exceptions.EntityNotFoundException(typeof(AttendanceDay), dayId);
+      attDay.SelfAssignKey = key;
+      await Db.SaveChangesAsync();
+    }
+
+    internal async System.Threading.Tasks.Task ResolveSelfSignsAsync(int selfSignId, int attendanceValueId)
+    {
+      AttendanceDaySelfSign atss = await Db.AttendanceDaySelfSign
+        .FirstOrDefaultAsync(q => q.Id == selfSignId)
+        ?? throw new EntityNotFoundException(typeof(AttendanceDaySelfSign), selfSignId);
+
+      using var transaction = await Db.Database.BeginTransactionAsync();
+      try
+      {
+
+        await CreateOrUpdateRecordAsync(atss.AttendanceDayId, atss.StudentId, attendanceValueId);
+
+        Db.AttendanceDaySelfSign.Remove(atss);
+        await Db.SaveChangesAsync();
+
+        await transaction.CommitAsync();
+      }
+      catch (Exception ex)
+      {
+        await transaction.RollbackAsync();
+        throw ex;
+      }
+    }
+
+    internal async Task<List<AttendanceDaySelfSign>> GetSelfSignsForDayAsync(int dayId)
+    {
+      List<AttendanceDaySelfSign> ret = await Db.AttendanceDaySelfSign
+        .Where(q => q.AttendanceDayId == dayId)
+        .Include(q => q.Student)
+        .ToListAsync();
       return ret;
     }
   }

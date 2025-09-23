@@ -1,3 +1,5 @@
+using EngTaskGradingNetBE.Models.DbModel;
+
 namespace EngTaskGradingNetBE.Models.Dtos;
 
 public record AttendanceValueDto(
@@ -15,7 +17,8 @@ public record AttendanceRecordDto(
 
 public record AttendanceDayDto(
   int Id,
-  string Title
+  string Title,
+  string? SelfAssignKey
 );
 
 public record AttendanceDto(
@@ -64,4 +67,17 @@ public record AttendanceDaySetRecordDto(
   string AttendanceValueTitle,
   double AttendanceValueWeight
 );
+
+public record AttendanceDaySelfSignCreateDto(
+  string StudyNumber,
+  string Key
+  );
+
+public record AttendanceDaySelfSignSetDto(
+  int AttendanceDayId,
+  string? Key,
+  List<AttendanceDaySelfSignDto> SelfSigns
+  );
+
+public record AttendanceDaySelfSignDto(int Id, StudentDto Student, DateTime CreationDateTime, string IP);
 

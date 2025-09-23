@@ -13,5 +13,9 @@ public class AttendanceDay
   [Required]
   public string Title { set; get; } = null!;
 
+  public string? SelfAssignKey { get; set; } = null;
+
+  public ICollection<AttendanceDaySelfSign> SelfSigns { get; set; } = new List<AttendanceDaySelfSign>();
+
   public ICollection<AttendanceRecord> Records { set; get; } = new List<AttendanceRecord>();
 }

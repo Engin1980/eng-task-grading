@@ -24,6 +24,10 @@ import { Route as StudentViewCoursesIndexRouteImport } from './routes/studentVie
 import { Route as StudentViewVerifyTokenRouteImport } from './routes/studentView/verify/$token'
 import { Route as StudentViewLoginTokenRouteImport } from './routes/studentView/login/$token'
 import { Route as StudentViewCoursesIdRouteImport } from './routes/studentView/courses/$id'
+import { Route as CoursesIdTasksRouteImport } from './routes/courses/$id/tasks'
+import { Route as CoursesIdStudentsRouteImport } from './routes/courses/$id/students'
+import { Route as CoursesIdGradesRouteImport } from './routes/courses/$id/grades'
+import { Route as CoursesIdAttendancesRouteImport } from './routes/courses/$id/attendances'
 import { Route as AttendanceSelfSignSelfSignIdRouteImport } from './routes/attendanceSelfSign/self-sign.$id'
 import { Route as AttendanceSelfSignViewInfoIdKeyRouteImport } from './routes/attendanceSelfSign/view-info.$id.$key'
 
@@ -102,6 +106,26 @@ const StudentViewCoursesIdRoute = StudentViewCoursesIdRouteImport.update({
   path: '/studentView/courses/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CoursesIdTasksRoute = CoursesIdTasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => CoursesIdRoute,
+} as any)
+const CoursesIdStudentsRoute = CoursesIdStudentsRouteImport.update({
+  id: '/students',
+  path: '/students',
+  getParentRoute: () => CoursesIdRoute,
+} as any)
+const CoursesIdGradesRoute = CoursesIdGradesRouteImport.update({
+  id: '/grades',
+  path: '/grades',
+  getParentRoute: () => CoursesIdRoute,
+} as any)
+const CoursesIdAttendancesRoute = CoursesIdAttendancesRouteImport.update({
+  id: '/attendances',
+  path: '/attendances',
+  getParentRoute: () => CoursesIdRoute,
+} as any)
 const AttendanceSelfSignSelfSignIdRoute =
   AttendanceSelfSignSelfSignIdRouteImport.update({
     id: '/attendanceSelfSign/self-sign/$id',
@@ -122,12 +146,16 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/attendanceDays/$id': typeof AttendanceDaysIdRoute
   '/attendances/$id': typeof AttendancesIdRoute
-  '/courses/$id': typeof CoursesIdRoute
+  '/courses/$id': typeof CoursesIdRouteWithChildren
   '/studentView/home': typeof StudentViewHomeRoute
   '/studentView/login': typeof StudentViewLoginRouteWithChildren
   '/tasks/$id': typeof TasksIdRoute
   '/courses': typeof CoursesIndexRoute
   '/attendanceSelfSign/self-sign/$id': typeof AttendanceSelfSignSelfSignIdRoute
+  '/courses/$id/attendances': typeof CoursesIdAttendancesRoute
+  '/courses/$id/grades': typeof CoursesIdGradesRoute
+  '/courses/$id/students': typeof CoursesIdStudentsRoute
+  '/courses/$id/tasks': typeof CoursesIdTasksRoute
   '/studentView/courses/$id': typeof StudentViewCoursesIdRoute
   '/studentView/login/$token': typeof StudentViewLoginTokenRoute
   '/studentView/verify/$token': typeof StudentViewVerifyTokenRoute
@@ -141,12 +169,16 @@ export interface FileRoutesByTo {
   '/register': typeof RegisterRoute
   '/attendanceDays/$id': typeof AttendanceDaysIdRoute
   '/attendances/$id': typeof AttendancesIdRoute
-  '/courses/$id': typeof CoursesIdRoute
+  '/courses/$id': typeof CoursesIdRouteWithChildren
   '/studentView/home': typeof StudentViewHomeRoute
   '/studentView/login': typeof StudentViewLoginRouteWithChildren
   '/tasks/$id': typeof TasksIdRoute
   '/courses': typeof CoursesIndexRoute
   '/attendanceSelfSign/self-sign/$id': typeof AttendanceSelfSignSelfSignIdRoute
+  '/courses/$id/attendances': typeof CoursesIdAttendancesRoute
+  '/courses/$id/grades': typeof CoursesIdGradesRoute
+  '/courses/$id/students': typeof CoursesIdStudentsRoute
+  '/courses/$id/tasks': typeof CoursesIdTasksRoute
   '/studentView/courses/$id': typeof StudentViewCoursesIdRoute
   '/studentView/login/$token': typeof StudentViewLoginTokenRoute
   '/studentView/verify/$token': typeof StudentViewVerifyTokenRoute
@@ -161,12 +193,16 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/attendanceDays/$id': typeof AttendanceDaysIdRoute
   '/attendances/$id': typeof AttendancesIdRoute
-  '/courses/$id': typeof CoursesIdRoute
+  '/courses/$id': typeof CoursesIdRouteWithChildren
   '/studentView/home': typeof StudentViewHomeRoute
   '/studentView/login': typeof StudentViewLoginRouteWithChildren
   '/tasks/$id': typeof TasksIdRoute
   '/courses/': typeof CoursesIndexRoute
   '/attendanceSelfSign/self-sign/$id': typeof AttendanceSelfSignSelfSignIdRoute
+  '/courses/$id/attendances': typeof CoursesIdAttendancesRoute
+  '/courses/$id/grades': typeof CoursesIdGradesRoute
+  '/courses/$id/students': typeof CoursesIdStudentsRoute
+  '/courses/$id/tasks': typeof CoursesIdTasksRoute
   '/studentView/courses/$id': typeof StudentViewCoursesIdRoute
   '/studentView/login/$token': typeof StudentViewLoginTokenRoute
   '/studentView/verify/$token': typeof StudentViewVerifyTokenRoute
@@ -188,6 +224,10 @@ export interface FileRouteTypes {
     | '/tasks/$id'
     | '/courses'
     | '/attendanceSelfSign/self-sign/$id'
+    | '/courses/$id/attendances'
+    | '/courses/$id/grades'
+    | '/courses/$id/students'
+    | '/courses/$id/tasks'
     | '/studentView/courses/$id'
     | '/studentView/login/$token'
     | '/studentView/verify/$token'
@@ -207,6 +247,10 @@ export interface FileRouteTypes {
     | '/tasks/$id'
     | '/courses'
     | '/attendanceSelfSign/self-sign/$id'
+    | '/courses/$id/attendances'
+    | '/courses/$id/grades'
+    | '/courses/$id/students'
+    | '/courses/$id/tasks'
     | '/studentView/courses/$id'
     | '/studentView/login/$token'
     | '/studentView/verify/$token'
@@ -226,6 +270,10 @@ export interface FileRouteTypes {
     | '/tasks/$id'
     | '/courses/'
     | '/attendanceSelfSign/self-sign/$id'
+    | '/courses/$id/attendances'
+    | '/courses/$id/grades'
+    | '/courses/$id/students'
+    | '/courses/$id/tasks'
     | '/studentView/courses/$id'
     | '/studentView/login/$token'
     | '/studentView/verify/$token'
@@ -240,7 +288,7 @@ export interface RootRouteChildren {
   RegisterRoute: typeof RegisterRoute
   AttendanceDaysIdRoute: typeof AttendanceDaysIdRoute
   AttendancesIdRoute: typeof AttendancesIdRoute
-  CoursesIdRoute: typeof CoursesIdRoute
+  CoursesIdRoute: typeof CoursesIdRouteWithChildren
   StudentViewHomeRoute: typeof StudentViewHomeRoute
   StudentViewLoginRoute: typeof StudentViewLoginRouteWithChildren
   TasksIdRoute: typeof TasksIdRoute
@@ -359,6 +407,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StudentViewCoursesIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/courses/$id/tasks': {
+      id: '/courses/$id/tasks'
+      path: '/tasks'
+      fullPath: '/courses/$id/tasks'
+      preLoaderRoute: typeof CoursesIdTasksRouteImport
+      parentRoute: typeof CoursesIdRoute
+    }
+    '/courses/$id/students': {
+      id: '/courses/$id/students'
+      path: '/students'
+      fullPath: '/courses/$id/students'
+      preLoaderRoute: typeof CoursesIdStudentsRouteImport
+      parentRoute: typeof CoursesIdRoute
+    }
+    '/courses/$id/grades': {
+      id: '/courses/$id/grades'
+      path: '/grades'
+      fullPath: '/courses/$id/grades'
+      preLoaderRoute: typeof CoursesIdGradesRouteImport
+      parentRoute: typeof CoursesIdRoute
+    }
+    '/courses/$id/attendances': {
+      id: '/courses/$id/attendances'
+      path: '/attendances'
+      fullPath: '/courses/$id/attendances'
+      preLoaderRoute: typeof CoursesIdAttendancesRouteImport
+      parentRoute: typeof CoursesIdRoute
+    }
     '/attendanceSelfSign/self-sign/$id': {
       id: '/attendanceSelfSign/self-sign/$id'
       path: '/attendanceSelfSign/self-sign/$id'
@@ -375,6 +451,24 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface CoursesIdRouteChildren {
+  CoursesIdAttendancesRoute: typeof CoursesIdAttendancesRoute
+  CoursesIdGradesRoute: typeof CoursesIdGradesRoute
+  CoursesIdStudentsRoute: typeof CoursesIdStudentsRoute
+  CoursesIdTasksRoute: typeof CoursesIdTasksRoute
+}
+
+const CoursesIdRouteChildren: CoursesIdRouteChildren = {
+  CoursesIdAttendancesRoute: CoursesIdAttendancesRoute,
+  CoursesIdGradesRoute: CoursesIdGradesRoute,
+  CoursesIdStudentsRoute: CoursesIdStudentsRoute,
+  CoursesIdTasksRoute: CoursesIdTasksRoute,
+}
+
+const CoursesIdRouteWithChildren = CoursesIdRoute._addFileChildren(
+  CoursesIdRouteChildren,
+)
 
 interface StudentViewLoginRouteChildren {
   StudentViewLoginTokenRoute: typeof StudentViewLoginTokenRoute
@@ -394,7 +488,7 @@ const rootRouteChildren: RootRouteChildren = {
   RegisterRoute: RegisterRoute,
   AttendanceDaysIdRoute: AttendanceDaysIdRoute,
   AttendancesIdRoute: AttendancesIdRoute,
-  CoursesIdRoute: CoursesIdRoute,
+  CoursesIdRoute: CoursesIdRouteWithChildren,
   StudentViewHomeRoute: StudentViewHomeRoute,
   StudentViewLoginRoute: StudentViewLoginRouteWithChildren,
   TasksIdRoute: TasksIdRoute,

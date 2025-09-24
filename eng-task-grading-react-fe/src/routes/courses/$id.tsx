@@ -1,20 +1,16 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link, Outlet } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import { useLogger } from '../../hooks/use-logger'
 import { courseService } from '../../services/course-service'
-import { GradesTab, StudentsTab, TasksTab } from '../../components/courses'
-import { AttendanceTab } from '../../components/courses'
 import type { CourseDto } from '../../model/course-dto'
 
 export const Route = createFileRoute('/courses/$id')({
   component: CourseDetailPage,
 })
 
-type TabType = 'grades' | 'students' | 'tasks' | 'attendances'
-
 function CourseDetailPage() {
   const { id } = Route.useParams()
-  const [activeTab, setActiveTab] = useState<TabType>('grades')
+  // Navigace je nyní přes Link komponenty, není potřeba activeTab
   const logger = useLogger("CourseDetailPage")
   const [course, setCourse] = useState<CourseDto | null>(null)
   const [loading, setLoading] = useState(true)
@@ -101,54 +97,42 @@ function CourseDetailPage() {
         )}
       </div>
 
-      {/* Tabs */}
+      {/* Tabs - nová navigace přes Link */}
       <div className="border-b border-gray-200 mb-6">
         <nav className="-mb-px flex space-x-8">
-          <button
-            onClick={() => setActiveTab('grades')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${activeTab === 'grades'
-              ? 'border-blue-500 text-blue-600'
-              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
+          <Link
+            to="/courses/$id/grades"
+            params={{ id }}
+            className="py-2 px-1 border-b-2 font-medium text-sm text-blue-600 hover:text-blue-800 hover:border-blue-500"
           >
             Známky
-          </button>
-          <button
-            onClick={() => setActiveTab('tasks')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${activeTab === 'tasks'
-              ? 'border-blue-500 text-blue-600'
-              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
+          </Link>
+          <Link
+            to="/courses/$id/tasks"
+            params={{ id }}
+            className="py-2 px-1 border-b-2 font-medium text-sm text-blue-600 hover:text-blue-800 hover:border-blue-500"
           >
             Úkoly
-          </button>
-          <button
-            onClick={() => setActiveTab('attendances')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${activeTab === 'attendances'
-              ? 'border-blue-500 text-blue-600'
-              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
+          </Link>
+          <Link
+            to="/courses/$id/attendances"
+            params={{ id }}
+            className="py-2 px-1 border-b-2 font-medium text-sm text-blue-600 hover:text-blue-800 hover:border-blue-500"
           >
             Účast
-          </button>
-          <button
-            onClick={() => setActiveTab('students')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${activeTab === 'students'
-              ? 'border-blue-500 text-blue-600'
-              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
+          </Link>
+          <Link
+            to="/courses/$id/students"
+            params={{ id }}
+            className="py-2 px-1 border-b-2 font-medium text-sm text-blue-600 hover:text-blue-800 hover:border-blue-500"
           >
             Studenti
-          </button>
+          </Link>
         </nav>
       </div>
-
-      {/* Tab Content */}
+      {/* Tab Content - nyní se renderuje podle child route */}
       <div className="min-h-96">
-        {activeTab === 'grades' && <GradesTab courseId={id} />}
-        {activeTab === 'students' && <StudentsTab courseId={id} />}
-        {activeTab === 'tasks' && <TasksTab courseId={id} />}
-        {activeTab === 'attendances' && <AttendanceTab courseId={id} />}
+        <Outlet />
       </div>
     </div>
   )

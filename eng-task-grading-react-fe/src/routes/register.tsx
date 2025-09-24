@@ -5,5 +5,5 @@ export const Route = createFileRoute('/register')({
 })
 
 function RouteComponent() {
-  return <div>Hello "/register"!</div>
+  return <div>Registration is not available yet.</div>
 }

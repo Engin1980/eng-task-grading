@@ -20,6 +20,8 @@ export function GradesTab({ courseId }: GradesTabProps) {
   const [loading, setLoading] = useState<boolean>(true);
   const [studentFilter, setStudentFilter] = useState<string>("");
   const [taskFilter, setTaskFilter] = useState<string>("");
+  const [showTasks, setShowTasks] = useState(true);
+  const [showAttendances, setShowAttendances] = useState(true);
 
   const loadGradeSet = async () => {
     try {
@@ -124,7 +126,7 @@ export function GradesTab({ courseId }: GradesTabProps) {
     return item ? item.value : null;
   };
 
-  // Funkce pro výpočet statistik úspěšných úkolů
+  // Výpočet úspěšných úkolů pro studenta
   const getStudentStats = (studentId: number) => {
     if (!filteredTasks) return { successful: 0, total: 0 };
 
@@ -138,6 +140,20 @@ export function GradesTab({ courseId }: GradesTabProps) {
         if (mainGrade.value >= (task.minGrade || 0)) {
           successful++;
         }
+      }
+    });
+    return { successful, total };
+  };
+
+  // Výpočet úspěšných docházek pro studenta
+  const getAttendanceStats = (studentId: number) => {
+    if (!showAttendances || !attendanceSet) return { successful: 0, total: 0 };
+    let successful = 0;
+    const total = attendanceSet.attendances.length;
+    attendanceSet.attendances.forEach(attendance => {
+      const value = getAttendanceValueForStudent(studentId, attendance.id);
+      if (value !== null && attendance.minWeight !== undefined && value >= attendance.minWeight) {
+        successful++;
       }
     });
     return { successful, total };
@@ -204,6 +220,26 @@ export function GradesTab({ courseId }: GradesTabProps) {
             />
           </div>
         </div>
+        <div className="flex gap-6 mt-4">
+          <label className="inline-flex items-center">
+            <input
+              type="checkbox"
+              checked={showAttendances}
+              onChange={e => setShowAttendances(e.target.checked)}
+              className="form-checkbox h-4 w-4 text-blue-600"
+            />
+            <span className="ml-2 text-sm text-gray-700">Zobrazit docházku</span>
+          </label>
+          <label className="inline-flex items-center">
+            <input
+              type="checkbox"
+              checked={showTasks}
+              onChange={e => setShowTasks(e.target.checked)}
+              className="form-checkbox h-4 w-4 text-blue-600"
+            />
+            <span className="ml-2 text-sm text-gray-700">Zobrazit úkoly</span>
+          </label>
+        </div>
 
         {(studentFilter || taskFilter) && (
           <div className="mt-3 flex gap-2">
@@ -238,10 +274,10 @@ export function GradesTab({ courseId }: GradesTabProps) {
                 Student
               </th>
               <th className="px-3 py-3 border-b border-gray-200 text-center text-xs font-medium text-gray-500 uppercase tracking-wider sticky left-0 bg-gray-50 z-10 w-24" style={{ left: '192px' }}>
-                Úspěšnost
+                Úspěšnost doch. <br /> úkolů
               </th>
               {/* Sloupce pro attendances */}
-              {attendanceSet?.attendances.map((attendance) => (
+              {showAttendances && attendanceSet?.attendances.map((attendance) => (
                 <th
                   key={`attendance-${attendance.id}`}
                   className="min-w-24 max-w-48 px-2 py-3 border-b border-gray-200 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
@@ -256,7 +292,7 @@ export function GradesTab({ courseId }: GradesTabProps) {
                   <div className="text-xs text-gray-400 font-normal">Min: {attendance.minWeight ?? "-"}</div>
                 </th>
               ))}
-              {filteredTasks?.map((task) => (
+              {showTasks && filteredTasks?.map((task) => (
                 <th
                   key={task.id}
                   className="min-w-24 max-w-48 px-2 py-3 border-b border-gray-200 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
@@ -284,6 +320,12 @@ export function GradesTab({ courseId }: GradesTabProps) {
                 </td>
                 <td className="px-3 py-4 whitespace-nowrap text-sm text-center sticky left-0 bg-white z-10" style={{ left: '192px' }}>
                   {(() => {
+                    const stats = getAttendanceStats(student.id);
+                    return (
+                      <div className="font-medium">{stats.successful}/{stats.total}</div>
+                    );
+                  })()}
+                  {(() => {
                     const stats = getStudentStats(student.id);
                     return (
                       <div className="font-medium">{stats.successful}/{stats.total}</div>
@@ -291,7 +333,7 @@ export function GradesTab({ courseId }: GradesTabProps) {
                   })()}
                 </td>
                 {/* Buňky pro attendance values */}
-                {attendanceSet?.attendances.map((attendance) => {
+                {showAttendances && attendanceSet?.attendances.map((attendance) => {
                   const attendanceValue = getAttendanceValueForStudent(student.id, attendance.id);
 
                   return (
@@ -309,7 +351,7 @@ export function GradesTab({ courseId }: GradesTabProps) {
                     </td>
                   );
                 })}
-                {filteredTasks?.map((task) => {
+                {showTasks && filteredTasks?.map((task) => {
                   const allGrades = getGradesForStudentAndTask(student.id, task.id);
                   const mainGrade = allGrades.length > 0 ? allGrades[allGrades.length - 1] : null; // Poslední podle data
                   const otherGrades = allGrades.slice(0, -1); // Všechny kromě poslední

@@ -14,7 +14,8 @@ namespace EngTaskGradingNetBE.Services
     IEmailService emailService,
     AppSettingsService appSettingsService) : DbContextBaseService(context)
   {
-    private readonly TokenSettings tokenSettings = appSettingsService.GetSettings().Token;
+    private readonly StudentSecuritySettings studentSecuritySettings =
+      appSettingsService.GetSettings().Security.Student;
 
     internal async System.Threading.Tasks.Task SendInvitationAsync(string studentNumber)
     {
@@ -40,7 +41,7 @@ namespace EngTaskGradingNetBE.Services
       string body = $"""
         <p>Dobrý den,</p>
         <p>pro vaše osobní číslo byla přijata žádost o přístup na přehled známek do systému EngTaskGrading.</p>
-        <p>Pokud jste o tento přístup požádali, klikněte na následující odkaz. Odkaz je platný {tokenSettings.StudentLoginTokenExpiryMinutes} minut od obdržení tohoto e-mailu.</p>
+        <p>Pokud jste o tento přístup požádali, klikněte na následující odkaz. Odkaz je platný {studentSecuritySettings.LoginTokenExpiryMinutes} minut od obdržení tohoto e-mailu.</p>
         <p><a href="{feUrl}/studentView/verify/{token}">Přihlásit se do systému známek EngTaskGrading</a></p>
         <p>Pokud jste o tento přístup nepožádali, tento e-mail ignorujte, nikdo nebude mít přístup k vašim známkám.</p>
         <p>V případě dotazů prosím kontaktuje vyučujícího daného předmětu.</p>
@@ -63,7 +64,7 @@ namespace EngTaskGradingNetBE.Services
       StudentViewToken tokenEntity = new()
       {
         CreatedAt = DateTime.UtcNow,
-        ExpiresAt = DateTime.UtcNow.AddMinutes(tokenSettings.StudentLoginTokenExpiryMinutes),
+        ExpiresAt = DateTime.UtcNow.AddMinutes(studentSecuritySettings.LoginTokenExpiryMinutes),
         StudentId = student.Id,
         Token = token,
         Type = StudentViewTokenType.Login
@@ -80,7 +81,7 @@ namespace EngTaskGradingNetBE.Services
     private string GenerateSecureToken()
     {
       // Generate token with configurable length from appsettings.json
-      byte[] tokenBytes = new byte[tokenSettings.StudentLoginTokenLengthBytes];
+      byte[] tokenBytes = new byte[studentSecuritySettings.LoginTokenLengthBytes];
       using (var rng = RandomNumberGenerator.Create())
       {
         rng.GetBytes(tokenBytes);
@@ -170,13 +171,13 @@ namespace EngTaskGradingNetBE.Services
     {
       var student = await Db.Students
         .FirstOrDefaultAsync(q => q.Number == studyNumber)
-        ?? throw new Exceptions.EntityNotFoundException(typeof(Student), $"StudyNumber == {studyNumber}");
+        ?? throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.StudentNotFound, $"StudyNumber == {studyNumber}");
 
       var courseWithTasks = await Db.Courses
         .Include(q => q.Tasks)
         .Include(q => q.Attendances).ThenInclude(q => q.Days)
         .FirstOrDefaultAsync(q => q.Id == courseId)
-        ?? throw new Exceptions.EntityNotFoundException(typeof(Course), courseId);
+        ?? throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.CourseNotFound, courseId);
       var grades = await Db.Grades
         .Where(q => q.StudentId == student.Id)
         .ToListAsync();

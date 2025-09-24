@@ -56,11 +56,10 @@ app.Run();
 static void BuildServices(WebApplicationBuilder builder)
 {
   // Configure settings
-  builder.Services.Configure<TokenSettings>(
-    builder.Configuration.GetSection(TokenSettings.SectionName));
-  
+  builder.Services.AddHttpClient();
+  builder.Services.AddTransient<AppSettingsService>();
   builder.Services.AddTransient<AppLogService>();
-  builder.Services.AddTransient<AuthService>();
+  builder.Services.AddTransient<IEmailService, EmailService>();
   builder.Services.AddTransient<TeacherService>();
   builder.Services.AddTransient<CourseService>();
   builder.Services.AddTransient<StudentService>();
@@ -69,12 +68,10 @@ static void BuildServices(WebApplicationBuilder builder)
   builder.Services.AddTransient<AttendanceService>();
   builder.Services.AddTransient<CloudflareTurnistilleService>();
   builder.Services.AddTransient<StudentViewService>();
-  builder.Services.AddTransient<IEmailService, EmailService>();
-  builder.Services.AddTransient<AppSettingsService>();
+  builder.Services.AddTransient<AuthService>();
+
   builder.Services.AddSingleton<BackgroundTaskQueue>();
   builder.Services.AddHostedService<BackgroundTaskManagerService>();
-  builder.Services.AddHttpClient<KeyCloakService>(); // http client for KeyCloakService
-  builder.Services.AddTransient<KeyCloakService>();
   builder.Services.AddControllers();
 }
 

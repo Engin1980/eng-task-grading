@@ -22,14 +22,14 @@ namespace EngTaskGradingNetBE.Services
         .Include(q => q.Students)
         .Include(q => q.Attendances)
         .FirstOrDefaultAsync()
-        ?? throw new Exceptions.EntityNotFoundException(typeof(Course), courseId);
+        ?? throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.CourseNotFound, courseId);
     }
 
     public async Task<Course> CreateAsync(Course course)
     {
       if (Db.Courses.Any(c => c.Code == course.Code))
       {
-        throw new Exceptions.DuplicateEntityException(typeof(Course), $"Course with code '{course.Code}' already exists.");
+        throw new Exceptions.DuplicateEntityException(Lib.AlreadyExistsErrorKind.CourseCodeAlreadyExists, course.Code);
       }
 
       Db.Courses.Add(course);
@@ -52,7 +52,7 @@ namespace EngTaskGradingNetBE.Services
           .FirstOrDefaultAsync(c => c.Id == courseId);
 
       if (course == null)
-        throw new Exceptions.EntityNotFoundException(typeof(Course), courseId);
+        throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.CourseNotFound, courseId);
 
       var studentsToAssign = await Db.Students
           .Where(s => studentIds.Contains(s.Id))
@@ -73,9 +73,9 @@ namespace EngTaskGradingNetBE.Services
       var course = await Db.Courses
           .Include(c => c.Students)
           .FirstOrDefaultAsync(c => c.Id == courseId)
-          ?? throw new Exceptions.EntityNotFoundException(typeof(Course), courseId);
+          ?? throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.CourseNotFound, courseId);
       var student = await Db.Students.FindAsync(studentId)
-        ?? throw new Exceptions.EntityNotFoundException(typeof(Student), studentId);
+        ?? throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.StudentNotFound, studentId);
 
       if (course.Students.Any(s => s.Id == student.Id) == false)
       {
@@ -89,9 +89,9 @@ namespace EngTaskGradingNetBE.Services
       var course = await Db.Courses
           .Include(c => c.Students)
           .FirstOrDefaultAsync(c => c.Id == courseId)
-          ?? throw new Exceptions.EntityNotFoundException(typeof(Course), courseId);
+          ?? throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.CourseNotFound, courseId);
       var student = await Db.Students.FindAsync(studentId)
-        ?? throw new Exceptions.EntityNotFoundException(typeof(Student), studentId);
+        ?? throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.StudentNotFound, studentId);
       if (course.Students.Any(s => s.Id == student.Id))
       {
         course.Students.Remove(student);
@@ -102,7 +102,7 @@ namespace EngTaskGradingNetBE.Services
     public async Task<Course> UpdateAsync(int courseId, Course updatedCourse)
     {
       var existingCourse = await Db.Courses.FirstOrDefaultAsync(q => q.Id == courseId)
-        ?? throw new Exceptions.EntityNotFoundException(typeof(Course), courseId);
+        ?? throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.CourseNotFound, courseId);
 
       existingCourse.Name = updatedCourse.Name;
       existingCourse.Code = updatedCourse.Code;

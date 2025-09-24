@@ -213,8 +213,7 @@ namespace EngTaskGradingNetBE.Controllers
       AttendanceDay atd = await attendanceService.GetDayByIdAsync(dayId, false);
       if (atd.SelfAssignKey == null || atd.SelfAssignKey.Length == 0 || atd.SelfAssignKey != data.Key)
       {
-        //TODO implement fully
-        throw new BadDataException("Attendance is not opened for self-assing or the key is invalid.");
+        throw new CommonBadDataException(CommonErrorKind.InvalidSelfSignKey, data.Key);
       }
       Student student = await studentService.GetByStudyNumberAsync(data.StudyNumber);
 

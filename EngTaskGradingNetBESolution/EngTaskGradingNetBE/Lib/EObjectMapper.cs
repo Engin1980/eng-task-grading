@@ -2,6 +2,7 @@
 
 using EngTaskGradingNetBE.Models.DbModel;
 using EngTaskGradingNetBE.Models.Dtos;
+using EngTaskGradingNetBE.Services;
 using System.Collections.Generic;
 
 public static class EObjectMapper
@@ -118,4 +119,19 @@ public static class EObjectMapper
   public static AttendanceRecordDto To(AttendanceRecord sa) => new AttendanceRecordDto(sa.Id, sa.StudentId, sa.AttendanceDayId, sa.AttendanceValueId);
 
   public static AttendanceDaySelfSignDto To(AttendanceDaySelfSign s) => new(s.Id, EObjectMapper.To(s.Student), s.CreationDateTime, s.IP);
+
+  internal static Teacher From(TeacherCreateDto request)
+  {
+    return new Teacher()
+    {
+      Email = request.Email,
+      PasswordHash = string.Empty,
+      IsActive = false
+    };
+  }
+
+  internal static AuthorizedDto To(AuthService.TokenAndTeacher tmp) =>
+    new(new(tmp.Tokens.AccessToken, tmp.Tokens.RefreshToken), To(tmp.Teacher));
+
+  internal static TokensDto To(AuthService.Tokens tmp) => new(tmp.AccessToken, tmp.RefreshToken);
 }

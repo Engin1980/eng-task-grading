@@ -159,8 +159,9 @@ public class StudentViewController(
         Console.WriteLine($"Token EXP (Expires): {exp:yyyy-MM-dd HH:mm:ss} UTC");
       }
     }
-    catch (Exception ex)
+    catch (Exception)
     {
+      // TODO rewrite this and following using AbstractBadRequestException
       throw new UnauthorizedAccessException("Invalid token: validation failed.");
     }
 
@@ -183,13 +184,14 @@ public class StudentViewController(
 
   private string GenerateJwtToken(string studyNumber)
   {
+    var sett = appSettingsService.GetSettings().Security.Student;
     var tokenHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
     var jwtKey = appSettingsService.GetKey("AppSettings:Token:JwtSecretKey");
     if (string.IsNullOrEmpty(jwtKey))
       throw new InvalidOperationException("JWT secret key is not configured.");
     var key = System.Text.Encoding.ASCII.GetBytes(jwtKey);
     var nowUtc = DateTime.UtcNow;
-    var expiryUtc = nowUtc.AddMinutes(appSettingsService.GetSettings().Token.StudentAccessJwtTokenExpiryMinutes);
+    var expiryUtc = nowUtc.AddMinutes(sett.AccessJwtTokenExpiryMinutes);
     var tokenDescriptor = new Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor
     {
       Subject = new System.Security.Claims.ClaimsIdentity(new[]

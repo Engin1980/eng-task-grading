@@ -33,7 +33,7 @@ namespace EngTaskGradingNetBE.Services
     {
       Student ret = await Db.Students
         .FirstOrDefaultAsync(q => q.Id == id)
-        ?? throw new Exceptions.EntityNotFoundException(typeof(Student), id);
+        ?? throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.StudentNotFound, id);
       return ret;
     }
 
@@ -130,7 +130,7 @@ namespace EngTaskGradingNetBE.Services
     public async Task<Student> UpdateAsync(int id, Student updatedStudent)
     {
       var existingStudent = await Db.Students.FirstOrDefaultAsync(q => q.Id == id)
-        ?? throw new Exceptions.EntityNotFoundException(typeof(Student), id);
+        ?? throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.StudentNotFound, id);
 
       existingStudent.Number = updatedStudent.Number;
       existingStudent.Name = updatedStudent.Name;
@@ -148,7 +148,7 @@ namespace EngTaskGradingNetBE.Services
     {
       var student = await Db.Students.FirstOrDefaultAsync(q => q.Id == id);
       if (student == null)
-        if (mustExist) throw new Exceptions.EntityNotFoundException(typeof(Student), id);
+        if (mustExist) throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.StudentNotFound, id);
         else return;
       Db.Students.Remove(student);
       await Db.SaveChangesAsync();
@@ -159,7 +159,7 @@ namespace EngTaskGradingNetBE.Services
     {
       Student ret = await Db.Students
         .FirstOrDefaultAsync(q => q.Number == studyNumber.ToUpper())
-        ?? throw new Exceptions.EntityNotFoundException(typeof(Student), "StudyNumber ==" + studyNumber);
+        ?? throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.StudentNotFound, "StudyNumber ==" + studyNumber);
       return ret;
     }
   }

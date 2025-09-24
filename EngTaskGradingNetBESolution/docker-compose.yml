@@ -11,25 +11,7 @@ services:
     networks:
       - mynet
     volumes:
-      - mssql-data:/var/opt/mssql 
-
-  keycloak:
-    image: quay.io/keycloak/keycloak:25.0.0
-    container_name: keycloak
-    command: start-dev
-    environment:
-      KEYCLOAK_ADMIN: sa
-      KEYCLOAK_ADMIN_PASSWORD: Bublinka#1
-      KC_DB: mssql
-      KC_DB_URL: jdbc:sqlserver://mssql:1433;databaseName=keycloak;encrypt=false
-      KC_DB_USERNAME: sa
-      KC_DB_PASSWORD: Bublinka#1
-    ports:
-      - "8080:8080"
-    networks:
-      - mynet
-    depends_on:
-    - mssql
+      - mssql-data:/var/opt/mssql   
 
   engtaskgradingnetbe:
     image: ${DOCKER_REGISTRY-}engtaskgradingnetbe

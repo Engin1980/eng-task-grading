@@ -20,7 +20,7 @@ namespace EngTaskGradingNetBE.Services
     {
       var course = await this.Db.Courses
         .FirstOrDefaultAsync(q => q.Id == courseId)
-        ?? throw new Exceptions.EntityNotFoundException(typeof(Course), courseId);
+        ?? throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.CourseNotFound, courseId);
       attendance.Course = course;
       await this.Db.Attendances.AddAsync(attendance);
       await this.Db.SaveChangesAsync();
@@ -32,7 +32,7 @@ namespace EngTaskGradingNetBE.Services
       var existingAttendance = await this.Db.Attendances
         .Include(a => a.Days)
         .FirstOrDefaultAsync(a => a.Id == id)
-        ?? throw new Exceptions.EntityNotFoundException(typeof(Attendance), id);
+        ?? throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.AttendanceNotFound, id);
       existingAttendance.Title = updatedAttendance.Title;
       await this.Db.SaveChangesAsync();
       return existingAttendance;
@@ -45,7 +45,7 @@ namespace EngTaskGradingNetBE.Services
         .FirstOrDefaultAsync(a => a.Id == id);
       if (attendance == null)
         if (mustExist)
-          throw new Exceptions.EntityNotFoundException(typeof(Attendance), id);
+          throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.AttendanceNotFound, id);
         else
           return;
 
@@ -58,7 +58,7 @@ namespace EngTaskGradingNetBE.Services
       var attendance = await this.Db.Attendances
         .Include(a => a.Days)
         .FirstOrDefaultAsync(a => a.Id == attendanceId)
-        ?? throw new Exceptions.EntityNotFoundException(typeof(Attendance), attendanceId);
+        ?? throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.AttendanceNotFound, attendanceId);
       attendance.Days.Add(day);
       await this.Db.SaveChangesAsync();
     }
@@ -69,7 +69,7 @@ namespace EngTaskGradingNetBE.Services
     {
       var existingDay = await this.Db.AttendanceDays
         .FirstOrDefaultAsync(d => d.Id == attendanceDayId)
-        ?? throw new Exceptions.EntityNotFoundException(typeof(AttendanceDay), attendanceDayId);
+        ?? throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.AttendanceDayNotFound, attendanceDayId);
       existingDay.Title = updatedDay.Title;
       await this.Db.SaveChangesAsync();
     }
@@ -80,7 +80,7 @@ namespace EngTaskGradingNetBE.Services
         .FirstOrDefaultAsync(d => d.Id == attendanceDayId);
       if (day == null)
         if (mustExist)
-          throw new Exceptions.EntityNotFoundException(typeof(AttendanceDay), attendanceDayId);
+          throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.AttendanceDayNotFound, attendanceDayId);
         else
           return;
       this.Db.AttendanceDays.Remove(day);
@@ -92,7 +92,7 @@ namespace EngTaskGradingNetBE.Services
       Attendance ret = await Db.Attendances
         .Include(q => q.Days)
         .FirstOrDefaultAsync(q => q.Id == attendanceId)
-        ?? throw new Exceptions.EntityNotFoundException(typeof(Attendance), attendanceId);
+        ?? throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.AttendanceNotFound, attendanceId);
       return ret;
     }
 
@@ -101,7 +101,7 @@ namespace EngTaskGradingNetBE.Services
       var att = await Db.Attendances
         .Include(q => q.Days).ThenInclude(q => q.Records).ThenInclude(q => q.Student)
         .Include(q => q.Course).ThenInclude(q => q.Students)
-        .FirstOrDefaultAsync(q => q.Id == id) ?? throw new Exceptions.EntityNotFoundException(typeof(Attendance), id);
+        .FirstOrDefaultAsync(q => q.Id == id) ?? throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.AttendanceNotFound, id);
       var students = att.Days
         .SelectMany(q => q.Records)
         .Select(q => q.Student)
@@ -133,7 +133,7 @@ namespace EngTaskGradingNetBE.Services
         .Include(q => q.Records).ThenInclude(q => q.Student)
         .Where(q => q.Id == attendanceDayId)
         .FirstOrDefaultAsync()
-        ?? throw new Exceptions.EntityNotFoundException(typeof(AttendanceDay), attendanceDayId);
+        ?? throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.AttendanceDayNotFound, attendanceDayId);
       var students = attDay.Attendance.Course.Students.Union(attDay.Records.Select(q => q.Student)).Distinct().ToList();
       return students;
     }
@@ -143,7 +143,7 @@ namespace EngTaskGradingNetBE.Services
       var attDay = await Db.AttendanceDays
         .Include(q => q.Records)
         .FirstOrDefaultAsync(q => q.Id == attendanceDayId)
-                ?? throw new Exceptions.EntityNotFoundException(typeof(AttendanceDay), attendanceDayId);
+                ?? throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.AttendanceDayNotFound, attendanceDayId);
       return attDay.Records;
 
     }
@@ -185,7 +185,7 @@ namespace EngTaskGradingNetBE.Services
         .ThenInclude(q => q.Days)
         .ThenInclude(q => q.Records)
         .FirstOrDefaultAsync(q => q.Id == courseId)
-        ?? throw new Exceptions.EntityNotFoundException(typeof(Course), courseId);
+        ?? throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.CourseNotFound, courseId);
 
       return course;
     }
@@ -197,7 +197,7 @@ namespace EngTaskGradingNetBE.Services
         .Include(q => q.Days).ThenInclude(q => q.Records).ThenInclude(q => q.Value)
         .Include(q => q.Course).ThenInclude(q => q.Students)
         .FirstOrDefaultAsync(q => q.Id == attendanceId)
-        ?? throw new Exceptions.EntityNotFoundException(typeof(Attendance), attendanceId);
+        ?? throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.AttendanceNotFound, attendanceId);
 
       var xa = att.Days.SelectMany(q => q.Records);
 
@@ -222,7 +222,7 @@ namespace EngTaskGradingNetBE.Services
       AttendanceDay ret =
         await tmp
         .FirstOrDefaultAsync(q => q.Id == attendanceDayId)
-        ?? throw new Exceptions.EntityNotFoundException(typeof(AttendanceDay), attendanceDayId);
+        ?? throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.AttendanceDayNotFound, attendanceDayId);
 
       return ret;
     }
@@ -231,7 +231,7 @@ namespace EngTaskGradingNetBE.Services
     {
       AttendanceDay attDay = await Db.AttendanceDays
         .FirstOrDefaultAsync(q => q.Id == dayId)
-        ?? throw new Exceptions.EntityNotFoundException(typeof(AttendanceDay), dayId);
+        ?? throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.AttendanceDayNotFound, dayId);
       attDay.SelfAssignKey = key;
       await Db.SaveChangesAsync();
     }
@@ -240,7 +240,7 @@ namespace EngTaskGradingNetBE.Services
     {
       AttendanceDaySelfSign atss = await Db.AttendanceDaySelfSign
         .FirstOrDefaultAsync(q => q.Id == selfSignId)
-        ?? throw new EntityNotFoundException(typeof(AttendanceDaySelfSign), selfSignId);
+        ?? throw new EntityNotFoundException(Lib.NotFoundErrorKind.AttendanceDaySelfSignNotFound, selfSignId);
 
       using var transaction = await Db.Database.BeginTransactionAsync();
       try
@@ -253,10 +253,10 @@ namespace EngTaskGradingNetBE.Services
 
         await transaction.CommitAsync();
       }
-      catch (Exception ex)
+      catch
       {
         await transaction.RollbackAsync();
-        throw ex;
+        throw;
       }
     }
 

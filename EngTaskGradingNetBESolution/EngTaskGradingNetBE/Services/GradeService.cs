@@ -64,7 +64,7 @@ namespace EngTaskGradingNetBE.Services
     {
       var grade = await Db.Grades.FirstOrDefaultAsync(q => q.Id == gradeId);
       if (grade == null)
-        if (mustExist) throw new Exceptions.EntityNotFoundException(typeof(Grade), gradeId);
+        if (mustExist) throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.GradeNotFound, gradeId);
         else return;
       Db.Grades.Remove(grade);
       await Db.SaveChangesAsync();
@@ -73,7 +73,7 @@ namespace EngTaskGradingNetBE.Services
     public async Task<Grade> UpdateAsync(int id, Grade grade)
     {
       var existingGrade = await Db.Grades.FirstOrDefaultAsync(q => q.Id == id)
-        ?? throw new Exceptions.EntityNotFoundException(typeof(Grade), id);
+        ?? throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.GradeNotFound, id);
 
       existingGrade.Value = grade.Value;
       existingGrade.Comment = grade.Comment;

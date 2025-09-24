@@ -22,13 +22,13 @@ namespace EngTaskGradingNetBE.Services
 
     public async Task<Models.DbModel.Task> GetByIdAsync(int id)
     {
-      return await Db.Tasks.FindAsync(id) ?? throw new Exceptions.EntityNotFoundException(typeof(Models.DbModel.Task), id);
+      return await Db.Tasks.FindAsync(id) ?? throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.TaskNotFound, id);
     }
 
     public async Task<Models.DbModel.Task> UpdateAsync(int id, Models.DbModel.Task updatedTask)
     {
       var existingTask = await Db.Tasks.FirstOrDefaultAsync(q => q.Id == id)
-        ?? throw new Exceptions.EntityNotFoundException(typeof(Models.DbModel.Task), id);
+        ?? throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.TaskNotFound, id);
       
       existingTask.Title = updatedTask.Title;
       existingTask.Description = updatedTask.Description;
@@ -43,7 +43,7 @@ namespace EngTaskGradingNetBE.Services
     {
       var task = await Db.Tasks.FirstOrDefaultAsync(q => q.Id == id);
       if (task == null)
-        if (mustExist) throw new Exceptions.EntityNotFoundException(typeof(Models.DbModel.Task), id);
+        if (mustExist) throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.TaskNotFound, id);
         else return;
       Db.Tasks.Remove(task);
       await Db.SaveChangesAsync();

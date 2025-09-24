@@ -1,4 +1,5 @@
 ﻿using EngTaskGradingNetBE.Exceptions;
+using EngTaskGradingNetBE.Lib;
 using System.Net;
 using System.Text.Json;
 
@@ -6,7 +7,15 @@ namespace EngTaskGradingNetBE.Middleware
 {
   public class GlobalExceptionHandler
   {
-    private record ErrorData(HttpStatusCode StatusCode, string Error);
+    private class ErrorData(HttpStatusCode StatusCode, IErrorKind? errorKind, string? additionalData)
+    {
+      public HttpStatusCode StatusCode { get; init; } = StatusCode;
+      public string? Key { get; init; } = errorKind?.Key;
+      public string? AdditionalData { get; init; } = additionalData;
+
+      public ErrorData(HttpStatusCode statusCode) : this(statusCode, null, null) { }
+      public ErrorData(HttpStatusCode statusCode, IErrorKind kind) : this(statusCode, kind, null) { }
+    }
     private readonly RequestDelegate _next;
     private readonly ILogger<GlobalExceptionHandler> _logger;
 
@@ -39,11 +48,10 @@ namespace EngTaskGradingNetBE.Middleware
       {
         ArgumentNullException => HandleInternalServerError(ex),
         ArgumentException => HandleInternalServerError(ex),
-        DuplicateEntityException => new ErrorData(HttpStatusCode.Conflict, $"Conflict - {ex.Message}"),
-        EntityNotFoundException => new ErrorData(HttpStatusCode.NotFound, $"Not Found - {ex.Message}"),
-        UnauthorizedAccessException => new ErrorData(HttpStatusCode.Unauthorized, "Unauthorized"),
-        BadDataException => new ErrorData(HttpStatusCode.BadRequest, $"Bad Request - {ex.Message}"),
-        StudentTokenInvalidException => new ErrorData(HttpStatusCode.Unauthorized, $"Unauthorized - {ex.Message}"),
+        InvalidCredentialsException => new ErrorData(HttpStatusCode.Unauthorized),
+        AbstractBadDataException => new ErrorData(HttpStatusCode.BadRequest, (ex as AbstractBadDataException)!.ErrorKind, (ex as AbstractBadDataException)!.AdditionalData),
+        UnauthorizedAccessException => new ErrorData(HttpStatusCode.Unauthorized),
+        StudentTokenInvalidException => new ErrorData(HttpStatusCode.Unauthorized),
         _ => HandleInternalServerError(ex)
       };
 
@@ -52,12 +60,12 @@ namespace EngTaskGradingNetBE.Middleware
 
       var result = JsonSerializer.Serialize(new
       {
-        error = errorData.Error,
+        error = errorData.Key,
         statusCode = (int)errorData.StatusCode,
         timestamp = DateTime.UtcNow
-      }, new JsonSerializerOptions 
-      { 
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase 
+      }, new JsonSerializerOptions
+      {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
       });
 
       return response.WriteAsync(result);
@@ -65,7 +73,8 @@ namespace EngTaskGradingNetBE.Middleware
 
     private static ErrorData HandleInternalServerError(Exception ex)
     {
-      return new(HttpStatusCode.InternalServerError, "Internal server error: " + ex.GetMessagesRecursively());
+      //TODO message only for debugging
+      return new(HttpStatusCode.InternalServerError, InternalErrorKind.Unknown, ex.Message);
     }
   }
 }

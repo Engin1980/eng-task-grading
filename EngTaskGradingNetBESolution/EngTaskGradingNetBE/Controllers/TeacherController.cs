@@ -13,18 +13,12 @@ namespace EngTaskGradingNetBE.Controllers
   [Route("api/v1/teacher")]
   public class TeacherController(AuthService authService, TeacherService teacherService) : ControllerBase
   {
-    [HttpPost("login")]
-    public async Task<TeacherDto> LoginAsync([FromBody] TeacherLoginDto request)
-    {
-      Teacher teacher = await authService.LoginAsync(request.Email, request.Password);
-      TeacherDto dto = EObjectMapper.To(teacher);
-      return dto;
-    }
-
     [HttpPost]
-    public async Task<TeacherDto> RegisterAsync([FromBody] TeacherRegisterDto request)
+    public async Task<TeacherDto> RegisterAsync([FromBody] TeacherCreateDto request)
     {
-      var teacher = await authService.RegisterTeacher(request.Email, request.Password);
+      Teacher teacher = EObjectMapper.From(request);
+      await teacherService.Create(teacher);
+      await authService.SetPasswordAsync(teacher.Id, request.Password);
       return EObjectMapper.To(teacher);
     }
 

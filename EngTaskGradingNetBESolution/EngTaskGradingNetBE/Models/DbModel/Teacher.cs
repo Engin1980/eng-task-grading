@@ -9,10 +9,14 @@ namespace EngTaskGradingNetBE.Models.DbModel
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
 
-    public string? KeycloakId { get; set; }
-
     [Required]
     public string Email { get; set; } = string.Empty;
+
+    [Required]
+    public string PasswordHash { get; set; } = string.Empty;
+
+    [Required]
+    public bool IsActive { get; set; } = false;
 
     public ICollection<Course> Courses { get; set; } = [];
   }

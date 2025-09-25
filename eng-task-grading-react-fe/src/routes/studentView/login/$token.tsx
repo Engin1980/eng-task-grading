@@ -4,6 +4,7 @@ export const Route = createFileRoute('/studentView/login/$token')({
   component: RouteComponent,
 })
 
+//TODO this is used? or should be deleted?
 function RouteComponent() {
   const { token } = Route.useParams()
   

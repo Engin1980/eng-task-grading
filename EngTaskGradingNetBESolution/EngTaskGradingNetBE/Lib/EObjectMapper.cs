@@ -129,9 +129,4 @@ public static class EObjectMapper
       IsActive = false
     };
   }
-
-  internal static AuthorizedDto To(AuthService.TokenAndTeacher tmp) =>
-    new(new(tmp.Tokens.AccessToken, tmp.Tokens.RefreshToken), To(tmp.Teacher));
-
-  internal static TokensDto To(AuthService.Tokens tmp) => new(tmp.AccessToken, tmp.RefreshToken);
 }

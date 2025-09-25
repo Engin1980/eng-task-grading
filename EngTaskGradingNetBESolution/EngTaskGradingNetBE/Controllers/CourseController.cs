@@ -3,12 +3,14 @@ using EngTaskGradingNetBE.Models;
 using EngTaskGradingNetBE.Models.DbModel;
 using EngTaskGradingNetBE.Models.Dtos;
 using EngTaskGradingNetBE.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EngTaskGradingNetBE.Controllers
 {
   [ApiController]
   [Route("api/v1/[controller]")]
+  [Authorize(Roles = Roles.TEACHER_ROLE)]
   public class CourseController(CourseService courseService, StudentService studentService) : ControllerBase
   {
     [HttpPost]

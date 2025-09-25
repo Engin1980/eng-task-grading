@@ -1,6 +1,7 @@
 ﻿using Azure.Core;
 using EngTaskGradingNetBE.Exceptions;
 using EngTaskGradingNetBE.Lib;
+using EngTaskGradingNetBE.Models.Config;
 using EngTaskGradingNetBE.Models.DbModel;
 using EngTaskGradingNetBE.Models.Dtos;
 using Microsoft.EntityFrameworkCore;
@@ -13,11 +14,45 @@ namespace EngTaskGradingNetBE.Services
     IEmailService emailService,
     AppSettingsService appSettingsService) : DbContextBaseService(context)
   {
-    public record TokenAndTeacher(Tokens Tokens, Teacher Teacher);
-
+    private readonly SecuritySettings sett = appSettingsService.GetSettings().Security;
     public record Tokens(string AccessToken, string RefreshToken);
 
-    internal async Task<TokenAndTeacher> LoginAsync(string email, string password)
+    internal async Task<Tokens> StudentViewVerifyAsync(string loginToken, int durationSeconds)
+    {
+      var refreshTokenEntity = await Db.StudentViewTokens
+        .Include(q => q.Student)
+        .FirstOrDefaultAsync(q => q.Token == loginToken && q.Type == StudentViewTokenType.Login);
+      if (refreshTokenEntity == null)
+        throw new Exceptions.StudentTokenInvalidException("Illegal token.");
+
+      Db.StudentViewTokens.Remove(refreshTokenEntity);
+      await Db.SaveChangesAsync();
+      if (refreshTokenEntity.ExpiresAt < DateTime.Now)
+      {
+        throw new Exceptions.StudentTokenInvalidException("Expired token.");
+      }
+
+      int studentId = refreshTokenEntity.StudentId;
+      refreshTokenEntity = new StudentViewToken()
+      {
+        CreatedAt = DateTime.Now,
+        ExpiresAt = DateTime.Now.AddSeconds(durationSeconds),
+        StudentId = studentId,
+        Token = SecurityUtils.GenerateSecureToken(sett.RefreshTokenLengthBytes),
+        Type = StudentViewTokenType.Access
+      };
+      await Db.StudentViewTokens.AddAsync(refreshTokenEntity);
+      await Db.SaveChangesAsync();
+
+      string accessToken = GenerateJwtToken(
+        refreshTokenEntity.Student.Email,
+        Roles.STUDENT_ROLE,
+        DateTime.Now.AddMinutes(sett.Student.AccessTokenExpiryMinutes));
+
+      return new(accessToken, refreshTokenEntity.Token);
+    }
+
+    internal async Task<Tokens> LoginTeacherAsync(string email, string password)
     {
       EAssert.Arg.IsNotEmpty(email, nameof(email));
       EAssert.Arg.IsNotEmpty(password, nameof(password));
@@ -45,19 +80,19 @@ namespace EngTaskGradingNetBE.Services
         };
         Db.TeacherTokens.Add(refreshToken);
       }
-      refreshToken.Value = GenerateRandomToken(32);
-      refreshToken.ExpirationDate = DateTime.UtcNow.AddSeconds(60 * 60 * 8); // 8 hours
+      refreshToken.Value = SecurityUtils.GenerateSecureToken(sett.RefreshTokenLengthBytes);
+      refreshToken.ExpirationDate = DateTime.UtcNow.AddMinutes(sett.Teacher.RefreshTokenExpiryInMinutes);
       await Db.SaveChangesAsync();
 
       string accessToken = GenerateJwtToken(
         teacher.Email,
-        "ROLE_TEACHER", //TODo resolve
-        DateTime.UtcNow.AddSeconds(60 * 5)); // 5 minutes //TODO make configurable
+        Roles.TEACHER_ROLE,
+        DateTime.UtcNow.AddMinutes(sett.Teacher.AccessTokenExpiryMinutes));
 
-      return new(new(accessToken, refreshToken.Value), teacher);
+      return new(accessToken, refreshToken.Value);
     }
 
-    internal async System.Threading.Tasks.Task LogoutAsync(string refreshToken)
+    internal async System.Threading.Tasks.Task LogoutTeacherAsync(string refreshToken)
     {
       TeacherToken? token = await Db.TeacherTokens
         .FirstOrDefaultAsync(t => t.Value == refreshToken && t.Type == TeacherToken.TokenType.Refresh);
@@ -66,10 +101,24 @@ namespace EngTaskGradingNetBE.Services
         Db.TeacherTokens.Remove(token);
         await Db.SaveChangesAsync();
       }
-      await FlushExpiredTokensAsync();
+      await FlushTeacherExpiredTokensAsync();
     }
 
-    internal async System.Threading.Tasks.Task FlushExpiredTokensAsync()
+    internal async System.Threading.Tasks.Task LogoutStudentAsync(string refreshToken)
+    {
+      StudentViewToken? token = await Db.StudentViewTokens
+        .FirstOrDefaultAsync(t => t.Token == refreshToken && t.Type == StudentViewTokenType.Access);
+
+      if (token != null)
+      {
+        Db.StudentViewTokens.Remove(token);
+        await Db.SaveChangesAsync();
+      }
+
+      await FlushExpiredStudentViewTokensAsync();
+    }
+
+    internal async System.Threading.Tasks.Task FlushTeacherExpiredTokensAsync()
     {
       var now = DateTime.UtcNow;
       var expiredTokens = Db.TeacherTokens.Where(t => t.ExpirationDate < now);
@@ -77,30 +126,12 @@ namespace EngTaskGradingNetBE.Services
       await Db.SaveChangesAsync();
     }
 
-    internal async Task<Tokens> RefreshAsync(string refreshToken)
+    private async System.Threading.Tasks.Task FlushExpiredStudentViewTokensAsync()
     {
-      TeacherToken token = await Db.TeacherTokens
-        .Include(t => t.Teacher)
-        .FirstOrDefaultAsync(t => t.Value == refreshToken || t.Type == TeacherToken.TokenType.Refresh)
-        ?? throw new InvalidCredentialsException();
-      if (token.ExpirationDate < DateTime.UtcNow)
-      {
-        await FlushExpiredTokensAsync();
-        throw new InvalidCredentialsException();
-      }
-
-      refreshToken = GenerateRandomToken(32);
-      token.Value = refreshToken;
-      token.ExpirationDate = DateTime.Now.AddSeconds(60 * 60 * 8);
+      var now = DateTime.UtcNow;
+      var expiredTokens = Db.StudentViewTokens.Where(t => t.ExpiresAt < now);
+      Db.StudentViewTokens.RemoveRange(expiredTokens);
       await Db.SaveChangesAsync();
-
-      string accessToken = GenerateJwtToken(
-        token.Teacher.Email,
-        "ROLE_TEACHER",
-        DateTime.Now.AddSeconds(60 * 5));
-
-      Tokens ret = new Tokens(accessToken, refreshToken);
-      return ret;
     }
 
     internal async System.Threading.Tasks.Task SetPasswordAsync(int teacherId, string password)
@@ -115,7 +146,7 @@ namespace EngTaskGradingNetBE.Services
 
     private string GenerateJwtToken(string email, string roleName, DateTime dateTime)
     {
-      var jwtKey = appSettingsService.GetSettings().Security.Teacher.AccessTokenJwtSecretKey;
+      var jwtKey = appSettingsService.GetSettings().Security.AccessTokenJwtSecretKey;
       if (string.IsNullOrEmpty(jwtKey))
         throw new InvalidOperationException("JWT secret key is not configured.");
 
@@ -144,22 +175,6 @@ namespace EngTaskGradingNetBE.Services
       return jwt;
     }
 
-    private string GenerateRandomToken(int length)
-    {
-      const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-      var data = new byte[length];
-      using (var rng = System.Security.Cryptography.RandomNumberGenerator.Create())
-      {
-        rng.GetBytes(data);
-      }
-      var result = new char[length];
-      for (int i = 0; i < length; i++)
-      {
-        result[i] = chars[data[i] % chars.Length];
-      }
-      return new string(result);
-    }
-
     internal async System.Threading.Tasks.Task InvokePasswordResetProcedure(string email)
     {
       Teacher teacher = await Db.Teachers
@@ -175,7 +190,7 @@ namespace EngTaskGradingNetBE.Services
         ExpirationDate = DateTime.UtcNow.AddHours(1),
         TeacherId = teacher.Id,
         Type = TeacherToken.TokenType.PasswordReset,
-        Value = GenerateRandomToken(128),
+        Value = SecurityUtils.GenerateSecureToken(sett.Teacher.PasswordResetTokenLength),
       };
       Db.TeacherTokens.Add(resetToken);
       await Db.SaveChangesAsync();
@@ -204,6 +219,68 @@ namespace EngTaskGradingNetBE.Services
       {
         throw new InvalidOperationException("Failed to send reset password email.", ex);
       }
+    }
+
+    internal async System.Threading.Tasks.Task StudentViewForgetAllRefreshsTokenAsync(string refreshToken)
+    {
+      var tokenEntity = await Db.StudentViewTokens
+        .Include(q => q.Student)
+        .FirstOrDefaultAsync(q => q.Token == refreshToken && q.Type == StudentViewTokenType.Access)
+        ?? throw new InvalidCredentialsException();
+
+      var tokens = Db.StudentViewTokens
+        .Where(q => q.StudentId == tokenEntity.StudentId && q.Type == StudentViewTokenType.Access);
+      Db.StudentViewTokens.RemoveRange(tokens);
+      await Db.SaveChangesAsync();
+    }
+
+    internal async System.Threading.Tasks.Task<Tokens> RefreshTeacherAsync(string refreshToken)
+    {
+      TeacherToken? token = await Db.TeacherTokens
+          .Include(t => t.Teacher)
+          .FirstOrDefaultAsync(t => t.Value == refreshToken || t.Type == TeacherToken.TokenType.Refresh)
+          ?? throw new InvalidCredentialsException();
+
+      if (token.ExpirationDate < DateTime.UtcNow)
+      {
+        await FlushTeacherExpiredTokensAsync();
+        throw new InvalidCredentialsException();
+      }
+
+      // update the current refresh token with new values
+      refreshToken = SecurityUtils.GenerateSecureToken(sett.RefreshTokenLengthBytes);
+      token.Value = refreshToken;
+      token.ExpirationDate = DateTime.Now.AddMinutes(sett.Teacher.RefreshTokenExpiryInMinutes);
+      await Db.SaveChangesAsync();
+
+      string accessToken = GenerateJwtToken(
+        token.Teacher.Email,
+        Roles.TEACHER_ROLE,
+        DateTime.UtcNow.AddMinutes(sett.Teacher.AccessTokenExpiryMinutes));
+
+      Tokens ret = new(accessToken, refreshToken);
+      return ret;
+    }
+
+    internal async Task<string> RefreshStudentAsync(string refreshToken)
+    {
+      var tokenEntity = await Db.StudentViewTokens
+        .Include(q => q.Student)
+        .FirstOrDefaultAsync(q => q.Token == refreshToken && q.Type == StudentViewTokenType.Access);
+      if (tokenEntity == null)
+        throw new InvalidCredentialsException();
+      if (tokenEntity.ExpiresAt < DateTime.Now)
+      {
+        await FlushExpiredStudentViewTokensAsync();
+        throw new InvalidCredentialsException();
+      }
+
+      string accessToken = GenerateJwtToken(
+        tokenEntity.Student.Number,
+        Roles.STUDENT_ROLE,
+        DateTime.UtcNow.AddMinutes(sett.Student.AccessTokenExpiryMinutes));
+
+      return accessToken;
     }
   }
 }

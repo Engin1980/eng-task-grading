@@ -36,12 +36,13 @@ Log.Information("Building main app");
 var app = builder.Build();
 
 InitDb(app);
+
 app.UseMiddleware<GlobalExceptionHandler>(); // must be the first one
+app.UseHttpsRedirection();
+app.UseCors("AllowFrontend"); // must be before authen-to
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-app.UseHttpsRedirection();
-app.UseCors("AllowFrontend");
 
 app.MapGet("/", context =>
 {
@@ -119,38 +120,59 @@ static void InitDb(WebApplication app)
 
 static void BuildSecurity(WebApplicationBuilder builder)
 {
-  //TODO move to config
-  var jwtKey = "SuperTajneHeslo12345";
+  var jwtKey = builder.Configuration["AppSettings:Security:AccessTokenJwtSecretKey"] ?? throw new ApplicationException("JWT secret not set.");
   var key = Encoding.ASCII.GetBytes(jwtKey);
 
-  //builder.Services
-  //  .AddAuthentication(options =>
-  //{
-  //  options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-  //  options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-  //})
-  //  .AddJwtBearer(options =>
-  //{
-  //  options.RequireHttpsMetadata = false; // v produkci = true
-  //  options.SaveToken = true;
-  //  options.TokenValidationParameters = new TokenValidationParameters
-  //  {
-  //    ValidateIssuer = false, // v produkci nastavit na true a dodat issuer
-  //    ValidateAudience = false, // v produkci nastavit na true a dodat audience
-  //    ValidateIssuerSigningKey = true,
-  //    IssuerSigningKey = new SymmetricSecurityKey(key),
-  //    ClockSkew = TimeSpan.Zero
-  //  };
-  //});
-
-  builder.Services.AddAuthentication("Bearer")
-    .AddJwtBearer("Bearer", options =>
+  builder.Services.AddAuthentication(options =>
+  {
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+  })
+    .AddJwtBearer(options =>
+  {
+    options.RequireHttpsMetadata = false; // v produkci = true
+    options.SaveToken = true;
+    options.TokenValidationParameters = new TokenValidationParameters
     {
-      options.Authority = "http://localhost:8080/realms/TaskGradingRealm";
-      options.RequireHttpsMetadata = false; //TODO jen pro vývoj!
-      options.Audience = "TaskGradingNetBE";
-    });
+      ValidateIssuer = false, // v produkci nastavit na true a dodat issuer
+      ValidateAudience = false, // v produkci nastavit na true a dodat audience
+      ValidateIssuerSigningKey = true,
+      IssuerSigningKey = new SymmetricSecurityKey(key),
+      ClockSkew = TimeSpan.Zero
+    };
+    options.Events = new JwtBearerEvents
+    {
+      OnAuthenticationFailed = ctx =>
+      {
+        Console.WriteLine("Chyba JWT: " + ctx.Exception);
+        return System.Threading.Tasks.Task.CompletedTask;
+      }
+    };
+    //options.Events = new JwtBearerEvents
+    //{
+    //  OnAuthenticationFailed = context =>
+    //  {
+    //    if (context.Exception is SecurityTokenExpiredException)
+    //    {
+    //      context.NoResult();
+    //      context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+    //      context.Response.ContentType = "application/json";
+    //      return context.Response.WriteAsync("{\"error\":\"Token expired\"}");
+    //    }
 
-  builder.Services
-    .AddAuthorization();
+    //    return System.Threading.Tasks.Task.CompletedTask;
+    //  }
+    //};
+  });
+
+  // demo pro Keycloak, ale tady v projektu se nepoužívá:
+  //builder.Services.AddAuthentication("Bearer")
+  //  .AddJwtBearer("Bearer", options =>
+  //  {
+  //    options.Authority = "http://localhost:8080/realms/TaskGradingRealm";
+  //    options.RequireHttpsMetadata = false; //TODO jen pro vývoj!
+  //    options.Audience = "TaskGradingNetBE";
+  //  });
+
+  builder.Services.AddAuthorization();
 }

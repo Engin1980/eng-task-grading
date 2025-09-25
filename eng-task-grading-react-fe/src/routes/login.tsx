@@ -1,30 +1,64 @@
 import { createFileRoute } from '@tanstack/react-router'
 import toast from 'react-hot-toast';
-import { useAuth } from "../hooks/use-auth";
 import { useLogger } from "../hooks/use-logger";
 import { useNavigate } from '@tanstack/react-router';
+import { Turnstile } from '../components/turnstille'
+import AppSettings from '../config/app-settings'
+import { useCallback, useEffect, useState } from 'react';
+import { useAuthContext } from '../contexts/AuthContext';
+import type { TeacherLoginDto } from '../model/teacher-dto';
 
 export const Route = createFileRoute('/login')({
   component: Login,
 })
 
-import { useState } from 'react';
-
 function Login() {
-  const { handleLogin } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
   const logger = useLogger("LoginPage");
   const navigate = useNavigate();
+  const { loginTeacher } = useAuthContext();
+
+  // Cloudflare konfigurace z AppSettings
+  const isCloudflareEnabled = AppSettings.cloudflare.enabled
+  const TURNSTILE_SITE_KEY = AppSettings.cloudflare.siteKey
+
+  useEffect(() => {
+    setEmail("marek.vajgl@osu.cz");
+    setPassword("Bublinka#1");
+    if (isCloudflareEnabled && !TURNSTILE_SITE_KEY) {
+      toast.error('Chyba: VITE_CLOUDFLARE_SITE_KEY není nastaven v .env.local');
+    }
+  }, [isCloudflareEnabled, TURNSTILE_SITE_KEY]);
+
+  // Stabilní callback pro captcha aby se neměnil při každém re-renderu
+  const handleCaptchaVerify = useCallback((token: string) => {
+    setCaptchaToken(token)
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     logger.debug("Pokus o přihlášení", { email });
+
+    // Kontrola captcha pouze pokud je Cloudflare enabled
+    if (isCloudflareEnabled && !captchaToken) {
+      toast.error('Prosím dokončete ověření captcha')
+      return
+    }
+
+    const data: TeacherLoginDto = {
+      email: email,
+      password: password,
+      rememberMe: rememberMe,
+      captchaToken: isCloudflareEnabled ? (captchaToken || undefined) : undefined
+    };
+
     try {
-      await handleLogin(email, password);
-      logger.info("Úspěšné přihlášení", { email });
-      toast.success("Přihlášeno");
-      //navigate({ to: '/courses' });
+      await loginTeacher(data);
+      toast.success("Učitel úspěšně přihlášen.");
+      navigate({ to: '/courses' });
     } catch (ex) {
       logger.error("Přihlášení selhalo", { email, error: ex });
       toast.error("Přihlášení selhalo: " + ex);
@@ -64,6 +98,35 @@ function Login() {
               required
             />
           </div>
+          <div className="flex items-center space-x-2">
+            <input
+              id="remember"
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+            />
+            <label className="text-sm font-medium text-gray-700" htmlFor="remember">
+              Zapamatovat si přihlášení
+            </label>
+          </div>
+
+          {/* Turnstile Captcha */}
+          {isCloudflareEnabled && (
+            <div>
+              {TURNSTILE_SITE_KEY ? (
+                <Turnstile
+                  siteKey={TURNSTILE_SITE_KEY}
+                  onVerify={handleCaptchaVerify}
+                />
+              ) : (
+                <div className="text-red-600 text-sm text-center py-4">
+                  Chyba: VITE_CLOUDFLARE_SITE_KEY není nastaven v .env.local
+                </div>
+              )}
+            </div>
+          )}
+
           <button
             type="submit"
             className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"

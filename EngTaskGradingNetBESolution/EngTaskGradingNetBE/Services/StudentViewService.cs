@@ -5,11 +5,12 @@ using EngTaskGradingNetBE.Models.Config;
 using EngTaskGradingNetBE.Models.DbModel;
 using EngTaskGradingNetBE.Models.Dtos;
 using System.Linq;
+using EngTaskGradingNetBE.Lib;
 
 namespace EngTaskGradingNetBE.Services
 {
   public class StudentViewService(
-    Models.DbModel.AppDbContext context,
+    AppDbContext context,
     ILogger<StudentViewService> logger,
     IEmailService emailService,
     AppSettingsService appSettingsService) : DbContextBaseService(context)
@@ -28,8 +29,9 @@ namespace EngTaskGradingNetBE.Services
       }
       logger.LogInformation("Requested access for student {StudentNumber}, verified; will send invitation.", studentNumber);
 
-      string token = GenerateSecureToken();
-      await SaveAccessTokenToDatabaseAsync(student, token);
+      var sett = appSettingsService.GetSettings().Security.Student;
+      string token = SecurityUtils.GenerateSecureToken(sett.LoginTokenLengthBytes);
+      await SaveLoginTokenToDatabaseAsync(student, token);
       SendEmailInBackground(student, token);
       logger.LogInformation("Requested access token for student {StudentNumber} generated & sending requested.", studentNumber);
     }
@@ -59,7 +61,7 @@ namespace EngTaskGradingNetBE.Services
       }
     }
 
-    private async System.Threading.Tasks.Task SaveAccessTokenToDatabaseAsync(Student student, string token)
+    private async System.Threading.Tasks.Task SaveLoginTokenToDatabaseAsync(Student student, string token)
     {
       StudentViewToken tokenEntity = new()
       {
@@ -76,71 +78,6 @@ namespace EngTaskGradingNetBE.Services
       Db.StudentViewTokens.RemoveRange(existing);
       await Db.StudentViewTokens.AddAsync(tokenEntity);
       await Db.SaveChangesAsync();
-    }
-
-    private string GenerateSecureToken()
-    {
-      // Generate token with configurable length from appsettings.json
-      byte[] tokenBytes = new byte[studentSecuritySettings.LoginTokenLengthBytes];
-      using (var rng = RandomNumberGenerator.Create())
-      {
-        rng.GetBytes(tokenBytes);
-      }
-
-      // Convert to Base64 and make URL-safe by replacing problematic characters
-      return Convert.ToBase64String(tokenBytes)
-        .Replace('+', '-')
-        .Replace('/', '_')
-        .TrimEnd('=');
-    }
-
-    public record RefreshTokenData(string RefreshToken, string studyNumber);
-    internal async Task<RefreshTokenData> VerifyLoginToken(string token, int durationSeconds)
-    {
-      var tokenEntity = await Db.StudentViewTokens
-        .Include(q => q.Student)
-        .FirstOrDefaultAsync(q => q.Token == token && q.Type == StudentViewTokenType.Login);
-      if (tokenEntity == null)
-        throw new Exceptions.StudentTokenInvalidException("Illegal token.");
-
-      Db.StudentViewTokens.Remove(tokenEntity);
-      await Db.SaveChangesAsync();
-      if (tokenEntity.ExpiresAt < DateTime.Now)
-      {
-        throw new Exceptions.StudentTokenInvalidException("Expired token.");
-      }
-
-      int studentId = tokenEntity.StudentId;
-      string studyNumber = tokenEntity.Student.Number;
-      tokenEntity = new StudentViewToken()
-      {
-        CreatedAt = DateTime.Now,
-        ExpiresAt = DateTime.Now.AddSeconds(durationSeconds),
-        StudentId = studentId,
-        Token = GenerateSecureToken(),
-        Type = StudentViewTokenType.Access
-      };
-      await Db.StudentViewTokens.AddAsync(tokenEntity);
-      await Db.SaveChangesAsync();
-
-      return new(tokenEntity.Token, studyNumber);
-    }
-
-    internal async System.Threading.Tasks.Task<string> ValidateRefreshTokenAsync(string refreshToken)
-    {
-      var tokenEntity = await Db.StudentViewTokens
-        .Include(q => q.Student)
-        .FirstOrDefaultAsync(q => q.Token == refreshToken && q.Type == StudentViewTokenType.Access);
-      if (tokenEntity == null)
-        throw new Exceptions.StudentTokenInvalidException("Illegal token.");
-      if (tokenEntity.ExpiresAt < DateTime.Now)
-      {
-        Db.StudentViewTokens.Remove(tokenEntity);
-        await Db.SaveChangesAsync();
-        throw new Exceptions.StudentTokenInvalidException("Expired token.");
-      }
-
-      return tokenEntity.Student.Number;
     }
 
     internal async Task<List<Course>> GetStudentCoursesAsync(string studyNumber)
@@ -167,7 +104,8 @@ namespace EngTaskGradingNetBE.Services
 
     public record StudentCourseDetailResult(Student Student, Course Course, List<Grade> Grades, List<AttendanceRecord> AttendanceRecords
       );
-    internal async System.Threading.Tasks.Task<StudentCourseDetailResult> GetStudentCourseDetailAsync(string studyNumber, int courseId)
+
+    internal async Task<StudentCourseDetailResult> GetStudentCourseDetailAsync(string studyNumber, int courseId)
     {
       var student = await Db.Students
         .FirstOrDefaultAsync(q => q.Number == studyNumber)
@@ -191,16 +129,5 @@ namespace EngTaskGradingNetBE.Services
       return ret;
     }
 
-    internal async System.Threading.Tasks.Task ForgetRefreshTokenAsync(string refreshToken)
-    {
-      var tokenEntity = await Db.StudentViewTokens
-        .Include(q => q.Student)
-        .FirstOrDefaultAsync(q => q.Token == refreshToken && q.Type == StudentViewTokenType.Access);
-      if (tokenEntity != null)
-      {
-        Db.StudentViewTokens.Remove(tokenEntity);
-        await Db.SaveChangesAsync();
-      }
-    }
   }
 };

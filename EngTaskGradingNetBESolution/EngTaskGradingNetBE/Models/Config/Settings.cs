@@ -5,20 +5,8 @@ namespace EngTaskGradingNetBE.Models.Config
     public SecuritySettings Security { get; set; } = new SecuritySettings();
     public CloudFlareSettings CloudFlare { get; set; } = new CloudFlareSettings();
     public EmailSettings Email { get; set; } = new EmailSettings();
-    public KeycloakSettings Keycloak { get; set; } = new KeycloakSettings();
+    //public KeycloakSettings Keycloak { get; set; } = new KeycloakSettings();
     public string FrontEndBaseUrl { get; set; } = "http://localhost:5173";
-  }
-
-  public class KeycloakSettings
-  {
-    public const string SectionName = "Keycloak";
-    public string BaseUrl { get; set; } = string.Empty;
-    public string Realm { get; set; } = string.Empty;
-    public string AdminClientId { get; set; } = string.Empty;
-    public string AdminClientSecret { get; set; } = string.Empty;
-    public string UserClientId { get; set; } = string.Empty;
-    public string TeacherRoleName { get; set; } = string.Empty;
-    public string StudentRoleName { get; set; } = string.Empty;
   }
 
   public class SecuritySettings
@@ -27,6 +15,9 @@ namespace EngTaskGradingNetBE.Models.Config
 
     public StudentSecuritySettings Student { get; set; } = new StudentSecuritySettings();
     public TeacherSecuritySettings Teacher { get; set; } = new TeacherSecuritySettings();
+    public string AccessTokenJwtSecretKey { get; set; } = string.Empty;
+    public bool UseHttps { get; set; } = false;
+    public int RefreshTokenLengthBytes { get; set; } = 32;
   }
 
   public class StudentSecuritySettings
@@ -35,8 +26,7 @@ namespace EngTaskGradingNetBE.Models.Config
 
     public int LoginTokenLengthBytes { get; set; } = 32;
     public int LoginTokenExpiryMinutes { get; set; } = 15;
-    public int AccessJwtTokenExpiryMinutes { get; set; } = 5;
-    public string AccessTokenJwtSecretKey { get; set; } = string.Empty;
+    public int AccessTokenExpiryMinutes { get; set; } = 5;
   }
 
   public class TeacherSecuritySettings
@@ -44,10 +34,9 @@ namespace EngTaskGradingNetBE.Models.Config
     public const string SectionName = "Teacher";
 
     public int PasswordResetTokenExpiryMinutes { get; set; } = 60;
+    public int PasswordResetTokenLength { get; set; } = 128;
     public int AccessTokenExpiryMinutes { get; set; } = 5;
     public int RefreshTokenExpiryInMinutes { get; set; } = 60 * 8;
-    public int RefreshTokenLengthBytes { get; set; } = 32;
-    public string AccessTokenJwtSecretKey { get; set; } = string.Empty;
   }
 
   public class CloudFlareSettings

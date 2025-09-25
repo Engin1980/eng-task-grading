@@ -3,6 +3,7 @@ using EngTaskGradingNetBE.Lib;
 using EngTaskGradingNetBE.Models.DbModel;
 using EngTaskGradingNetBE.Models.Dtos;
 using EngTaskGradingNetBE.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Client;
 using Microsoft.IdentityModel.Tokens;
@@ -12,6 +13,7 @@ namespace EngTaskGradingNetBE.Controllers
 {
   [ApiController]
   [Route("api/v1/[controller]")]
+  [Authorize(Roles = Roles.TEACHER_ROLE)]
   public class AttendanceController(AttendanceService attendanceService, StudentService studentService) : ControllerBase
   {
     [HttpGet("for-course/{courseId}")]

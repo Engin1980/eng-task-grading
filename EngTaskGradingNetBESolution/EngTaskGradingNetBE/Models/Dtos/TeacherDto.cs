@@ -1,8 +1,10 @@
 ﻿namespace EngTaskGradingNetBE.Models.Dtos
 {
   public record TeacherLoginDto(
-    string Email, 
-    string Password
+    string Email,
+    string Password,
+    bool RememberMe,
+    string? CaptchaToken = null
   );
 
   public record TeacherCreateDto(

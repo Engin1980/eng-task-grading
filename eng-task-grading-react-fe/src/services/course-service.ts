@@ -25,7 +25,7 @@ export const courseService = {
 
   async importStudentsToCourse(courseId: string, students: StudentCreateDto[]): Promise<void> {
     logger.info("Importuji studenty do kurzu", { courseId });
-    await apiHttp.post(`/course/${courseId}/import`, students);
+    await apiHttp.post(`/v1/course/${courseId}/import-students`, students);
     logger.info("Studenti byli úspěšně importováni do kurzu", { courseId });
   },
 

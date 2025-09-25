@@ -1,4 +1,4 @@
-import { createFileRoute, Link, Outlet } from '@tanstack/react-router'
+import { createFileRoute, Link, Outlet, redirect, useNavigate } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import { useLogger } from '../../hooks/use-logger'
 import { courseService } from '../../services/course-service'
@@ -15,6 +15,7 @@ function CourseDetailPage() {
   const [course, setCourse] = useState<CourseDto | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const navigate = useNavigate();
 
   const loadCourse = async () => {
     try {
@@ -34,8 +35,17 @@ function CourseDetailPage() {
   }
 
   useEffect(() => {
-    loadCourse()
-  }, [id])
+    console.log("### running Useeffect()");
+    // Pokud je aktuální cesta přesně /courses/{id}, přesměruj na /courses/{id}/grades
+    if (window.location.pathname === `/courses/${id}` || window.location.pathname === `/courses/${id}/`) {
+      navigate({
+        to: '/courses/$id/grades',
+        params: { id }
+      });
+    } else
+      loadCourse();
+    console.log("### useEffect done");
+  }, [id, navigate])
 
   logger.debug(`Rendering course detail page for course ID: ${id}`)
 

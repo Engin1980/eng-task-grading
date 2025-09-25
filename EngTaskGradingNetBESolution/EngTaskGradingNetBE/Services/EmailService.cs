@@ -11,7 +11,10 @@ namespace EngTaskGradingNetBE.Services
     public void SendEmailInBackground(string recipient, string title, string htmlBody);
   }
 
-  public class EmailService(AppSettingsService appSettingsService, BackgroundTaskQueue backgroundTaskQueue, ILogger<EmailService> logger) : IEmailService
+  public class EmailService(
+    AppSettingsService appSettingsService, 
+    BackgroundTaskQueue backgroundTaskQueue, 
+    ILogger<EmailService> logger) : IEmailService
   {
     private class SmtpConfig
     {

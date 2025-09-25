@@ -19,7 +19,7 @@ interface Logger {
 
 // Privátní implementace logování
 const logImplementation = (level: LogLevel, sender: string, message: string, meta?: any) => {
-  if (meta == null || meta == undefined) meta = "";
+  if (meta == null || meta == undefined) meta = "\t";
   
   const fullMessage = `[${sender}] ${message}`;
   

@@ -6,6 +6,8 @@ export interface TeacherRegisterDto {
 export interface TeacherLoginDto {
   email: string;
   password: string;
+  rememberMe: boolean;
+captchaToken?: string;
 }
 
 export interface TeacherDto {

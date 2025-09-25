@@ -1,6 +1,7 @@
 ﻿using EngTaskGradingNetBE.Models.DbModel;
 using EngTaskGradingNetBE.Models.Dtos;
 using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Security;
 
 namespace EngTaskGradingNetBE.Services
 {
@@ -39,6 +40,7 @@ namespace EngTaskGradingNetBE.Services
 
     public StudentAnalysisResultDto AnalyseStagExport(string data)
     {
+      const string COLUMN_SEPARATOR = ";";
       var errors = new List<string>();
       var result = new List<StudentCreateDto>();
       if (string.IsNullOrWhiteSpace(data)) return new(result, errors);
@@ -46,8 +48,25 @@ namespace EngTaskGradingNetBE.Services
       var lines = data.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
       if (lines.Length < 2) return new(result, errors); ;
 
+      string removeQuotes(string s)
+      {
+        if (s.StartsWith("\"") && s.EndsWith("\"") && s.Length >= 2)
+          s = s[1..^1];
+        return s;
+      }
+      string[] splitLineToColumns(string line)
+      {
+        var pts = line
+        .Split(COLUMN_SEPARATOR)
+        .Select(q => q.Trim())
+        .Select(q => removeQuotes(q))
+        .Select(q => q.Trim())
+        .ToArray();
+        return pts;
+      }
+
       string firstLine = lines[0];
-      var pts = firstLine.Split("\t").Select(q => q.Trim()).ToList();
+      var pts = splitLineToColumns(firstLine).ToList();
       int ptsCount = pts.Count;
       int numberIndex = pts.IndexOf("osCislo");
       int nameIndex = pts.IndexOf("jmeno");
@@ -61,7 +80,7 @@ namespace EngTaskGradingNetBE.Services
       foreach (string line in lines[1..])
       {
         index++;
-        var dataPts = line.Split("\t").Select(q => q.Trim()).ToList();
+        var dataPts = splitLineToColumns(line).ToList();
 
         if (dataPts.Count != pts.Count)
         {

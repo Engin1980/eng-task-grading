@@ -41,12 +41,11 @@ function RouteComponent() {
       // Kontrola captcha pouze pokud je Cloudflare enabled
       if (isCloudflareEnabled && !captchaToken) {
         toast.error('Prosím dokončete ověření captcha')
-        return
+        return;
       }
 
-      setIsSubmitting(true)
+      setIsSubmitting(true);
       try {
-
         const data: StudentViewLoginDto = {
           studentNumber: value.studentNumber,
           captchaToken: isCloudflareEnabled ? (captchaToken || undefined) : undefined
@@ -155,8 +154,8 @@ function RouteComponent() {
               <button
                 type="submit"
                 disabled={
-                  isSubmitting || 
-                  !form.state.canSubmit || 
+                  isSubmitting ||
+                  !form.state.canSubmit ||
                   (isCloudflareEnabled && !captchaToken)
                 }
                 className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"

@@ -1,16 +1,18 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using EngTaskGradingNetBE.Services;
-using EngTaskGradingNetBE.Models;
-using System.Threading.Tasks;
-using EngTaskGradingNetBE.Exceptions;
-using EngTaskGradingNetBE.Models.Dtos;
+﻿using EngTaskGradingNetBE.Exceptions;
 using EngTaskGradingNetBE.Lib;
+using EngTaskGradingNetBE.Models;
 using EngTaskGradingNetBE.Models.DbModel;
+using EngTaskGradingNetBE.Models.Dtos;
+using EngTaskGradingNetBE.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace EngTaskGradingNetBE.Controllers
 {
   [ApiController]
   [Route("api/v1/teacher")]
+  [Authorize(Roles = Roles.TEACHER_ROLE)]
   public class TeacherController(AuthService authService, TeacherService teacherService) : ControllerBase
   {
     [HttpPost]

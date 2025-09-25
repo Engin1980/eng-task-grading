@@ -34,7 +34,7 @@ function RouteComponent() {
   // Funkce pro filtrování studentů
   const filteredStudentData = data?.studentDatas.filter(studentData => {
     if (!filterText.trim()) return true;
-    
+
     const searchText = filterText.toLowerCase();
     const student = studentData.student;
     return (
@@ -45,9 +45,9 @@ function RouteComponent() {
   });
 
   const loadData = async () => {
-     const task: TaskDto = await taskService.get(id);
-     setTask(task);
-     const gradeSet: GradeSet = await gradeService.getGradesByTask(id);
+    const task: TaskDto = await taskService.get(id);
+    setTask(task);
+    const gradeSet: GradeSet = await gradeService.getGradesByTask(id);
     const data: DataSet = transformData(gradeSet);
     setData(data);
   }
@@ -71,6 +71,7 @@ function RouteComponent() {
 
   const handleGradeAdded = (newGrade: GradeDto) => {
     // Aktualizace dat s novou známkou
+    console.log("### New grade added:", newGrade);
     if (data) {
       const updatedStudentDatas = data.studentDatas.map(studentData => {
         if (studentData.student.id === newGrade.studentId) {
@@ -107,7 +108,7 @@ function RouteComponent() {
         if (studentData.student.id === updatedGrade.studentId) {
           return {
             ...studentData,
-            grades: studentData.grades.map(grade => 
+            grades: studentData.grades.map(grade =>
               grade.id === updatedGrade.id ? updatedGrade : grade
             ).sort((a, b) => {
               const dateA = new Date(a.date);
@@ -132,7 +133,7 @@ function RouteComponent() {
     if (window.confirm('Opravdu chcete smazat tuto známku? Tato akce je nevratná.')) {
       try {
         await gradeService.deleteGrade(gradeId.toString());
-        
+
         // Aktualizace dat po smazání známky
         if (data) {
           const updatedStudentDatas = data.studentDatas.map(studentData => ({
@@ -161,7 +162,7 @@ function RouteComponent() {
       {/* Informace o úkolu */}
       <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6 shadow-sm">
         <h1 className="text-3xl font-bold text-gray-900 mb-4">{task.title}</h1>
-        
+
         {task.description && (
           <div className="mb-4">
             <h2 className="text-lg font-semibold text-gray-700 mb-2">Popis</h2>
@@ -176,7 +177,7 @@ function RouteComponent() {
               <span className="ml-2 text-gray-600">{task.keywords}</span>
             </div>
           )}
-          
+
           {task.minGrade !== null && task.minGrade !== undefined && (
             <div>
               <strong className="text-gray-700">Minimální hodnota:</strong>
@@ -212,7 +213,7 @@ function RouteComponent() {
               />
             </div>
           </div>
-          
+
           <div className="overflow-x-auto">
             {filteredStudentData && filteredStudentData.length === 0 && filterText.trim() ? (
               <div className="text-center py-8">
@@ -220,128 +221,127 @@ function RouteComponent() {
               </div>
             ) : (
               <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Číslo
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Příjmení
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Jméno
-                  </th>
-                  <th className="px-3 py-3 text-center">
-                    {/* Prázdný sloupec pro tlačítko + */}
-                  </th>
-                  <th className="px-3 py-3 text-center">
-                    {/* Prázdný sloupec pro akce */}
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Datum
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Známka
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Komentář
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {(filteredStudentData || []).map((studentData) => (
-                  studentData.grades.length === 0 ? (
-                    <tr key={`student-${studentData.student.id}`} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {studentData.student.number}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {studentData.student.surname || '-'}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {studentData.student.name || '-'}
-                      </td>
-                      <td className="px-3 py-4 text-center">
-                        <button 
-                          className="inline-flex items-center justify-center w-6 h-6 text-sm font-medium text-white bg-green-600 rounded-full hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                          onClick={() => handleAddGrade(studentData.student)}
-                        >
-                          +
-                        </button>
-                      </td>
-                      <td className="px-3 py-4 text-center">
-                        {/* Prázdné pro akce */}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500" colSpan={3}>
-                        Bez známky
-                      </td>
-                    </tr>
-                  ) : (
-                    studentData.grades.map((grade, gradeIndex) => (
-                      <tr key={`student-${studentData.student.id}-grade-${grade.id}`} className="hover:bg-gray-50">
-                        {gradeIndex === 0 && (
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900" rowSpan={studentData.grades.length}>
-                            {studentData.student.number}
-                          </td>
-                        )}
-                        {gradeIndex === 0 && (
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900" rowSpan={studentData.grades.length}>
-                            {studentData.student.surname || '-'}
-                          </td>
-                        )}
-                        {gradeIndex === 0 && (
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900" rowSpan={studentData.grades.length}>
-                            {studentData.student.name || '-'}
-                          </td>
-                        )}
-                        {gradeIndex === 0 && (
-                          <td className="px-3 py-4 text-center" rowSpan={studentData.grades.length}>
-                            <button 
-                              className="inline-flex items-center justify-center w-6 h-6 text-sm font-medium text-white bg-green-600 rounded-full hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                              onClick={() => handleAddGrade(studentData.student)}
-                            >
-                              +
-                            </button>
-                          </td>
-                        )}
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Číslo
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Příjmení
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Jméno
+                    </th>
+                    <th className="px-3 py-3 text-center">
+                      {/* Prázdný sloupec pro tlačítko + */}
+                    </th>
+                    <th className="px-3 py-3 text-center">
+                      {/* Prázdný sloupec pro akce */}
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Datum
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Známka
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Komentář
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {(filteredStudentData || []).map((studentData) => (
+                    studentData.grades.length === 0 ? (
+                      <tr key={`student-${studentData.student.id}`} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {studentData.student.number}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          {studentData.student.surname || '-'}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          {studentData.student.name || '-'}
+                        </td>
                         <td className="px-3 py-4 text-center">
-                          <div className="flex justify-center space-x-1">
-                            <button
-                              onClick={() => handleEditGrade(studentData.student, grade)}
-                              className="inline-flex items-center justify-center w-6 h-6 text-sm font-medium text-white bg-blue-500 rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                              title="Upravit známku"
-                            >
-                              🖉
-                            </button>
-                            <button
-                              onClick={() => handleDeleteGrade(grade.id)}
-                              className="inline-flex items-center justify-center w-6 h-6 text-sm font-medium text-white bg-red-500 rounded-full hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                              title="Smazat známku"
-                            >
-                              ⨯
-                            </button>
-                          </div>
+                          <button
+                            className="inline-flex items-center justify-center w-6 h-6 text-sm font-medium text-white bg-green-600 rounded-full hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                            onClick={() => handleAddGrade(studentData.student)}
+                          >
+                            +
+                          </button>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {new Date(grade.date).toLocaleString('cs-CZ')}
+                        <td className="px-3 py-4 text-center">
+                          {/* Prázdné pro akce */}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            grade.value >= (task?.minGrade || 0)
-                              ? 'bg-green-100 text-green-800' 
-                              : 'bg-red-100 text-red-800'
-                          }`}>
-                            {grade.value}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-sm text-gray-500">
-                          {grade.comment || '-'}
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500" colSpan={3}>
+                          Bez známky
                         </td>
                       </tr>
-                    ))
-                  )
-                ))}
-              </tbody>
+                    ) : (
+                      studentData.grades.map((grade, gradeIndex) => (
+                        <tr key={`student-${studentData.student.id}-grade-${grade.id}`} className="hover:bg-gray-50">
+                          {gradeIndex === 0 && (
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900" rowSpan={studentData.grades.length}>
+                              {studentData.student.number}
+                            </td>
+                          )}
+                          {gradeIndex === 0 && (
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900" rowSpan={studentData.grades.length}>
+                              {studentData.student.surname || '-'}
+                            </td>
+                          )}
+                          {gradeIndex === 0 && (
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900" rowSpan={studentData.grades.length}>
+                              {studentData.student.name || '-'}
+                            </td>
+                          )}
+                          {gradeIndex === 0 && (
+                            <td className="px-3 py-4 text-center" rowSpan={studentData.grades.length}>
+                              <button
+                                className="inline-flex items-center justify-center w-6 h-6 text-sm font-medium text-white bg-green-600 rounded-full hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                                onClick={() => handleAddGrade(studentData.student)}
+                              >
+                                +
+                              </button>
+                            </td>
+                          )}
+                          <td className="px-3 py-4 text-center">
+                            <div className="flex justify-center space-x-1">
+                              <button
+                                onClick={() => handleEditGrade(studentData.student, grade)}
+                                className="inline-flex items-center justify-center w-6 h-6 text-sm font-medium text-white bg-blue-500 rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                title="Upravit známku"
+                              >
+                                🖉
+                              </button>
+                              <button
+                                onClick={() => handleDeleteGrade(grade.id)}
+                                className="inline-flex items-center justify-center w-6 h-6 text-sm font-medium text-white bg-red-500 rounded-full hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                                title="Smazat známku"
+                              >
+                                ⨯
+                              </button>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {new Date(grade.date).toLocaleString('cs-CZ')}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${grade.value >= (task?.minGrade || 0)
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-red-100 text-red-800'
+                              }`}>
+                              {grade.value}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-500">
+                            {grade.comment || '-'}
+                          </td>
+                        </tr>
+                      ))
+                    )
+                  ))}
+                </tbody>
               </table>
             )}
           </div>

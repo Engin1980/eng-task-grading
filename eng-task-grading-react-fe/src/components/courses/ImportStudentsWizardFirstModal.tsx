@@ -3,6 +3,7 @@ import * as Dialog from '@radix-ui/react-dialog';
 import { useLogger } from '../../hooks/use-logger';
 import type { StudentAnalysisResultDto } from '../../model/student-dto';
 import { studentService } from '../../services/student-service';
+import toast from 'react-hot-toast';
 
 interface ImportStudentsWizardFirstModalProps {
   isOpen: boolean;
@@ -17,16 +18,20 @@ export function ImportStudentsWizardFirstModal({ isOpen, onClose, onAnalyzed }: 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!importText.trim()) {
       logger.warn('Import text is empty');
       return;
     }
 
     setIsLoading(true);
-    const data :StudentAnalysisResultDto = await studentService.analyseForImport(importText);
+    try {
+      const data: StudentAnalysisResultDto = await studentService.analyseForImport(importText);
+      onAnalyzed(data);
+    } catch {
+      toast.error('Chyba při analýze textu pro import studentů.');
+    }
     setIsLoading(false);
-    onAnalyzed(data);
   };
 
   const handleCancel = () => {
@@ -43,9 +48,9 @@ export function ImportStudentsWizardFirstModal({ isOpen, onClose, onAnalyzed }: 
           <Dialog.Title className="text-lg font-semibold text-gray-900 mb-4">
             Import studentů
           </Dialog.Title>
-          
+
           <Dialog.Description className="text-sm text-gray-600 mb-6">
-            Vložte text se seznamem studentů. Seznam studentů získáte z přehledu is-stag.osu.cz, 
+            Vložte text se seznamem studentů. Seznam studentů získáte z přehledu is-stag.osu.cz,
             exportem do CSV. CSV obsahuje záhlaví na prvním řádku,  ze kterého se získají klíčová slova
             pro mapování studentů. Vložte zde planý text získaného CSV.
           </Dialog.Description>

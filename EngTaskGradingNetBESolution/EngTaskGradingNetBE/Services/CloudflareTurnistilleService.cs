@@ -4,7 +4,9 @@ using System.Net.Http;
 
 namespace EngTaskGradingNetBE.Services
 {
-  public class CloudflareTurnistilleService(AppSettingsService appSettingsService, IHttpClientFactory httpClientFactory)
+  public class CloudflareTurnistilleService(
+    AppSettingsService appSettingsService, 
+    IHttpClientFactory httpClientFactory)
   {
     public record TurnstileResponse(
         bool Success,

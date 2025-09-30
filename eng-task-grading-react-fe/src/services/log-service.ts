@@ -1,14 +1,7 @@
-import axios from "axios";
+import AppSettings from "../config/app-settings";
 
 type LogLevel = "debug" | "info" | "warn" | "error";
-
-interface LogEntry {
-  level: LogLevel;
-  message: string;
-  sender: string;
-  meta?: any;
-  timestamp: string;
-}
+const minimalLogLevel: LogLevel = (AppSettings.logLevel || "info") as LogLevel;
 
 interface Logger {
   debug: (message: string, meta?: any) => void;
@@ -20,48 +13,32 @@ interface Logger {
 // Privátní implementace logování
 const logImplementation = (level: LogLevel, sender: string, message: string, meta?: any) => {
   if (meta == null || meta == undefined) meta = "\t";
-  
+
   const fullMessage = `[${sender}] ${message}`;
-  
+
+  if (!shouldBeLogged(level)) return;
+
   // log to console
   switch (level) {
     case "debug":
-      console.log(`🐛 ${fullMessage}`, meta);
+      console.log(`DEBUG\t ${fullMessage}`, meta);
       break;
     case "info":
-      console.info(fullMessage, meta);
+      console.info(`INFO\t ${fullMessage}`, meta);
       break;
     case "warn":
-      console.warn(fullMessage, meta);
+      console.warn(`WARN\t ${fullMessage}`, meta);
       break;
     case "error":
-      console.error(fullMessage, meta);
+      console.error(`ERROR\t ${fullMessage}`, meta);
       break;
   }
-
-  // log to backend for errors
-  if (level === "error") {
-    // TODO logging to backend disabled
-    //logToBackend(level, sender, message, meta);
-  }
 };
 
-/**
- * Odešle log na backend server
- */
-const logToBackend = async (level: LogLevel, sender: string, message: string, meta?: any) => {
-  try {
-    await axios.post("/api/logs", {
-      level,
-      message,
-      sender,
-      meta,
-      timestamp: new Date().toISOString(),
-    } as LogEntry);
-  } catch {
-    // silently fail if logging backend is unreachable
-  }
-};
+const shouldBeLogged = (level: LogLevel): boolean => {
+  const levels: LogLevel[] = ["debug", "info", "warn", "error"];
+  return levels.indexOf(level) >= levels.indexOf(minimalLogLevel);
+}
 
 /**
  * Factory funkce pro vytvoření loggeru s daným senderem

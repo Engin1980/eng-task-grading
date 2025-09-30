@@ -39,7 +39,7 @@ namespace EngTaskGradingNetBE.Services
     private void SendEmailInBackground(Student student, string token)
     {
       string title = "Žádost o přístup do systému známek EngTaskGrading";
-      string feUrl = appSettingsService.GetSettings().FrontEndBaseUrl;
+      string feUrl = appSettingsService.GetSettings().FrontEndUrl;
       string body = $"""
         <p>Dobrý den,</p>
         <p>pro vaše osobní číslo byla přijata žádost o přístup na přehled známek do systému EngTaskGrading.</p>

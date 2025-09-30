@@ -20,12 +20,13 @@ void BuildCors(WebApplicationBuilder builder)
 {
   builder.Services.AddCors(options =>
   {
+    string feUrl = builder.Configuration["AppSettings:FrontEndUrl"] ?? throw new ApplicationException("Front-end URL not set.");
     options.AddPolicy("AllowFrontend", policy =>
     {
-      policy.WithOrigins("http://localhost:5173") // tvoje FE adresa
+      policy.WithOrigins(feUrl)
             .AllowAnyHeader()
             .AllowAnyMethod()
-            .AllowCredentials(); // pokud používáš cookie/token z Keycloak
+            .AllowCredentials();
     });
   });
 }

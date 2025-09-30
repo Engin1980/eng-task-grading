@@ -201,7 +201,7 @@ namespace EngTaskGradingNetBE.Services
     private async System.Threading.Tasks.Task SendResetPasswordEmail(string emailAddress, string token)
     {
       string title = "Obnovení hesla do systému EngTaskGrading";
-      string feUrl = appSettingsService.GetSettings().FrontEndBaseUrl;
+      string feUrl = appSettingsService.GetSettings().FrontEndUrl;
       string body = $"""
         <p>Dobrý den,</p>
         <p>pro váš účet byla přijata žádost o obnovení hesla do systému EngTaskGrading.</p>

@@ -6,7 +6,7 @@ namespace EngTaskGradingNetBE.Models.Config
     public CloudFlareSettings CloudFlare { get; set; } = new CloudFlareSettings();
     public EmailSettings Email { get; set; } = new EmailSettings();
     //public KeycloakSettings Keycloak { get; set; } = new KeycloakSettings();
-    public string FrontEndBaseUrl { get; set; } = "http://localhost:5173";
+    public string FrontEndUrl { get; set; } = string.Empty;
   }
 
   public class SecuritySettings

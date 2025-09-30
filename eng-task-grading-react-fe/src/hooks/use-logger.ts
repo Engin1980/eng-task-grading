@@ -1,4 +1,3 @@
-// src/hooks/useLogger.ts
 import { useMemo } from "react";
 import { createLogger } from "../services/log-service";
 

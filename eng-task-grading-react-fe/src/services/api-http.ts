@@ -1,9 +1,10 @@
 import axios from "axios";
 import type { AxiosInstance, AxiosResponse } from "axios";
 import { createLogger } from "./log-service";
+import AppSettings from "../config/app-settings";
 
 const logger = createLogger("ApiHttp");
-const BASE_URL = "https://localhost:55556/api";
+const BASE_URL = AppSettings.backendUrl; //backendUrl; "https://localhost:55556/api";
 
 let getAccessToken: (() => string | null) = () => null;
 let refreshHandler: (() => Promise<string | undefined>) = () => Promise.resolve(undefined);
@@ -33,10 +34,10 @@ axiosInstance.interceptors.request.use(
     if (token) {
       config.headers = config.headers || {};
       config.headers["Authorization"] = `Bearer ${token}`;
-      console.log("### axiosInstance - adding accessToken:", token);
+      logger.debug("interceptors.request - adding accessToken:", token);
     }
     else
-      console.log("### axiosInstance - no accessToken available");
+      logger.debug("interceptors.request - no accessToken available");
     return config;
   },
   (error) => Promise.reject(error)
@@ -60,7 +61,7 @@ axiosInstance.interceptors.response.use(
       originalRequest._retry = true;
       try {
         const newAccessToken: string | undefined = await refreshHandler();
-        console.log("### axiosInstance - refreshed token:", newAccessToken);
+        logger.debug("interceptors.response - refreshed token:", newAccessToken);
         if (newAccessToken) {
           originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
           return axiosInstance(originalRequest);

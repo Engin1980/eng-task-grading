@@ -1,8 +1,14 @@
-import { createFileRoute, Link, Outlet, redirect, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, Link, Outlet, useNavigate } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import { useLogger } from '../../hooks/use-logger'
 import { courseService } from '../../services/course-service'
 import type { CourseDto } from '../../model/course-dto'
+import { TabLabelBlock } from '../../ui/tabLabelBlock'
+import { TabLabelLink } from '../../ui/tabLabelLink'
+import { TaskIcon } from '../../ui/icons/taskIcon'
+import { AttendanceIcon } from '../../ui/icons/attendanceIcon'
+import { GradeIcon } from '../../ui/icons/gradeIcon'
+import { StudentIcon } from '../../ui/icons/studentIcon'
 
 export const Route = createFileRoute('/courses/$id')({
   component: CourseDetailPage,
@@ -10,7 +16,6 @@ export const Route = createFileRoute('/courses/$id')({
 
 function CourseDetailPage() {
   const { id } = Route.useParams()
-  // Navigace je nyní přes Link komponenty, není potřeba activeTab
   const logger = useLogger("CourseDetailPage")
   const [course, setCourse] = useState<CourseDto | null>(null)
   const [loading, setLoading] = useState(true)
@@ -35,16 +40,7 @@ function CourseDetailPage() {
   }
 
   useEffect(() => {
-    console.log("### running Useeffect()");
-    // Pokud je aktuální cesta přesně /courses/{id}, přesměruj na /courses/{id}/grades
-    if (window.location.pathname === `/courses/${id}` || window.location.pathname === `/courses/${id}/`) {
-      navigate({
-        to: '/courses/$id/grades',
-        params: { id }
-      });
-    } else
-      loadCourse();
-    console.log("### useEffect done");
+    loadCourse();
   }, [id, navigate])
 
   logger.debug(`Rendering course detail page for course ID: ${id}`)
@@ -108,38 +104,25 @@ function CourseDetailPage() {
       </div>
 
       {/* Tabs - nová navigace přes Link */}
-      <div className="border-b border-gray-200 mb-6">
-        <nav className="-mb-px flex space-x-8">
-          <Link
-            to="/courses/$id/grades"
-            params={{ id }}
-            className="py-2 px-1 border-b-2 font-medium text-sm text-blue-600 hover:text-blue-800 hover:border-blue-500"
-          >
-            Známky
-          </Link>
-          <Link
-            to="/courses/$id/tasks"
-            params={{ id }}
-            className="py-2 px-1 border-b-2 font-medium text-sm text-blue-600 hover:text-blue-800 hover:border-blue-500"
-          >
-            Úkoly
-          </Link>
-          <Link
-            to="/courses/$id/attendances"
-            params={{ id }}
-            className="py-2 px-1 border-b-2 font-medium text-sm text-blue-600 hover:text-blue-800 hover:border-blue-500"
-          >
-            Účast
-          </Link>
-          <Link
-            to="/courses/$id/students"
-            params={{ id }}
-            className="py-2 px-1 border-b-2 font-medium text-sm text-blue-600 hover:text-blue-800 hover:border-blue-500"
-          >
-            Studenti
-          </Link>
-        </nav>
-      </div>
+      <TabLabelBlock selectedTabKey='grades'>
+        <TabLabelLink to={`/courses/${id}/grades`} tabKey='grades'>
+          <GradeIcon />
+          Známky
+        </TabLabelLink>
+        <TabLabelLink to={`/courses/${id}/tasks`} tabKey='tasks'>
+          <TaskIcon />
+          Úkoly
+        </TabLabelLink>
+        <TabLabelLink to={`/courses/${id}/attendances`} tabKey='attendances'>
+          <AttendanceIcon />
+          Účast
+        </TabLabelLink>
+        <TabLabelLink to={`/courses/${id}/students`} tabKey='students'>
+          <StudentIcon />
+          Studenti
+        </TabLabelLink>
+      </TabLabelBlock>
+
       {/* Tab Content - nyní se renderuje podle child route */}
       <div className="min-h-96">
         <Outlet />

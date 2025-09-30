@@ -1,10 +1,5 @@
-import type { AttendanceDto } from '../../model/attendance-dto';
-import type { AttendanceDaySetRecordDto } from '../../model/attendance-dto';
-
-interface AttendanceTabProps {
-  attendances: AttendanceDto[];
-  attendanceRecords: AttendanceDaySetRecordDto[];
-}
+import { createFileRoute } from '@tanstack/react-router'
+import { useStudentViewData } from '../../../../contexts/StudentViewDataContext';
 
 interface AttendanceDay {
   title: string;
@@ -18,7 +13,16 @@ interface AttendanceSet {
   days: AttendanceDay[];
 }
 
-export function AttendanceTab({ attendances, attendanceRecords }: AttendanceTabProps) {
+export const Route = createFileRoute('/studentView/courses/$id/attendance')({
+  component: RouteComponent,
+})
+
+function RouteComponent() {
+  const courseDataOrNull = useStudentViewData();
+  const courseData = courseDataOrNull!;
+  const attendances = courseData.attendances;
+  const attendanceRecords = courseData.attendanceRecords;
+
   // Transform attendance data to match component structure
   const attendanceSets: AttendanceSet[] = attendances.map(attendance => {
     const days: AttendanceDay[] = attendance.days.map(day => {
@@ -61,7 +65,7 @@ export function AttendanceTab({ attendances, attendanceRecords }: AttendanceTabP
           <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
             <h3 className="text-lg font-medium text-gray-900">{attendanceSet.title}</h3>
           </div>
-          
+
           {/* Table for each attendance set */}
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
@@ -84,15 +88,14 @@ export function AttendanceTab({ attendances, attendanceRecords }: AttendanceTabP
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        day.weight === 1
-                          ? 'bg-green-100 text-green-800' 
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${day.weight === 1
+                          ? 'bg-green-100 text-green-800'
                           : day.weight === 0.5
-                          ? 'bg-yellow-100 text-yellow-800'
-                          : day.weight === 0
-                          ? 'bg-red-100 text-red-800'
-                          : 'bg-gray-100 text-gray-800'
-                      }`}>
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : day.weight === 0
+                              ? 'bg-red-100 text-red-800'
+                              : 'bg-gray-100 text-gray-800'
+                        }`}>
                         {day.recordTitle}
                       </span>
                     </td>

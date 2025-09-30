@@ -1,10 +1,6 @@
-import type { TaskDto } from '../../model/task-dto';
-import type { GradeDto } from '../../model/grade-dto';
-
-interface TasksTabProps {
-  tasks: TaskDto[];
-  grades: GradeDto[];
-}
+import { createFileRoute } from '@tanstack/react-router'
+import type { StudentViewCourseDto } from '../../../../model/student-view-dto';
+import { useStudentViewData } from '../../../../contexts/StudentViewDataContext';
 
 interface TaskWithGrades {
   id: number;
@@ -17,8 +13,15 @@ interface TaskWithGrades {
   }[];
 }
 
-export function TasksTab({ tasks, grades }: TasksTabProps) {
-  // Combine tasks with all their grades
+export const Route = createFileRoute('/studentView/courses/$id/tasks')({
+  component: RouteComponent,
+})
+
+function RouteComponent() {
+  const courseDataOrNull: StudentViewCourseDto | null = useStudentViewData();
+  const courseData = courseDataOrNull!;
+  const tasks = courseData.tasks || [];
+  const grades = courseData.grades || [];
   const tasksWithGrades: TaskWithGrades[] = tasks.map(task => {
     const taskGrades = grades.filter(g => g.taskId === task.id);
     return {
@@ -99,11 +102,10 @@ export function TasksTab({ tasks, grades }: TasksTabProps) {
                               </td>
                               <td className="px-4 py-2 whitespace-nowrap text-sm">
                                 {grade.rating !== null ? (
-                                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                                    grade.rating >= 90 ? 'bg-green-100 text-green-800' :
+                                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${grade.rating >= 90 ? 'bg-green-100 text-green-800' :
                                     grade.rating >= 70 ? 'bg-yellow-100 text-yellow-800' :
-                                    'bg-red-100 text-red-800'
-                                  }`}>
+                                      'bg-red-100 text-red-800'
+                                    }`}>
                                     {grade.rating}%
                                   </span>
                                 ) : (

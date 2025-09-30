@@ -1,18 +1,18 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link, Outlet } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
-import { AttendanceDays, StudentOverview } from '../../components/attendances'
 import { attendanceService } from '../../services/attendance-service'
 import type { AttendanceDto } from '../../model/attendance-dto'
+import { TabLabelBlock } from '../../ui/tabLabelBlock'
+import { TabLabelLink } from '../../ui/tabLabelLink'
+import { AttendanceIcon } from '../../ui/icons/attendanceIcon'
+import { AttendanceOverviewIcon } from '../../ui/icons/attendanceOverviewIcon'
 
 export const Route = createFileRoute('/attendances/$id')({
   component: AttendanceDetailPage,
 })
 
-type TabType = 'attendanceDays' | 'studentOverview'
-
 function AttendanceDetailPage() {
   const { id } = Route.useParams() // attendanceId
-  const [activeTab, setActiveTab] = useState<TabType>('attendanceDays')
   const [attendance, setAttendance] = useState<AttendanceDto | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -89,34 +89,21 @@ function AttendanceDetailPage() {
         )}
       </div>
 
-      {/* Tabs */}
-      <div className="border-b border-gray-200 mb-6">
-        <nav className="-mb-px flex space-x-8">
-          <button
-            onClick={() => setActiveTab('attendanceDays')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${activeTab === 'attendanceDays'
-              ? 'border-blue-500 text-blue-600'
-              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-          >
-            Zaznamenané dny
-          </button>
-          <button
-            onClick={() => setActiveTab('studentOverview')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${activeTab === 'studentOverview'
-              ? 'border-blue-500 text-blue-600'
-              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-          >
-            Celkový přehled
-          </button>
-        </nav>
-      </div>
+      {/* Tabs - nová navigace přes Link */}
+      <TabLabelBlock selectedTabKey='days'>
+        <TabLabelLink to={`/attendances/${id}/days`} tabKey='days'>
+          <AttendanceIcon />
+          Zaznamenané dny
+        </TabLabelLink>
+        <TabLabelLink to={`/attendances/${id}/overview`} tabKey='overview'>
+          <AttendanceOverviewIcon />
+          Celkový přehled
+        </TabLabelLink>
+      </TabLabelBlock>
 
-      {/* Tab Content */}
+      {/* Tab Content - nyní se renderuje podle child route */}
       <div className="min-h-96">
-        {activeTab === 'attendanceDays' && <AttendanceDays attendanceId={id} />}
-        {activeTab === 'studentOverview' && <StudentOverview attendanceId={id} />}
+        <Outlet />
       </div>
     </div>
   )

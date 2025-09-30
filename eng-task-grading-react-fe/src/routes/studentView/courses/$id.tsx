@@ -1,9 +1,15 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link, Outlet } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import { studentViewService } from '../../../services/student-view-service'
 import toast from 'react-hot-toast'
 import type { StudentViewCourseDto } from '../../../model/student-view-dto'
-import { TasksTab, AttendanceTab, StudentInfo } from '../../../components/studentView'
+import { StudentViewDataContext } from '../../../contexts/StudentViewDataContext'
+import { StudentInfo } from '../../../components/studentView'
+import { TabLabel } from '../../../ui/tabLabel'
+import { TaskIcon } from '../../../ui/icons/taskIcon'
+import { AttendanceIcon } from '../../../ui/icons/attendanceIcon'
+import { TabLabelLink } from '../../../ui/tabLabelLink'
+import { TabLabelBlock } from '../../../ui/tabLabelBlock'
 
 export const Route = createFileRoute('/studentView/courses/$id')({
   component: RouteComponent,
@@ -27,13 +33,10 @@ function getStudentNumberFromJWT(): string | null {
   }
 }
 
-
-
 function RouteComponent() {
   const { id } = Route.useParams()
   const [courseData, setCourseData] = useState<StudentViewCourseDto | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState<'tasks' | 'attendance'>('tasks')
   const studentNumber = getStudentNumberFromJWT()
 
   const loadCourse = async () => {
@@ -110,61 +113,25 @@ function RouteComponent() {
           </div>
         </div>
 
-        {/* Course Content with Tabs */}
-        <div className="bg-white rounded-lg shadow-sm">
-          {/* Tab Navigation */}
-          <div className="border-b border-gray-200">
-            <nav className="flex space-x-8 px-6" aria-label="Tabs">
-              <button
-                onClick={() => setActiveTab('tasks')}
-                className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === 'tasks'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-              >
-                <div className="flex items-center">
-                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  Úkoly
-                </div>
-              </button>
-              <button
-                onClick={() => setActiveTab('attendance')}
-                className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === 'attendance'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-              >
-                <div className="flex items-center">
-                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                  </svg>
-                  Docházka
-                </div>
-              </button>
-            </nav>
-          </div>
+        {/* Tabs - nová navigace přes Link */}
+        <TabLabelBlock selectedTabKey="a">
+          <TabLabelLink to={`/studentView/courses/${id}/tasks`} tabKey="a">
+            <TaskIcon />
+            Úkoly
+          </TabLabelLink>
+          <TabLabelLink to={`/studentView/courses/${id}/attendance`} tabKey="b">
+            <AttendanceIcon />
+            Docházka
+          </TabLabelLink>
+        </TabLabelBlock>
 
-          {/* Tab Content */}
-          <div className="p-6">
-            {activeTab === 'tasks' && (
-              <TasksTab 
-                tasks={courseData.tasks} 
-                grades={courseData.grades} 
-              />
-            )}
-            {activeTab === 'attendance' && (
-              <AttendanceTab 
-                attendances={courseData.attendances} 
-                attendanceRecords={courseData.attendanceRecords}
-              />
-            )}
-          </div>
+        {/* Tab Content - nyní se renderuje podle child route */}
+        <div className="min-h-96">
+          <StudentViewDataContext.Provider value={courseData}>
+            <Outlet />
+          </StudentViewDataContext.Provider>
         </div>
-      </div>
-    </div>
+      </div >
+    </div >
   )
 }

@@ -1,14 +1,15 @@
+import { createFileRoute, Link } from '@tanstack/react-router'
+import { CreateAttendanceDayModal } from '../../../components/attendances';
 import { useEffect, useState } from 'react';
-import { Link } from '@tanstack/react-router';
-import { attendanceService } from '../../services/attendance-service';
-import { CreateAttendanceDayModal } from './CreateAttendanceDayModal';
-import { type AttendanceDto, type AttendanceDayCreateDto } from '../../model/attendance-dto';
+import type { AttendanceDayCreateDto, AttendanceDto } from '../../../model/attendance-dto';
+import { attendanceService } from '../../../services/attendance-service';
 
-interface AttendanceDaysProps {
-  attendanceId: string;
-}
+export const Route = createFileRoute('/attendances/$id/days')({
+  component: RouteComponent,
+})
 
-export function AttendanceDays({ attendanceId }: AttendanceDaysProps) {
+function RouteComponent() {
+  const { id: attendanceId } = Route.useParams(); // attendanceId
   const [attendance, setAttendance] = useState<AttendanceDto | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

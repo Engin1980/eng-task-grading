@@ -1,13 +1,14 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from '@tanstack/react-router';
-import type { AttendanceDaySetDto } from "../../model/attendance-dto";
-import { attendanceService } from "../../services/attendance-service";
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import type { AttendanceDaySetDto } from '../../../model/attendance-dto';
+import { useEffect, useState } from 'react';
+import { attendanceService } from '../../../services/attendance-service';
 
-interface StudentOverviewProps {
-  attendanceId: string;
-}
+export const Route = createFileRoute('/attendances/$id/overview')({
+  component: RouteComponent,
+})
 
-export function StudentOverview({ attendanceId }: StudentOverviewProps) {
+function RouteComponent() {
+  const { id: attendanceId } = Route.useParams(); // attendanceId
   const [data, setData] = useState<AttendanceDaySetDto | null>(null);
   const [loading, setLoading] = useState(true);
   const [studentFilter, setStudentFilter] = useState("");

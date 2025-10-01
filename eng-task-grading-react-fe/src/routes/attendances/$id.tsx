@@ -6,6 +6,7 @@ import { TabLabelBlock } from '../../ui/tabLabelBlock'
 import { TabLabelLink } from '../../ui/tabLabelLink'
 import { AttendanceIcon } from '../../ui/icons/attendanceIcon'
 import { AttendanceOverviewIcon } from '../../ui/icons/attendanceOverviewIcon'
+import { useNavigationContext } from '../../contexts/NavigationContext'
 
 export const Route = createFileRoute('/attendances/$id')({
   component: AttendanceDetailPage,
@@ -16,13 +17,15 @@ function AttendanceDetailPage() {
   const [attendance, setAttendance] = useState<AttendanceDto | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const navCtx = useNavigationContext();
 
   const loadAttendance = async () => {
     try {
       setLoading(true)
       setError(null)
       const attendanceData = await attendanceService.getById(+id)
-      setAttendance(attendanceData)
+      setAttendance(attendanceData);
+      navCtx.setAttendance({ id: attendanceData.id, title: attendanceData.title });
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Chyba při načítání docházky'
       setError(errorMessage)

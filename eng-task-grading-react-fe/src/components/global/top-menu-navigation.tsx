@@ -14,7 +14,7 @@ export function TopMenuNavigation() {
         {navCtx?.course && <>
             <span className="text-gray-600">{separator}</span>
             <CourseIcon />
-            <Link to={`/courses/${navCtx.course.id}`} className="mx-1 text-blue-600">{navCtx.course.title}</Link>
+            <Link to={`/courses/${navCtx.course.id}/grades`} className="mx-1 text-blue-600">{navCtx.course.title}</Link>
         </>}
         {navCtx?.task && <>
             <span className="text-gray-600 mr-1">{separator}</span>

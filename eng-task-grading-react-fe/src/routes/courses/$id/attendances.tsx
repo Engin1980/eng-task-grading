@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import type { AttendanceCreateDto, AttendanceDto } from '../../../model/attendance-dto';
 import { attendanceService } from '../../../services/attendance-service';
 import { CreateAttendanceModal } from '../../../components/attendances';
+import { useNavigationContext } from '../../../contexts/NavigationContext';
 
 export const Route = createFileRoute('/courses/$id/attendances')({
   component: AttendancesPage,
@@ -17,6 +18,7 @@ function AttendancesPage() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
 
   const loadAttendances = async () => {
     try {
@@ -105,7 +107,7 @@ function AttendancesPage() {
                 <tr key={attendance.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <Link
-                      to="/attendances/$id"
+                      to="/attendances/$id/days"
                       params={{ id: attendance.id.toString() }}
                       className="text-blue-600 hover:text-blue-900 hover:underline"
                     >

@@ -15,6 +15,7 @@ namespace EngTaskGradingNetBE.Controllers
   [Authorize(Roles = Roles.TEACHER_ROLE)]
   public class TeacherController(AuthService authService, TeacherService teacherService) : ControllerBase
   {
+    [AllowAnonymous]
     [HttpPost]
     public async Task<TeacherDto> RegisterAsync([FromBody] TeacherCreateDto request)
     {

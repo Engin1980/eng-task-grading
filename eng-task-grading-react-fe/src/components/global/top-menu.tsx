@@ -1,5 +1,6 @@
 import { Link } from '@tanstack/react-router';
 import { useAuthContext } from '../../contexts/AuthContext';
+import { TopMenuNavigation } from './top-menu-navigation';
 
 const TopMenu: React.FC = () => {
   const { loggedUser, logout } = useAuthContext();
@@ -23,9 +24,9 @@ const TopMenu: React.FC = () => {
                     <Link to="/studentView/login" className="mr-4 text-blue-600">Přihlášení studenta</Link>
                   </>
                 )}
-                {loggedUser && loggedUser.role == "ROLE_TEACHER" && (<>
-                  <Link to="/courses" className="mr-4 text-blue-600">Kurzy</Link>
-                  <Link to="/logs" className="ml-4 text-blue-600">App-Log</Link>
+                {loggedUser && loggedUser.role == "ROLE_TEACHER" && (<>                  
+                  <TopMenuNavigation />
+                  <Link to="/logs" className="ml-8 text-blue-600">📝 App-Log</Link>
                 </>)}
                 {loggedUser && loggedUser.role == "ROLE_STUDENT" && (<>
                   <Link to="/courses" className="mr-4 text-blue-600">Kurzy</Link>

@@ -6,6 +6,7 @@ import type { GradeDto, GradeSet } from '../../model/grade-dto';
 import { gradeService } from '../../services/grade-service';
 import { taskService } from '../../services/task-service';
 import { AddGradeModal, EditGradeModal } from '../../components/tasks';
+import { useNavigationContext } from '../../contexts/NavigationContext';
 
 export const Route = createFileRoute('/tasks/$id')({
   component: RouteComponent,
@@ -30,6 +31,7 @@ function RouteComponent() {
   const [selectedStudent, setSelectedStudent] = useState<StudentDto | null>(null);
   const [isEditGradeModalOpen, setIsEditGradeModalOpen] = useState(false);
   const [selectedGrade, setSelectedGrade] = useState<GradeDto | null>(null);
+  const navCtx = useNavigationContext();
 
   // Funkce pro filtrování studentů
   const filteredStudentData = data?.studentDatas.filter(studentData => {
@@ -50,6 +52,7 @@ function RouteComponent() {
     const gradeSet: GradeSet = await gradeService.getGradesByTask(id);
     const data: DataSet = transformData(gradeSet);
     setData(data);
+    navCtx.setTask({ id: task.id, title: task.title });
   }
 
   const transformData = (gradeSet: GradeSet) => {
@@ -328,8 +331,8 @@ function RouteComponent() {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${grade.value >= (task?.minGrade || 0)
-                                ? 'bg-green-100 text-green-800'
-                                : 'bg-red-100 text-red-800'
+                              ? 'bg-green-100 text-green-800'
+                              : 'bg-red-100 text-red-800'
                               }`}>
                               {grade.value}
                             </span>

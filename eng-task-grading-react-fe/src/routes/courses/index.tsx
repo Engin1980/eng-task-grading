@@ -95,7 +95,7 @@ function CoursesPage() {
                 <p>Účasti: {course.attendancesCount}</p>
               </div>
               <Link
-                to="/courses/$id/grades"     // 💡 tady musí být stejný název jako v souboru ($courseId.tsx)
+                to="/courses/$id/grades"
                 params={{ id: course.id.toString() }}
                 className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 inline-block"
               >

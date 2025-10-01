@@ -3,6 +3,7 @@ import './index.css'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
 import { routeTree } from './routeTree.gen'
 import { AuthProvider } from './contexts/AuthContext'
+import { NavigationProvider } from './contexts/NavigationContext'
 
 
 // Set up a Router instance
@@ -25,7 +26,9 @@ if (!rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement)
   root.render(<>
     <AuthProvider>
-      <RouterProvider router={router} />
+      <NavigationProvider>
+        <RouterProvider router={router} />
+      </NavigationProvider>
     </AuthProvider>
   </>)
 }

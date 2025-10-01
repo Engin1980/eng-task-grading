@@ -9,6 +9,7 @@ import { TaskIcon } from '../../ui/icons/taskIcon'
 import { AttendanceIcon } from '../../ui/icons/attendanceIcon'
 import { GradeIcon } from '../../ui/icons/gradeIcon'
 import { StudentIcon } from '../../ui/icons/studentIcon'
+import { useNavigationContext } from '../../contexts/NavigationContext'
 
 export const Route = createFileRoute('/courses/$id')({
   component: CourseDetailPage,
@@ -21,21 +22,23 @@ function CourseDetailPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const navigate = useNavigate();
+  const navCtx = useNavigationContext();
 
   const loadCourse = async () => {
     try {
-      setLoading(true)
-      setError(null)
-      logger.info(`Načítám kurz s ID: ${id}`)
-      const courseData = await courseService.get(id)
-      setCourse(courseData)
-      logger.info('Kurz byl úspěšně načten', { course: courseData })
+      setLoading(true);
+      setError(null);
+      logger.info(`Načítám kurz s ID: ${id}`);
+      const courseData = await courseService.get(id);
+      setCourse(courseData);
+      navCtx.setCourse({ id: courseData.id, title: courseData.code });
+      logger.info('Kurz byl úspěšně načten', { course: courseData });
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Chyba při načítání kurzu'
-      setError(errorMessage)
-      logger.error('Chyba při načítání kurzu', { error: err, courseId: id })
+      const errorMessage = err instanceof Error ? err.message : 'Chyba při načítání kurzu';
+      setError(errorMessage);
+      logger.error('Chyba při načítání kurzu', { error: err, courseId: id });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 

@@ -27,6 +27,32 @@ namespace EngTaskGradingNetBE.Controllers
       return ret;
     }
 
+    [HttpGet("for-course/{courseId}/new")]
+    public async Task<List<NewGradeSetTaskDto>> GetCourseGradeSetNewAsync([FromRoute] int courseId)
+    {
+      var tmp = await gradeService.GetGradesByCourseAsync(courseId);
+      List<NewGradeSetTaskDto> ret = [];
+
+      foreach (var tmpTask in tmp.Tasks)
+      {
+        TaskDto taskDto = EObjectMapper.To(tmpTask);
+
+        List<NewGradeSetStudentDto> students = [];
+
+        foreach (var tmpStudent in tmp.Students)
+        {
+          StudentDto studentDto = EObjectMapper.To(tmpStudent);
+          List<Grade> grades = tmp.Grades.Where(q => q.StudentId == tmpStudent.Id && q.TaskId == tmpTask.Id).OrderByDescending(q => q.Date).ToList();
+          List<GradeDto> gradeDtos = grades.Select(EObjectMapper.To).ToList();
+          NewGradeSetStudentDto studentSetDto = new(studentDto, gradeDtos);
+          students.Add(studentSetDto);
+        }
+        NewGradeSetTaskDto it = new(taskDto, students.OrderBy(q => q.Student.Surname).ThenBy(q => q.Student.Name).ToList());
+        ret.Add(it);
+      }
+      return ret;
+    }
+
     [HttpGet("for-task/{taskId}")]
     public async Task<GradeSetDto> GetTaskGradeSetAsync([FromRoute] int taskId)
     {
@@ -36,6 +62,28 @@ namespace EngTaskGradingNetBE.Controllers
       GradeSetDto ret = new GradeSetDto(tasks.Select(EObjectMapper.To).ToList(),
         tmp.Students.Select(EObjectMapper.To).OrderBy(q => q.Surname).ThenBy(q => q.Name).ToList(),
         tmp.Grades.Select(EObjectMapper.To).ToList());
+      return ret;
+    }
+
+    [HttpGet("for-task/{taskId}/new")]
+    public async Task<NewGradeSetTaskDto> GetTaskGradeSetNewAsync([FromRoute] int taskId)
+    {
+      var tmp = await gradeService.GetGradesByTaskAsync(taskId);
+
+      NewGradeSetTaskDto ret;
+
+      TaskDto taskDto = EObjectMapper.To(tmp.Task);
+      List<NewGradeSetStudentDto> students = [];
+
+      foreach (var tmpStudent in tmp.Students)
+      {
+        StudentDto studentDto = EObjectMapper.To(tmpStudent);
+        List<Grade> grades = tmp.Grades.Where(q => q.StudentId == tmpStudent.Id).OrderByDescending(q => q.Date).ToList();
+        List<GradeDto> gradeDtos = grades.Select(EObjectMapper.To).ToList();
+        NewGradeSetStudentDto studentSetDto = new(studentDto, gradeDtos);
+        students.Add(studentSetDto);
+      }
+      ret = new(taskDto, students.OrderBy(q => q.Student.Surname).ThenBy(q => q.Student.Name).ToList());
       return ret;
     }
 

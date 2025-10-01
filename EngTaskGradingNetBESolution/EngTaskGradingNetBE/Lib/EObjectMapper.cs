@@ -29,7 +29,7 @@ public static class EObjectMapper
   };
 
 
-  public static TaskDto To(Task task) => new(task.Id, task.Title, task.Keywords, task.Description, task.MinGrade);
+  public static TaskDto To(Task task) => new(task.Id, task.Title, task.Keywords, task.Description, task.MinGrade, task.Aggregation.ToString());
   public static Task From(TaskCreateDto taskDto) => new()
   {
     Title = taskDto.Title,

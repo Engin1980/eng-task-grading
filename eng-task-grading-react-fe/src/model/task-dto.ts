@@ -4,6 +4,7 @@ export interface TaskDto {
   description?: string;
   keywords: string | null;
   minGrade: number | null;
+  aggregation: string | null;
 }
 
 export interface TaskCreateDto {

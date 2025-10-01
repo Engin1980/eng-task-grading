@@ -30,6 +30,7 @@ function GradesPage() {
   const loadGradeSet = async () => {
     try {
       setLoading(true);
+tady opravit grade set a přepsat attendance aby se taky vracely jinak
       const data = await gradeService.getGradesByCourse(courseId);
       setGradeSet(data);
       const dota = await attendanceService.getCourseSet(+courseId);

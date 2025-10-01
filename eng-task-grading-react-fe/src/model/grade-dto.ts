@@ -1,5 +1,21 @@
-import type { StudentDto } from "./student-dto";
+// --- NewGradeSet DTOs ---
 import type { TaskDto } from "./task-dto";
+import type { StudentDto } from "./student-dto";
+
+export interface NewGradeSetStudentDto {
+  student: StudentDto;
+  finalValue: number | null;
+  grades: GradeDto[];
+}
+
+export interface NewGradeSetTaskDto {
+  task: TaskDto;
+  students: NewGradeSetStudentDto[];
+}
+
+export interface NewGradeSetDto {
+  tasks: NewGradeSetTaskDto[];
+}
 
 export interface GradeDto {
   id: number;
@@ -27,3 +43,4 @@ export interface GradeSet {
   students: StudentDto[];
   grades: GradeDto[];
 }
+

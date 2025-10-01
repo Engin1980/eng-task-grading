@@ -2,9 +2,8 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState } from 'react';
 import type { TaskDto } from '../../model/task-dto';
 import type { StudentDto } from '../../model/student-dto';
-import type { GradeDto, GradeSet } from '../../model/grade-dto';
+import type { GradeDto, NewGradeSetTaskDto } from '../../model/grade-dto';
 import { gradeService } from '../../services/grade-service';
-import { taskService } from '../../services/task-service';
 import { AddGradeModal, EditGradeModal } from '../../components/tasks';
 import { useNavigationContext } from '../../contexts/NavigationContext';
 
@@ -12,20 +11,27 @@ export const Route = createFileRoute('/tasks/$id')({
   component: RouteComponent,
 })
 
-interface DataSet {
-  studentDatas: StudentData[];
+function reducerMin(grades: GradeDto[]): number | null {
+  if (grades.length === 0) return null;
+  return Math.min(...grades.map(g => g.value));
 }
-
-interface StudentData {
-  student: StudentDto;
-  grades: GradeDto[];
+function reducerMax(grades: GradeDto[]): number | null {
+  if (grades.length === 0) return null;
+  return Math.max(...grades.map(g => g.value));
 }
-
+function reducerAvg(grades: GradeDto[]): number | null {
+  if (grades.length === 0) return null;
+  return grades.reduce((sum, g) => sum + g.value, 0) / grades.length;
+}
+function reducerLast(grades: GradeDto[]): number | null {
+  if (grades.length === 0) return null;
+  return grades[0].value; // backend returns last as first
+}
 
 function RouteComponent() {
   const { id } = Route.useParams()
+  const [set, setSet] = useState<NewGradeSetTaskDto | null>(null);
   const [task, setTask] = useState<TaskDto | null>(null);
-  const [data, setData] = useState<DataSet>();
   const [filterText, setFilterText] = useState<string>("");
   const [isAddGradeModalOpen, setIsAddGradeModalOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<StudentDto | null>(null);
@@ -34,7 +40,7 @@ function RouteComponent() {
   const navCtx = useNavigationContext();
 
   // Funkce pro filtrování studentů
-  const filteredStudentData = data?.studentDatas.filter(studentData => {
+  const filteredStudentData = set?.students.filter(studentData => {
     if (!filterText.trim()) return true;
 
     const searchText = filterText.toLowerCase();
@@ -46,25 +52,35 @@ function RouteComponent() {
     );
   });
 
-  const loadData = async () => {
-    const task: TaskDto = await taskService.get(id);
-    setTask(task);
-    const gradeSet: GradeSet = await gradeService.getGradesByTask(id);
-    const data: DataSet = transformData(gradeSet);
-    setData(data);
-    navCtx.setTask({ id: task.id, title: task.title });
+  const setSetFinalValues = (set: NewGradeSetTaskDto, reducer: (grades: GradeDto[]) => number | null): void => {
+    set.students.forEach(studentData => {
+      studentData.finalValue = reducer(studentData.grades);
+    });
   }
 
-  const transformData = (gradeSet: GradeSet) => {
-    const studentDatas: StudentData[] = gradeSet.students.map(student => ({
-      student,
-      grades: gradeSet.grades.filter(grade => grade.studentId === student.id).sort((a, b) => {
-        const dateA = new Date(a.date);
-        const dateB = new Date(b.date);
-        return dateB.getTime() - dateA.getTime();
-      }),
-    }));
-    return { studentDatas };
+  const selectAggregationByType = (task: TaskDto): ((grades: GradeDto[]) => number | null) => {
+    switch (task.aggregation?.toLowerCase()) {
+      case 'min':
+        return reducerMin;
+      case 'max':
+        return reducerMax;
+      case 'avg':
+        return reducerAvg;
+      case 'last':
+        return reducerLast;
+      default:
+        return reducerLast;
+    }
+  };
+
+  const loadData = async () => {
+    const set: NewGradeSetTaskDto = await gradeService.getGradesByTaskNew(id);
+    const reducer = selectAggregationByType(set.task);
+    setSetFinalValues(set, reducer);
+    console.log(set);
+    setSet(set);
+    setTask(set.task);
+    navCtx.setTask({ id: set.task.id, title: set.task.title });
   }
 
   const handleAddGrade = (student: StudentDto) => {
@@ -73,13 +89,13 @@ function RouteComponent() {
   };
 
   const handleGradeAdded = (newGrade: GradeDto) => {
-    // Aktualizace dat s novou známkou
-    console.log("### New grade added:", newGrade);
-    if (data) {
-      const updatedStudentDatas = data.studentDatas.map(studentData => {
+    if (set) {
+      const reducer = selectAggregationByType(set.task);
+      const updatedStudentDatas = set.students.map(studentData => {
         if (studentData.student.id === newGrade.studentId) {
           return {
             ...studentData,
+            finalValue: reducer([newGrade, ...studentData.grades]),
             grades: [newGrade, ...studentData.grades].sort((a, b) => {
               const dateA = new Date(a.date);
               const dateB = new Date(b.date);
@@ -89,7 +105,7 @@ function RouteComponent() {
         }
         return studentData;
       });
-      setData({ studentDatas: updatedStudentDatas });
+      setSet({ ...set, students: updatedStudentDatas });
     }
   };
 
@@ -106,11 +122,13 @@ function RouteComponent() {
 
   const handleGradeUpdated = (updatedGrade: GradeDto) => {
     // Aktualizace dat s upravenou známkou
-    if (data) {
-      const updatedStudentDatas = data.studentDatas.map(studentData => {
+    if (set) {
+      const reducer = selectAggregationByType(set.task);
+      const updatedStudentDatas = set.students.map(studentData => {
         if (studentData.student.id === updatedGrade.studentId) {
           return {
             ...studentData,
+            finalValue: reducer([updatedGrade, ...studentData.grades]),
             grades: studentData.grades.map(grade =>
               grade.id === updatedGrade.id ? updatedGrade : grade
             ).sort((a, b) => {
@@ -122,7 +140,7 @@ function RouteComponent() {
         }
         return studentData;
       });
-      setData({ studentDatas: updatedStudentDatas });
+      setSet({ ...set, students: updatedStudentDatas });
     }
   };
 
@@ -137,13 +155,15 @@ function RouteComponent() {
       try {
         await gradeService.deleteGrade(gradeId.toString());
 
-        // Aktualizace dat po smazání známky
-        if (data) {
-          const updatedStudentDatas = data.studentDatas.map(studentData => ({
+        // TODO tohle je tu 3x podobné, refactorovat
+        if (set) {
+          const reducer = selectAggregationByType(set.task);
+          const updatedStudentDatas = set.students.map(studentData => ({
             ...studentData,
+            finalValue: reducer(studentData.grades.filter(grade => grade.id !== gradeId)),
             grades: studentData.grades.filter(grade => grade.id !== gradeId)
           }));
-          setData({ studentDatas: updatedStudentDatas });
+          setSet({ ...set, students: updatedStudentDatas });
         }
       } catch (error) {
         console.error('Error deleting grade:', error);
@@ -173,30 +193,27 @@ function RouteComponent() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-          {task.keywords && (
-            <div>
-              <strong className="text-gray-700">Klíčová slova:</strong>
-              <span className="ml-2 text-gray-600">{task.keywords}</span>
-            </div>
-          )}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+          <div>
+            <strong className="text-gray-700">Klíčová slova:</strong>
+            <span className="ml-2 text-gray-600">{task.keywords || '-'}</span>
+          </div>
 
-          {task.minGrade !== null && task.minGrade !== undefined && (
-            <div>
-              <strong className="text-gray-700">Minimální hodnota:</strong>
-              <span className="ml-2 text-gray-600">{task.minGrade}</span>
-            </div>
-          )}
+          <div>
+            <strong className="text-gray-700">Minimální hodnota:</strong>
+            <span className="ml-2 text-gray-600">{task.minGrade || '-'}</span>
+          </div>
+
+          <div>
+            <strong className="text-gray-700">Agregace:</strong>
+            <span className="ml-2 text-gray-600">{task.aggregation || '-'}</span>
+          </div>
         </div>
       </div>
 
       {/* Tabulka se studenty a známkami */}
-      {!data ? (
+      {!set ? (
         <div className="text-center">Načítám známky...</div>
-      ) : data.studentDatas.length === 0 ? (
-        <div className="text-center py-8">
-          <p className="text-gray-500">Nejsou k dispozici žádné známky pro tento úkol.</p>
-        </div>
       ) : (
         <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
@@ -235,6 +252,9 @@ function RouteComponent() {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Jméno
                     </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Výsledek
+                    </th>
                     <th className="px-3 py-3 text-center">
                       {/* Prázdný sloupec pro tlačítko + */}
                     </th>
@@ -264,6 +284,9 @@ function RouteComponent() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                           {studentData.student.name || '-'}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          ---
                         </td>
                         <td className="px-3 py-4 text-center">
                           <button
@@ -296,6 +319,16 @@ function RouteComponent() {
                           {gradeIndex === 0 && (
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900" rowSpan={studentData.grades.length}>
                               {studentData.student.name || '-'}
+                            </td>
+                          )}
+                          {gradeIndex === 0 && (
+                            <td className="px-6 py-4 whitespace-nowrap" rowSpan={studentData.grades.length}>
+                              <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${studentData.finalValue && studentData.finalValue >= (task?.minGrade || 0)
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-red-100 text-red-800'
+                                }`}>
+                                {studentData.finalValue}
+                              </span>
                             </td>
                           )}
                           {gradeIndex === 0 && (

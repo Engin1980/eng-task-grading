@@ -5,6 +5,14 @@ namespace EngTaskGradingNetBE.Models.DbModel;
 
 public class Task
 {
+  public enum AggregationType
+  {
+    Min,
+    Max,
+    Avg,
+    Last
+  }
+
   [Key]
   [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
   public int Id { get; set; }
@@ -19,6 +27,8 @@ public class Task
   public Course Course { get; set; } = null!;
 
   public int? MinGrade { get; set; }
+
+  public AggregationType Aggregation { get; set; } = AggregationType.Last;
 
   public List<Grade> Grades { get; set; } = null!;
 }

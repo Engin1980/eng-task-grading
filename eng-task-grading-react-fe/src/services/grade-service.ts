@@ -19,33 +19,9 @@ function reducerLast(grades: GradeDto[]): number {
 }
 
 export const gradeService = {
-  //TODO delete the old one
-  async getGradesByTask(taskId: string): Promise<GradeSet> {
-    const { data } = await apiHttp.get<GradeSet>(`/v1/grade/for-task/${taskId}`);
-    logger.info(`Načteny známky pro úkol ${taskId}`, { count: data.grades.length });
-    logger.info(`Grades data: ${JSON.stringify(data)}`);
-    return data;
-  },
-
   async getGradesByTaskNew(taskId: string): Promise<NewGradeSetTaskDto> {
     const { data } = await apiHttp.get<NewGradeSetTaskDto>(`/v1/grade/for-task/${taskId}/new`);
     logger.info(`Načteny známky pro úkol ${taskId}`);
-    return data;
-  },
-
-  //TODO delete the old one
-  async getGradesByCourse(courseId: string): Promise<GradeSet> {
-    const { data } = await apiHttp.get<GradeSet>(`/v1/grade/for-course/${courseId}`);
-    logger.info(`Načteny známky pro kurz ${courseId}`, { count: data.grades.length });
-    logger.info(`Grades data: ${JSON.stringify(data)}`);
-    return data;
-  },
-
-  //TODO delete the new one :-D it is in  coursesService now
-  async getGradesByCourseNew(courseId: string): Promise<NewGradeSetTaskDto[]> {
-    const { data } = await apiHttp.get<NewGradeSetTaskDto[]>(`/v1/grade/for-course/${courseId}/new`);
-    logger.info(`Načteny známky pro kurz ${courseId}`);
-    logger.info(`Grades data: ${JSON.stringify(data)}`);
     return data;
   },
 

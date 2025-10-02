@@ -81,24 +81,6 @@ function GradesPage() {
     return task.title.toLowerCase().includes(searchText);
   });
 
-  //TODO del if not used
-  // Funkce pro získání všech známek pro konkrétního studenta a task
-  // const getGradesForStudentAndTask = (studentId: number, taskId: number): GradeDto[] => {
-  //   if (!gradeSet) return [];
-
-  //   // Najdeme všechny známky pro danou kombinaci studenta a tasku
-  //   const studentGrades = gradeSet.grades.filter(
-  //     grade => grade.studentId === studentId && grade.taskId === taskId
-  //   );
-
-  //   // Seřadíme podle data vzestupně (nejstarší první, nejnovější poslední)
-  //   return studentGrades.sort((a, b) => {
-  //     const dateA = new Date(a.date);
-  //     const dateB = new Date(b.date);
-  //     return dateA.getTime() - dateB.getTime();
-  //   });
-  // };
-
   // Funkce pro barevné označení známek
   const getGradeColor = (value: number, minGrade: number) => {
     if (value >= minGrade) {
@@ -121,18 +103,6 @@ function GradesPage() {
       return 'bg-red-100 text-red-800 border border-red-200';
     }
   };
-
-  //TODO remove
-  // // Funkce pro získání attendance hodnoty pro studenta
-  // const getAttendanceValueForStudent = (studentId: number, attendanceId: number): number | null => {
-  //   if (!attendanceSet) return null;
-
-  //   const item = attendanceSet.items.find(
-  //     item => item.studentId === studentId && item.attendanceId === attendanceId
-  //   );
-
-  //   return item ? item.value : null;
-  // };
 
   // Výpočet úspěšných úkolů pro studenta
   const getStudentTaskStats = (dto: GSetCourseStudentDto) => {

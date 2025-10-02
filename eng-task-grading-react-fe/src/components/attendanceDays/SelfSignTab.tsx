@@ -270,7 +270,7 @@ export function SelfSignTab({ attendanceDayId }: SelfSignTabProps) {
                           <div className="flex flex-wrap gap-1">
                             {/* Zobraz všechny dostupné attendance values */}
                             {values.map((value) => {
-                              const isSelected = false; // TODO here
+                              const isSelected = false; // TODO upravit s využitím nových GUI komponent
 
                               // Výpočet barvy na základě hodnoty (0-1, červená-zelená)
                               const normalizedValue = Math.max(0, Math.min(1, value.weight)); // Omez na 0-1

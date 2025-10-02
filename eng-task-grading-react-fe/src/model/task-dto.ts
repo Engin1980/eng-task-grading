@@ -4,7 +4,7 @@ export interface TaskDto {
   description?: string;
   keywords: string | null;
   minGrade: number | null;
-  aggregation: string | null;
+  aggregation: "min" | "max" | "avg" | "last";
 }
 
 export interface TaskCreateDto {

@@ -110,5 +110,27 @@ namespace EngTaskGradingNetBE.Services
       await Db.SaveChangesAsync();
       return existingCourse;
     }
+
+    internal async Task<Course> GetForOverview(int id)
+    {
+      Course ret = await Db.Courses
+        .Where(q => q.Id == id)
+        .Include(q => q.Tasks)
+        .Include(q => q.Students)
+          .ThenInclude(s => s.Grades)
+            .ThenInclude(g => g.Task)
+        .Include(q => q.Attendances)
+        .ThenInclude(a => a.Days)
+          .ThenInclude(a => a.Records)
+            .ThenInclude(ar => ar.Student)
+        .Include(q => q.Attendances)
+          .ThenInclude(a => a.Days)
+            .ThenInclude(a => a.Records)
+              .ThenInclude(ar => ar.Value)
+        .AsSplitQuery()
+        .FirstOrDefaultAsync()
+        ?? throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.CourseNotFound, id);
+      return ret;
+    }
   }
 }

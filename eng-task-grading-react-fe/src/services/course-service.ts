@@ -2,6 +2,7 @@ import { apiHttp } from "./api-http";
 import { createLogger } from "./log-service";
 import type { CourseCreateDto, CourseDto } from "../model/course-dto";
 import type { StudentCreateDto } from "../model/student-dto";
+import type { GSetCourse, GSetCourseDto } from "../model/gset";
 
 const logger = createLogger("CourseService");
 
@@ -33,6 +34,12 @@ export const courseService = {
     logger.info("Stahuji kurz " + courseId);
     const { data } = await apiHttp.get<CourseDto>(`/v1/course/${courseId}`);
     logger.info("Kurz stažen", { courseId });
+    return data;
+  },
+
+  async getOverview(courseId: string): Promise<GSetCourseDto> {
+    const { data } = await apiHttp.get<GSetCourseDto>(`/v1/course/${courseId}/overview`);
+    logger.info(`Načtena přehledová data pro kurz ${courseId}`);
     return data;
   }
 };

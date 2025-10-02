@@ -1,10 +1,25 @@
 import type { GradeCreateDto, GradeDto, GradeSet, GradeUpdateDto, NewGradeSetDto, NewGradeSetTaskDto } from "../model/grade-dto";
+import type { FinalGradeDto } from "../model/gset";
 import { apiHttp } from "./api-http"
 import { createLogger } from "./log-service";
 
 const logger = createLogger("GradeService");
 
+function reducerMin(grades: GradeDto[]): number {
+  return Math.min(...grades.map(g => g.value));
+}
+function reducerMax(grades: GradeDto[]): number {
+  return Math.max(...grades.map(g => g.value));
+}
+function reducerAvg(grades: GradeDto[]): number {
+  return grades.reduce((sum, g) => sum + g.value, 0) / grades.length;
+}
+function reducerLast(grades: GradeDto[]): number {
+  return grades[0].value;
+}
+
 export const gradeService = {
+  //TODO delete the old one
   async getGradesByTask(taskId: string): Promise<GradeSet> {
     const { data } = await apiHttp.get<GradeSet>(`/v1/grade/for-task/${taskId}`);
     logger.info(`Načteny známky pro úkol ${taskId}`, { count: data.grades.length });
@@ -18,6 +33,7 @@ export const gradeService = {
     return data;
   },
 
+  //TODO delete the old one
   async getGradesByCourse(courseId: string): Promise<GradeSet> {
     const { data } = await apiHttp.get<GradeSet>(`/v1/grade/for-course/${courseId}`);
     logger.info(`Načteny známky pro kurz ${courseId}`, { count: data.grades.length });
@@ -25,6 +41,7 @@ export const gradeService = {
     return data;
   },
 
+  //TODO delete the new one :-D it is in  coursesService now
   async getGradesByCourseNew(courseId: string): Promise<NewGradeSetTaskDto[]> {
     const { data } = await apiHttp.get<NewGradeSetTaskDto[]>(`/v1/grade/for-course/${courseId}/new`);
     logger.info(`Načteny známky pro kurz ${courseId}`);
@@ -45,5 +62,42 @@ export const gradeService = {
 
   async deleteGrade(gradeId: string): Promise<void> {
     await apiHttp.delete(`/v1/grade/${gradeId}`);
+  },
+
+  evaluateFinalGrade(type: "min" | "max" | "avg" | "last", grades: GradeDto[]): FinalGradeDto | null {
+    if (grades.length === 0) return null;
+
+    // order grades by date descending
+    const orderedGrades = grades.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+    let value: number;
+    let date: Date;
+    let ret: FinalGradeDto;
+    switch (type.toLowerCase()) {
+      case "min":
+        value = reducerMin(grades);
+        date = grades.find(g => g.value === value)!.date;
+        ret = { value, date };
+        break;
+      case "max":
+        value = reducerMax(grades);
+        date = grades.find(g => g.value === value)!.date;
+        ret = { value, date };
+        break;
+      case "avg":
+        value = reducerAvg(grades);
+        date = orderedGrades[0].date;
+        ret = { value, date };
+        break;
+      case "last":
+        value = reducerLast(orderedGrades);
+        date = orderedGrades[0].date;
+        ret = { value, date };
+        break;
+      default:
+        throw new Error(`Unknown final grade evaluation type: ${type}`);
+    }
+
+    return ret;
   }
 }

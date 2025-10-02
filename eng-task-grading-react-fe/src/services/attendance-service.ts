@@ -69,6 +69,11 @@ export const attendanceService = {
     return data;
   },
 
+  getCourseSetNew: async (courseId: number) => {
+    const { data } = await apiHttp.get<AttendanceSetForTaskDto[]>(`/v1/attendance/for-course/${courseId}/set-new`);
+    return data;
+  },
+
   getAttendanceSet: async (attendanceId: number) => {
     const { data } = await apiHttp.get<AttendanceDaySetDto>(`/v1/attendance/${attendanceId}/set`);
     return data;

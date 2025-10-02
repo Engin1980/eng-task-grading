@@ -14,8 +14,6 @@ public class AttendanceRecord
   [Required]
   public int AttendanceDayId { set; get; }
   public AttendanceDay AttendanceDay { set; get; } = null!;
-
-
   [Required]
   public int AttendanceValueId { get; set; }
   public AttendanceValue Value { set; get; } = null!;

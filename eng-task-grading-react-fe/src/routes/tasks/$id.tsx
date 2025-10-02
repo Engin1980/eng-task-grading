@@ -11,22 +11,7 @@ export const Route = createFileRoute('/tasks/$id')({
   component: RouteComponent,
 })
 
-function reducerMin(grades: GradeDto[]): number | null {
-  if (grades.length === 0) return null;
-  return Math.min(...grades.map(g => g.value));
-}
-function reducerMax(grades: GradeDto[]): number | null {
-  if (grades.length === 0) return null;
-  return Math.max(...grades.map(g => g.value));
-}
-function reducerAvg(grades: GradeDto[]): number | null {
-  if (grades.length === 0) return null;
-  return grades.reduce((sum, g) => sum + g.value, 0) / grades.length;
-}
-function reducerLast(grades: GradeDto[]): number | null {
-  if (grades.length === 0) return null;
-  return grades[0].value; // backend returns last as first
-}
+
 
 function RouteComponent() {
   const { id } = Route.useParams()
@@ -52,31 +37,15 @@ function RouteComponent() {
     );
   });
 
-  const setSetFinalValues = (set: NewGradeSetTaskDto, reducer: (grades: GradeDto[]) => number | null): void => {
+  const setSetFinalValues = (set: NewGradeSetTaskDto, taskReduceType: "min" | "max" | "avg" | "last"): void => {
     set.students.forEach(studentData => {
-      studentData.finalValue = reducer(studentData.grades);
+      studentData.finalValue = gradeService.evaluateFinalGrade(taskReduceType, studentData.grades)?.value ?? null;
     });
   }
 
-  const selectAggregationByType = (task: TaskDto): ((grades: GradeDto[]) => number | null) => {
-    switch (task.aggregation?.toLowerCase()) {
-      case 'min':
-        return reducerMin;
-      case 'max':
-        return reducerMax;
-      case 'avg':
-        return reducerAvg;
-      case 'last':
-        return reducerLast;
-      default:
-        return reducerLast;
-    }
-  };
-
   const loadData = async () => {
     const set: NewGradeSetTaskDto = await gradeService.getGradesByTaskNew(id);
-    const reducer = selectAggregationByType(set.task);
-    setSetFinalValues(set, reducer);
+    setSetFinalValues(set, set.task.aggregation!);
     console.log(set);
     setSet(set);
     setTask(set.task);
@@ -90,13 +59,14 @@ function RouteComponent() {
 
   const handleGradeAdded = (newGrade: GradeDto) => {
     if (set) {
-      const reducer = selectAggregationByType(set.task);
       const updatedStudentDatas = set.students.map(studentData => {
         if (studentData.student.id === newGrade.studentId) {
+          const newGrades = [newGrade, ...studentData.grades];
+          const finalValue = gradeService.evaluateFinalGrade(set.task.aggregation!, newGrades)?.value ?? null;
           return {
             ...studentData,
-            finalValue: reducer([newGrade, ...studentData.grades]),
-            grades: [newGrade, ...studentData.grades].sort((a, b) => {
+            finalValue,
+            grades: newGrades.sort((a, b) => {
               const dateA = new Date(a.date);
               const dateB = new Date(b.date);
               return dateB.getTime() - dateA.getTime();
@@ -123,12 +93,13 @@ function RouteComponent() {
   const handleGradeUpdated = (updatedGrade: GradeDto) => {
     // Aktualizace dat s upravenou známkou
     if (set) {
-      const reducer = selectAggregationByType(set.task);
       const updatedStudentDatas = set.students.map(studentData => {
         if (studentData.student.id === updatedGrade.studentId) {
+          const newGrades = [updatedGrade, ...studentData.grades];
+          const finalValue = gradeService.evaluateFinalGrade(set.task.aggregation!, newGrades)?.value ?? null;
           return {
             ...studentData,
-            finalValue: reducer([updatedGrade, ...studentData.grades]),
+            finalValue,
             grades: studentData.grades.map(grade =>
               grade.id === updatedGrade.id ? updatedGrade : grade
             ).sort((a, b) => {
@@ -155,14 +126,16 @@ function RouteComponent() {
       try {
         await gradeService.deleteGrade(gradeId.toString());
 
-        // TODO tohle je tu 3x podobné, refactorovat
+        // TODO tohle je tu 3x podobné, refactorovat a když už, tak využít FinalGradeDto
         if (set) {
-          const reducer = selectAggregationByType(set.task);
-          const updatedStudentDatas = set.students.map(studentData => ({
-            ...studentData,
-            finalValue: reducer(studentData.grades.filter(grade => grade.id !== gradeId)),
-            grades: studentData.grades.filter(grade => grade.id !== gradeId)
-          }));
+          const updatedStudentDatas = set.students.map(studentData => {
+            const finalValue = gradeService.evaluateFinalGrade(set.task.aggregation!, studentData.grades)?.value ?? null;
+            return {
+              ...studentData,
+              finalValue,
+              grades: studentData.grades.filter(grade => grade.id !== gradeId)
+            };
+          });
           setSet({ ...set, students: updatedStudentDatas });
         }
       } catch (error) {

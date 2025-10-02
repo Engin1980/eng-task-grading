@@ -2,11 +2,13 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useState, useEffect } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useLogger } from '../../../hooks/use-logger';
-import type { GradeDto, GradeSet } from '../../../model/grade-dto';
+import type { GradeDto, GradeSet, NewGradeSetTaskDto } from '../../../model/grade-dto';
 import type { AttendanceSetDto } from '../../../model/attendance-dto';
 import type { StudentDto } from '../../../model/student-dto';
 import { gradeService } from '../../../services/grade-service';
 import { attendanceService } from '../../../services/attendance-service';
+import type { FinalGradeDto, GSetCourseDto, GSetCourseStudentDto } from '../../../model/gset';
+import { courseService } from '../../../services/course-service';
 
 export const Route = createFileRoute('/courses/$id/grades')({
   component: GradesPage,
@@ -18,31 +20,30 @@ function GradesPage() {
 
   const logger = useLogger("GradesTab");
   const navigate = useNavigate();
-  const [gradeSet, setGradeSet] = useState<GradeSet | null>(null);
-  const [attendanceSet, setAttendanceSet] = useState<AttendanceSetDto | null>(null);
-  const [unitedStudents, setUnitedStudents] = useState<StudentDto[]>([]);
+  const [set, setSet] = useState<GSetCourseDto | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [studentFilter, setStudentFilter] = useState<string>("");
   const [taskFilter, setTaskFilter] = useState<string>("");
   const [showTasks, setShowTasks] = useState(true);
   const [showAttendances, setShowAttendances] = useState(true);
 
+  const updateMainGrade = (data: GSetCourseDto) => {
+    // Update the main grade structure as needed
+    data.students.forEach(student => {
+      student.tasks.forEach(taskDto => {
+        const finalGrade: FinalGradeDto | null = gradeService.evaluateFinalGrade(data.tasks.find(t => t.id === taskDto.taskId)?.aggregation!, taskDto.grades);
+        taskDto.final = finalGrade;
+      });
+    });
+    return data;
+  };
+
   const loadGradeSet = async () => {
     try {
       setLoading(true);
-tady opravit grade set a přepsat attendance aby se taky vracely jinak
-      const data = await gradeService.getGradesByCourse(courseId);
-      setGradeSet(data);
-      const dota = await attendanceService.getCourseSet(+courseId);
-      setAttendanceSet(dota);
-
-      // prunik studentu:
-      const allStudents = [
-        ...(gradeSet?.students ?? []),
-        ...(dota?.students ?? [])
-      ];
-      const uniqueStudentIds = new Set(allStudents.map(student => student.id));
-      setUnitedStudents(allStudents.filter(student => uniqueStudentIds.has(student.id)));
+      const data = await courseService.getOverview(courseId);
+      const uData = updateMainGrade(data);
+      setSet(uData);
     } catch (error) {
       logger.error('Error loading grades:', error);
     } finally {
@@ -61,41 +62,42 @@ tady opravit grade set a přepsat attendance aby se taky vracely jinak
   };
 
   // Funkce pro filtrování studentů z unitedStudents
-  const filteredStudents = unitedStudents.filter(student => {
+  const filteredStudents = set?.students.filter(student => {
     if (!studentFilter.trim()) return true;
 
     const searchText = studentFilter.toLowerCase();
     return (
-      student.number.toLowerCase().includes(searchText) ||
-      (student.name?.toLowerCase().includes(searchText) ?? false) ||
-      (student.surname?.toLowerCase().includes(searchText) ?? false)
+      student.student.number.toLowerCase().includes(searchText) ||
+      (student.student.name?.toLowerCase().includes(searchText) ?? false) ||
+      (student.student.surname?.toLowerCase().includes(searchText) ?? false)
     );
   });
 
   // Funkce pro filtrování tasků
-  const filteredTasks = gradeSet?.tasks.filter(task => {
+  const filteredTasks = set?.tasks.filter(task => {
     if (!taskFilter.trim()) return true;
 
     const searchText = taskFilter.toLowerCase();
     return task.title.toLowerCase().includes(searchText);
   });
 
+  //TODO del if not used
   // Funkce pro získání všech známek pro konkrétního studenta a task
-  const getGradesForStudentAndTask = (studentId: number, taskId: number): GradeDto[] => {
-    if (!gradeSet) return [];
+  // const getGradesForStudentAndTask = (studentId: number, taskId: number): GradeDto[] => {
+  //   if (!gradeSet) return [];
 
-    // Najdeme všechny známky pro danou kombinaci studenta a tasku
-    const studentGrades = gradeSet.grades.filter(
-      grade => grade.studentId === studentId && grade.taskId === taskId
-    );
+  //   // Najdeme všechny známky pro danou kombinaci studenta a tasku
+  //   const studentGrades = gradeSet.grades.filter(
+  //     grade => grade.studentId === studentId && grade.taskId === taskId
+  //   );
 
-    // Seřadíme podle data vzestupně (nejstarší první, nejnovější poslední)
-    return studentGrades.sort((a, b) => {
-      const dateA = new Date(a.date);
-      const dateB = new Date(b.date);
-      return dateA.getTime() - dateB.getTime();
-    });
-  };
+  //   // Seřadíme podle data vzestupně (nejstarší první, nejnovější poslední)
+  //   return studentGrades.sort((a, b) => {
+  //     const dateA = new Date(a.date);
+  //     const dateB = new Date(b.date);
+  //     return dateA.getTime() - dateB.getTime();
+  //   });
+  // };
 
   // Funkce pro barevné označení známek
   const getGradeColor = (value: number, minGrade: number) => {
@@ -120,46 +122,45 @@ tady opravit grade set a přepsat attendance aby se taky vracely jinak
     }
   };
 
-  // Funkce pro získání attendance hodnoty pro studenta
-  const getAttendanceValueForStudent = (studentId: number, attendanceId: number): number | null => {
-    if (!attendanceSet) return null;
+  //TODO remove
+  // // Funkce pro získání attendance hodnoty pro studenta
+  // const getAttendanceValueForStudent = (studentId: number, attendanceId: number): number | null => {
+  //   if (!attendanceSet) return null;
 
-    const item = attendanceSet.items.find(
-      item => item.studentId === studentId && item.attendanceId === attendanceId
-    );
+  //   const item = attendanceSet.items.find(
+  //     item => item.studentId === studentId && item.attendanceId === attendanceId
+  //   );
 
-    return item ? item.value : null;
-  };
+  //   return item ? item.value : null;
+  // };
 
   // Výpočet úspěšných úkolů pro studenta
-  const getStudentStats = (studentId: number) => {
+  const getStudentTaskStats = (dto: GSetCourseStudentDto) => {
     if (!filteredTasks) return { successful: 0, total: 0 };
 
     let successful = 0;
     const total = filteredTasks.length;
 
     filteredTasks.forEach(task => {
-      const allGrades = getGradesForStudentAndTask(studentId, task.id);
-      if (allGrades.length > 0) {
-        const mainGrade = allGrades[allGrades.length - 1]; // Poslední podle data
-        if (mainGrade.value >= (task.minGrade || 0)) {
-          successful++;
-        }
-      }
+      const studentTaskDto = dto.tasks.find(t => t.taskId === task.id);
+      if (studentTaskDto && studentTaskDto.final && (studentTaskDto.final.value >= (task.minGrade || 0)))
+        successful++;
     });
+
     return { successful, total };
   };
 
   // Výpočet úspěšných docházek pro studenta
-  const getAttendanceStats = (studentId: number) => {
-    if (!showAttendances || !attendanceSet) return { successful: 0, total: 0 };
+  const getStudentAttendanceStats = (dto: GSetCourseStudentDto) => {
+    if (!showAttendances) return { successful: 0, total: 0 };
     let successful = 0;
-    const total = attendanceSet.attendances.length;
-    attendanceSet.attendances.forEach(attendance => {
-      const value = getAttendanceValueForStudent(studentId, attendance.id);
-      if (value !== null && attendance.minWeight !== undefined && value >= attendance.minWeight) {
+    const total = set?.attendances.length;
+
+    set?.attendances.forEach(attendance => {
+      const studentAttendanceDto = dto.attendances.find(a => a.attendanceId === attendance.id)!;
+
+      if (studentAttendanceDto && (!attendance.minWeight || studentAttendanceDto.value > attendance.minWeight))
         successful++;
-      }
     });
     return { successful, total };
   };
@@ -174,10 +175,10 @@ tady opravit grade set a přepsat attendance aby se taky vracely jinak
     );
   }
 
-  if (!gradeSet || gradeSet.students.length === 0 || gradeSet.tasks.length === 0) {
+  if (!set || set.students.length === 0 || (set.tasks.length === 0 && set.attendances.length === 0)) {
     return (
       <div className="text-center py-8">
-        <p className="text-gray-500">Nejsou k dispozici žádná data pro zobrazení známek.</p>
+        <p className="text-gray-500">Nejsou k dispozici žádná data pro zobrazení známek nebo docházek.</p>
       </div>
     );
   }
@@ -282,7 +283,7 @@ tady opravit grade set a přepsat attendance aby se taky vracely jinak
                 Úspěšnost doch. <br /> úkolů
               </th>
               {/* Sloupce pro attendances */}
-              {showAttendances && attendanceSet?.attendances.map((attendance) => (
+              {showAttendances && set.attendances.map((attendance) => (
                 <th
                   key={`attendance-${attendance.id}`}
                   className="min-w-24 max-w-48 px-2 py-3 border-b border-gray-200 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
@@ -297,6 +298,7 @@ tady opravit grade set a přepsat attendance aby se taky vracely jinak
                   <div className="text-xs text-gray-400 font-normal">Min: {attendance.minWeight ?? "-"}</div>
                 </th>
               ))}
+              {/* Sloupce pro tasks */}
               {showTasks && filteredTasks?.map((task) => (
                 <th
                   key={task.id}
@@ -316,34 +318,34 @@ tady opravit grade set a přepsat attendance aby se taky vracely jinak
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {filteredStudents?.map((student) => (
-              <tr key={student.id} className="hover:bg-gray-50">
+              <tr key={student.student.id} className="hover:bg-gray-50">
                 <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 sticky left-0 bg-white z-10">
                   <div>
-                    <div className="font-semibold">{student.surname}, {student.name}</div>
-                    <div className="text-xs text-gray-500">{student.number}</div>
+                    <div className="font-semibold">{student.student.surname}, {student.student.name}</div>
+                    <div className="text-xs text-gray-500">{student.student.number}</div>
                   </div>
                 </td>
                 <td className="px-3 py-4 whitespace-nowrap text-sm text-center sticky left-0 bg-white z-10" style={{ left: '192px' }}>
                   {(() => {
-                    const stats = getAttendanceStats(student.id);
+                    const stats = getStudentAttendanceStats(student);
                     return (
                       <div className="font-medium">{stats.successful}/{stats.total}</div>
                     );
                   })()}
                   {(() => {
-                    const stats = getStudentStats(student.id);
+                    const stats = getStudentTaskStats(student);
                     return (
                       <div className="font-medium">{stats.successful}/{stats.total}</div>
                     );
                   })()}
                 </td>
                 {/* Buňky pro attendance values */}
-                {showAttendances && attendanceSet?.attendances.map((attendance) => {
-                  const attendanceValue = getAttendanceValueForStudent(student.id, attendance.id);
+                {showAttendances && set?.attendances.map((attendance) => {
+                  const attendanceValue = student.attendances.find(a => a.attendanceId === attendance.id)?.value ?? null;
 
                   return (
                     <td
-                      key={`${student.id}-attendance-${attendance.id}`}
+                      key={`${student.student.id}-attendance-${attendance.id}`}
                       className="px-2 py-4 text-center text-sm"
                     >
                       {attendanceValue !== null ? (
@@ -357,23 +359,22 @@ tady opravit grade set a přepsat attendance aby se taky vracely jinak
                   );
                 })}
                 {showTasks && filteredTasks?.map((task) => {
-                  const allGrades = getGradesForStudentAndTask(student.id, task.id);
-                  const mainGrade = allGrades.length > 0 ? allGrades[allGrades.length - 1] : null; // Poslední podle data
-                  const otherGrades = allGrades.slice(0, -1); // Všechny kromě poslední
+                  const studentTaskGrades = student.tasks.find(t => t.taskId === task.id)!;
+                  const mainGrade = studentTaskGrades?.final;
+                  const otherGrades = studentTaskGrades?.grades ?? [];
 
                   return (
                     <td
-                      key={`${student.id}-${task.id}`}
-                      className={`px-2 py-4 text-center text-sm ${mainGrade ? getGradeColor(mainGrade.value, task.minGrade || 0) : ''
+                      key={`${student.student.id}-${task.id}`}
+                      className={`px-2 py-4 text-center text-sm ${mainGrade ? getGradeColor(mainGrade.value ?? 0, task.minGrade || 0) : ''
                         }`}
                     >
                       {mainGrade ? (
                         <div className="space-y-1">
                           <span
                             className="inline-flex px-2 text-xs font-semibold rounded-full"
-                            title={mainGrade.comment || undefined}
                           >
-                            {mainGrade.value}
+                            {mainGrade?.value ?? "-"}
                           </span>
                           {otherGrades.length > 0 && (
                             <div className="text-xs opacity-60">
@@ -381,7 +382,7 @@ tady opravit grade set a přepsat attendance aby se taky vracely jinak
                             </div>
                           )}
                           <div className="text-xs opacity-75">
-                            {new Date(mainGrade.date).toLocaleDateString('cs-CZ')}
+                            {mainGrade && new Date(mainGrade.date).toLocaleDateString('cs-CZ')}
                           </div>
                         </div>
                       ) : (

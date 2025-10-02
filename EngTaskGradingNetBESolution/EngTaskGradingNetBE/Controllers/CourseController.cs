@@ -44,9 +44,55 @@ namespace EngTaskGradingNetBE.Controllers
       return dto;
     }
 
+    [HttpGet("{id}/overview")]
+    public async Task<GSetCourse> GetOverviewAsync(int id)
+    {
+      Course course = await courseService.GetForOverview(id);
+      GSetCourse ret;
+
+      List<GSetCourseStudentDto> students = [];
+      foreach (var student in course.Students.OrderBy(q => q.Surname).ThenBy(q => q.Name))
+      {
+        var gradesPerTask = student.Grades
+          .Where(q => q.Task.CourseId == course.Id)
+          .GroupBy(q => q.TaskId)
+          .ToDictionary(q => q.Key, q => q.ToList());
+        var taskGrades = gradesPerTask
+          .Select(q => new GSetCourseStudentTaskDto(
+            q.Key,
+            q.Value.Select(q => EObjectMapper.To(q)).ToArray()))
+          .ToArray();
+
+        var atts = student.AttendanceRecords
+          .Where(q => q.AttendanceDay.Attendance.CourseId == course.Id)
+          .GroupBy(q => q.AttendanceDay.AttendanceId)
+          .ToDictionary(q => q.Key, q => q.ToList());
+
+        GSetCourseStudentAttendanceDto[] attDtos = atts
+          .Select(q => new GSetCourseStudentAttendanceDto(
+            q.Key,
+            q.Value.Sum(p => p.Value.Weight)))
+          .ToArray();
+
+        GSetCourseStudentDto gSetStudentDto = new(
+          EObjectMapper.To(student),
+          taskGrades,
+          attDtos);
+        students.Add(gSetStudentDto);
+      }
+
+      ret = new GSetCourse(
+        EObjectMapper.To(course),
+        course.Tasks.Select(EObjectMapper.To).ToArray(),
+        course.Attendances.Select(EObjectMapper.To).ToArray(),
+        students.ToArray());
+
+      return ret;
+    }
+
 
     [HttpPost("{courseId}/import-students")]
-    public async System.Threading.Tasks.Task DoImportAsync([FromBody] List<StudentCreateDto> students, [FromRoute]int courseId)
+    public async System.Threading.Tasks.Task DoImportAsync([FromBody] List<StudentCreateDto> students, [FromRoute] int courseId)
     {
       List<Student> entities = students
         .Select(EObjectMapper.From)

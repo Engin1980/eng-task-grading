@@ -1,4 +1,5 @@
 import type { StudentDto } from "./student-dto";
+import type { TaskDto } from "./task-dto";
 
 export interface AttendanceDayDto {
   id: number;
@@ -57,6 +58,16 @@ export interface AttendanceSetDto {
   attendances: AttendanceDto[];
   students: StudentDto[];
   items: AttendanceSetItemDto[];
+}
+
+export interface NewAttendanceSetForCourseDto {
+  attendance: AttendanceDto;
+  students: NewAttendanceSetForStudentDto[];
+}
+
+export interface NewAttendanceSetForStudentDto {
+  studentId: number;
+  attendanceDays: AttendanceSetItemDto[];
 }
 
 export interface AttendanceDaySetDto {

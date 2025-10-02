@@ -1,4 +1,5 @@
-﻿using EngTaskGradingNetBE.Exceptions;
+﻿using EngTaskGradingNetBE.Controllers;
+using EngTaskGradingNetBE.Exceptions;
 using EngTaskGradingNetBE.Models.DbModel;
 using EngTaskGradingNetBE.Models.Dtos;
 using Microsoft.EntityFrameworkCore;
@@ -267,6 +268,76 @@ namespace EngTaskGradingNetBE.Services
         .Include(q => q.Student)
         .ToListAsync();
       return ret;
+    }
+
+    public record AnalyseForImportResult(List<Student> Students, List<string> Errors);
+    internal async Task<AnalyseForImportResult> AnalyseForImportAsync(int attendanceDayId, string text)
+    {
+      AttendanceDay day = await Db.AttendanceDays
+        .Include(q => q.Attendance).ThenInclude(q => q.Course).ThenInclude(q => q.Students)
+        .FirstOrDefaultAsync(q => q.Id == attendanceDayId) 
+        ?? throw new EntityNotFoundException(Lib.NotFoundErrorKind.AttendanceDayNotFound, attendanceDayId);
+
+      List<Student> students = day.Attendance.Course.Students.ToList();
+      List<Student> okStudents = [];
+      List<string> errors = [];
+
+      List<string> studyNumbers = text.Replace(";", " ").Replace(",", " ").Split(" ")
+        .Select(q => q.Trim())
+        .Where(q => q.Length > 0)
+        .Distinct()
+        .Select(q => q.ToUpper())
+        .ToList();
+
+      foreach (var studyNumber in studyNumbers)
+      {
+        Student? student = students.FirstOrDefault(q => q.Number == studyNumber);
+        if (student == null)
+        {
+          List<Student> potentialStudents = students.Where(q => q.Number.Contains(studyNumber)).ToList();
+          if (potentialStudents.Count == 0)
+          {
+            errors.Add($"{studyNumber} - not found");
+            continue;
+          }
+          else if (potentialStudents.Count > 1)
+          {
+            errors.Add($"{studyNumber} - multiple found");
+            continue;
+          }
+          student = potentialStudents.First();
+        }
+
+        okStudents.Add(student);
+      }
+
+      return new AnalyseForImportResult(okStudents, errors);
+    }
+
+    internal async System.Threading.Tasks.Task ImportAsync(int attendanceDayId, int attendanceValueId, List<int> studentIds)
+    {
+      AttendanceDay day = await Db.AttendanceDays
+        .Include(q => q.Attendance).ThenInclude(q => q.Course).ThenInclude(q => q.Students)
+        .Include(q=>q.Records)
+        .FirstOrDefaultAsync(q => q.Id == attendanceDayId) 
+        ?? throw new EntityNotFoundException(Lib.NotFoundErrorKind.AttendanceDayNotFound, attendanceDayId);
+
+      
+      foreach (var studentId in studentIds)
+      {
+        AttendanceRecord? record = day.Records.FirstOrDefault(q=>q.StudentId == studentId);
+        if (record == null)
+        {
+          record = new AttendanceRecord()
+          {
+            StudentId = studentId
+          };
+          day.Records.Add(record);
+        }
+        record.AttendanceValueId = attendanceValueId;
+      }
+
+      await Db.SaveChangesAsync();
     }
   }
 }

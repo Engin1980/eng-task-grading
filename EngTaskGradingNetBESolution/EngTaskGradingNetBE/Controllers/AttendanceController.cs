@@ -235,5 +235,25 @@ namespace EngTaskGradingNetBE.Controllers
     {
       await attendanceService.ResolveSelfSignsAsync(selfSignId, attendanceValueId);
     }
+
+    public record BulkImportRequest(int AttendanceDayId, string Text);
+    [HttpPost("analyse-for-import")]
+    public async Task<AttendanceAnalysisResultDto> AnalyseForBulkImport([FromBody] BulkImportRequest data)
+    {
+      var tmp = await attendanceService.AnalyseForImportAsync(data.AttendanceDayId, data.Text);
+      var ret = new AttendanceAnalysisResultDto(
+        tmp.Students.Select(EObjectMapper.To).ToList(), tmp.Errors);
+      return ret;
+    }
+
+    public record AttendanceDayImportRequest(int AttendanceValueId, List<int> StudentIds);
+    [HttpPost("days/{attendanceDayId}/import")]
+    public async System.Threading.Tasks.Task ImportDayAttendance([FromRoute] int attendanceDayId, [FromBody] AttendanceDayImportRequest data)
+    {
+      await attendanceService.ImportAsync(attendanceDayId, data.AttendanceValueId, data.StudentIds);
+    }
+
+    //TODO move to DTO file
+    public record AttendanceAnalysisResultDto(List<StudentDto> Students, List<string> Errors);
   }
 }

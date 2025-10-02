@@ -91,3 +91,7 @@ export interface AttendanceDaySelfSignDto {
   ip: string;
 }
 
+export interface AttendanceStudentAnalysisResultDto{
+  
+}
+

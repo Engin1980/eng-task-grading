@@ -12,7 +12,7 @@ function AttendanceDayDetailPage() {
 
   const tabs = [
     { key: 'records', label: 'Záznamy docházky' },
-    { key: 'self-sign', label: 'Samo-zápis' }
+    { key: 'self-sign', label: 'Pokročilé možnosti' }
   ];
 
   return (

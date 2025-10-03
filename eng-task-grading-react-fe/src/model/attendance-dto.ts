@@ -101,8 +101,3 @@ export interface AttendanceDaySelfSignDto {
   creationDateTime: Date;
   ip: string;
 }
-
-export interface AttendanceStudentAnalysisResultDto{
-  
-}
-

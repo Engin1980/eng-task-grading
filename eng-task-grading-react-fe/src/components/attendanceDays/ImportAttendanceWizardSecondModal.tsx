@@ -24,8 +24,6 @@ export function ImportAttendanceWizardSecondModal({
 
   const handleDoImport = async () => {
     logger.info("Zahajuji import do docházky");
-    console.log("####");
-    console.log(analysisResult?.attendanceValue);
     try {
       await attendanceService.importAttendanceToDay(
         attendanceDayId,

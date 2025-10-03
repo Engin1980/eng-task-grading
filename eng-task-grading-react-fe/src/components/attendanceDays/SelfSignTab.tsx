@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { attendanceService } from '../../services/attendance-service';
 import toast from 'react-hot-toast';
-import type { AttendanceDaySelfSignSetDto, AttendanceStudentAnalysisResultDto, AttendanceValueDto } from '../../model/attendance-dto';
+import type { AttendanceDaySelfSignSetDto, AttendanceValueDto } from '../../model/attendance-dto';
 import { useLogger } from '../../hooks/use-logger';
 import { ImportAttendanceWizardFirstModal } from './ImportAttendanceWizardFirstModal';
 import { ImportAttendanceWizardSecondModal } from './ImportAttendanceWizardSecondModal';
@@ -11,6 +11,7 @@ import { AttendanceValueLabel } from '../../ui/attendanceValueLabel';
 import { useLoadingState } from '../../types/loadingState';
 import { Loading } from '../../ui/loading';
 import { LoadingError } from '../../ui/loadingError';
+import type { StudentAnalysisResultDtoWithAttendanceValue } from '../../model/student-dto';
 
 interface SelfSignTabProps {
   attendanceDayId: string;
@@ -27,7 +28,7 @@ export function SelfSignTab({ attendanceDayId }: SelfSignTabProps) {
   const logger = useLogger("SelfSignTab");
   const [isImportFirstModalOpen, setIsImportFirstModalOpen] = useState(false);
   const [isImportSecondModalOpen, setIsImportSecondModalOpen] = useState(false);
-  const [analysisResult, setAnalysisResult] = useState<AttendanceStudentAnalysisResultDto>();
+  const [analysisResult, setAnalysisResult] = useState<StudentAnalysisResultDtoWithAttendanceValue>();
 
   const loadDataAsync = async () => {
     try {
@@ -137,7 +138,7 @@ export function SelfSignTab({ attendanceDayId }: SelfSignTabProps) {
     setIsImportFirstModalOpen(true);
   }
 
-  const handleAnalyzed = async (data: AttendanceStudentAnalysisResultDto) => {
+  const handleAnalyzed = async (data: StudentAnalysisResultDtoWithAttendanceValue) => {
     setAnalysisResult(data);
     setIsImportFirstModalOpen(false);
     setIsImportSecondModalOpen(true);

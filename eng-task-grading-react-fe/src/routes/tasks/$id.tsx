@@ -6,12 +6,13 @@ import type { GradeDto, NewGradeSetTaskDto } from '../../model/grade-dto';
 import { gradeService } from '../../services/grade-service';
 import { AddGradeModal, EditGradeModal } from '../../components/tasks';
 import { useNavigationContext } from '../../contexts/NavigationContext';
+import { useLoadingState } from '../../types/loadingState';
+import { LoadingError } from '../../ui/loadingError';
+import { Loading } from '../../ui/loading';
 
 export const Route = createFileRoute('/tasks/$id')({
   component: RouteComponent,
 })
-
-
 
 function RouteComponent() {
   const { id } = Route.useParams()
@@ -22,6 +23,7 @@ function RouteComponent() {
   const [selectedStudent, setSelectedStudent] = useState<StudentDto | null>(null);
   const [isEditGradeModalOpen, setIsEditGradeModalOpen] = useState(false);
   const [selectedGrade, setSelectedGrade] = useState<GradeDto | null>(null);
+  const ldgState = useLoadingState();
   const navCtx = useNavigationContext();
 
   // Funkce pro filtrování studentů
@@ -44,12 +46,17 @@ function RouteComponent() {
   }
 
   const loadData = async () => {
-    const set: NewGradeSetTaskDto = await gradeService.getGradesByTaskNew(id);
-    setSetFinalValues(set, set.task.aggregation!);
-    console.log(set);
-    setSet(set);
-    setTask(set.task);
-    navCtx.setTask({ id: set.task.id, title: set.task.title });
+    try {
+      ldgState.setLoading();
+      const set: NewGradeSetTaskDto = await gradeService.getGradesByTaskNew(id);
+      setSetFinalValues(set, set.task.aggregation!);
+      setSet(set);
+      setTask(set.task);
+      navCtx.setTask({ id: set.task.id, title: set.task.title });
+      ldgState.setDone();
+    } catch (err) {
+      ldgState.setError(err);
+    }
   }
 
   const handleAddGrade = (student: StudentDto) => {
@@ -149,9 +156,11 @@ function RouteComponent() {
     loadData();
   }, [id]);
 
-  if (!task) {
-    return <div className="container mx-auto p-4">Načítám úkol...</div>;
-  }
+
+  if (ldgState.loading) { return (<Loading message="Načítám úkol..." />) }
+  if (ldgState.error) { return (<LoadingError message={ldgState.error} onRetry={loadData} />) }
+
+  if (!task) throw new Error("Task is null, unexpectingly.");
 
   return (
     <div className="container mx-auto p-4">

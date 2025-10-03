@@ -2,6 +2,9 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import type { AppLogDto } from '../model/applog-dto'
 import { appLogService } from '../services/applog-service'
+import { Loading } from '../ui/loading'
+import { LoadingError } from '../ui/loadingError'
+import { useLoadingState } from '../types/loadingState'
 
 export const Route = createFileRoute('/logs')({
   component: RouteComponent,
@@ -9,22 +12,19 @@ export const Route = createFileRoute('/logs')({
 
 function RouteComponent() {
   const [logs, setLogs] = useState<AppLogDto[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const ldgState = useLoadingState();
   const [filter, setFilter] = useState('')
   const [levelFilter, setLevelFilter] = useState('')
 
   const loadLogs = async () => {
     try {
-      setLoading(true)
-      setError(null)
+      ldgState.setLoading();
       const data = await appLogService.getAll()
       setLogs(data)
+      ldgState.setDone();
     } catch (err) {
-      setError('Chyba při načítání logů')
+      ldgState.setError('Chyba při načítání logů')
       console.error('Error loading logs:', err)
-    } finally {
-      setLoading(false)
     }
   }
 
@@ -34,13 +34,13 @@ function RouteComponent() {
 
   // Filtrování logů
   const filteredLogs = logs.filter(log => {
-    const matchesText = !filter || 
+    const matchesText = !filter ||
       log.message?.toLowerCase().includes(filter.toLowerCase()) ||
       log.messageTemplate?.toLowerCase().includes(filter.toLowerCase()) ||
       log.properties?.toLowerCase().includes(filter.toLowerCase())
-    
+
     const matchesLevel = !levelFilter || log.level === levelFilter
-    
+
     return matchesText && matchesLevel
   })
 
@@ -62,37 +62,14 @@ function RouteComponent() {
 
   const uniqueLevels = [...new Set(logs.map(log => log.level).filter(level => level !== null))]
 
-  if (loading) {
-    return (
-      <div className="container mx-auto p-4">
-        <div className="text-center py-8">
-          <p className="text-gray-500">Načítám logy...</p>
-        </div>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="container mx-auto p-4">
-        <div className="text-center py-8">
-          <p className="text-red-500">{error}</p>
-          <button 
-            onClick={loadLogs}
-            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-          >
-            Zkusit znovu
-          </button>
-        </div>
-      </div>
-    )
-  }
+  if (ldgState.loading) return (<Loading message="Načítám logy, to může chvilku trvat..." />)
+  if (ldgState.error) { return (<LoadingError message={ldgState.error} onRetry={loadLogs} />) }
 
   return (
     <div className="container mx-auto p-4">
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900 mb-4">Aplikační logy</h1>
-        
+
         {/* Filtry */}
         <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm mb-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -109,7 +86,7 @@ function RouteComponent() {
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
-            
+
             <div>
               <label htmlFor="level-filter" className="block text-sm font-medium text-gray-700 mb-2">
                 Úroveň logu
@@ -127,7 +104,7 @@ function RouteComponent() {
               </select>
             </div>
           </div>
-          
+
           {(filter || levelFilter) && (
             <div className="mt-3 flex gap-2">
               {filter && (
@@ -247,6 +224,5 @@ function RouteComponent() {
           </div>
         </div>
       )}
-    </div>
-  )
+    </div>)
 }

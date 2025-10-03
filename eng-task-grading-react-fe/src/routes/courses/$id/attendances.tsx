@@ -4,7 +4,9 @@ import { useEffect, useState } from 'react';
 import type { AttendanceCreateDto, AttendanceDto } from '../../../model/attendance-dto';
 import { attendanceService } from '../../../services/attendance-service';
 import { CreateAttendanceModal } from '../../../components/attendances';
-import { useNavigationContext } from '../../../contexts/NavigationContext';
+import { Loading } from '../../../ui/loading';
+import { LoadingError } from '../../../ui/loadingError';
+import { useLoadingState } from '../../../types/loadingState';
 
 export const Route = createFileRoute('/courses/$id/attendances')({
   component: AttendancesPage,
@@ -15,22 +17,19 @@ function AttendancesPage() {
   const courseId = id;
   const logger = useLogger("AttendancesPage");
   const [attendances, setAttendances] = useState<AttendanceDto[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const ldgState = useLoadingState();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
 
   const loadAttendances = async () => {
     try {
-      setLoading(true);
-      setError(null);
+      ldgState.setLoading();
       const data = await attendanceService.getAllByCourseId(parseInt(courseId));
       setAttendances(data);
+      ldgState.setDone();
     } catch (err) {
-      setError('Chyba při načítání docházek');
+      ldgState.setError(err);
       logger.error('Error loading attendances:', err);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -48,25 +47,15 @@ function AttendancesPage() {
     }
   };
 
-  if (loading) {
+  if (ldgState.loading) {
     return (
-      <div className="text-center py-8">
-        <p className="text-gray-500">Načítám docházky...</p>
-      </div>
+      <Loading message="Načítám docházky..." />
     );
   }
 
-  if (error) {
+  if (ldgState.error) {
     return (
-      <div className="text-center py-8">
-        <p className="text-red-500">{error}</p>
-        <button
-          onClick={loadAttendances}
-          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-        >
-          Zkusit znovu
-        </button>
-      </div>
+      <LoadingError message={ldgState.error} onRetry={loadAttendances} />
     );
   }
 

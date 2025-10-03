@@ -2,13 +2,12 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useState, useEffect } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useLogger } from '../../../hooks/use-logger';
-import type { GradeDto, GradeSet, NewGradeSetTaskDto } from '../../../model/grade-dto';
-import type { AttendanceSetDto } from '../../../model/attendance-dto';
-import type { StudentDto } from '../../../model/student-dto';
 import { gradeService } from '../../../services/grade-service';
-import { attendanceService } from '../../../services/attendance-service';
 import type { FinalGradeDto, GSetCourseDto, GSetCourseStudentDto } from '../../../model/gset';
 import { courseService } from '../../../services/course-service';
+import { Loading } from '../../../ui/loading';
+import { LoadingError } from '../../../ui/loadingError';
+import { useLoadingState } from '../../../types/loadingState';
 
 export const Route = createFileRoute('/courses/$id/grades')({
   component: GradesPage,
@@ -21,7 +20,7 @@ function GradesPage() {
   const logger = useLogger("GradesTab");
   const navigate = useNavigate();
   const [set, setSet] = useState<GSetCourseDto | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const ldgState = useLoadingState();
   const [studentFilter, setStudentFilter] = useState<string>("");
   const [taskFilter, setTaskFilter] = useState<string>("");
   const [showTasks, setShowTasks] = useState(true);
@@ -40,14 +39,14 @@ function GradesPage() {
 
   const loadGradeSet = async () => {
     try {
-      setLoading(true);
+      ldgState.setLoading();
       const data = await courseService.getOverview(courseId);
       const uData = updateMainGrade(data);
       setSet(uData);
+      ldgState.setDone();
     } catch (error) {
       logger.error('Error loading grades:', error);
-    } finally {
-      setLoading(false);
+      ldgState.setError(error);
     }
   };
 
@@ -137,21 +136,10 @@ function GradesPage() {
 
   logger.debug(`Rendering grades tab for course ${courseId}`);
 
-  if (loading) {
-    return (
-      <div className="text-center py-8">
-        <p className="text-gray-500">Načítám známky...</p>
-      </div>
-    );
-  }
+  if (ldgState.loading) { return (<Loading message="Načítám známky..." />); }
+  if (ldgState.error) { return (<LoadingError message={ldgState.error} onRetry={loadGradeSet} />); }
 
-  if (!set || set.students.length === 0 || (set.tasks.length === 0 && set.attendances.length === 0)) {
-    return (
-      <div className="text-center py-8">
-        <p className="text-gray-500">Nejsou k dispozici žádná data pro zobrazení známek nebo docházek.</p>
-      </div>
-    );
-  }
+  if (!set) throw new Error("Set is null, unexpectingly.");
 
   return (
     <div className="space-y-4">

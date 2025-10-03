@@ -4,6 +4,8 @@ import type { CourseDto } from '../../../model/course-dto';
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast'
 import { StudentInfo } from '../../../components/studentView'
+import { Loading } from '../../../ui/loading';
+import { LoadingError } from '../../../ui/loadingError';
 
 export const Route = createFileRoute('/studentView/courses/')({
   component: RouteComponent,
@@ -31,6 +33,7 @@ function RouteComponent() {
   const navigate = useNavigate();
   const [courses, setCourses] = useState<CourseDto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const studentNumber = getStudentNumberFromJWT();
 
   const loadCourses = async () => {
@@ -50,16 +53,8 @@ function RouteComponent() {
     loadCourses();
   }, []);
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Načítám kurzy...</p>
-        </div>
-      </div>
-    );
-  }
+  if (isLoading) { return (<Loading message="Načítám kurzy..." />); }
+  if (error) { return (<LoadingError message={error} onRetry={loadCourses} />); }
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">

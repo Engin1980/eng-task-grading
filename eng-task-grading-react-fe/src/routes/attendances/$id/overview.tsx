@@ -2,6 +2,9 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import type { AttendanceDaySetDto } from '../../../model/attendance-dto';
 import { useEffect, useState } from 'react';
 import { attendanceService } from '../../../services/attendance-service';
+import { useLoadingState } from '../../../types/loadingState';
+import { Loading } from '../../../ui/loading';
+import { LoadingError } from '../../../ui/loadingError';
 
 export const Route = createFileRoute('/attendances/$id/overview')({
   component: RouteComponent,
@@ -10,19 +13,19 @@ export const Route = createFileRoute('/attendances/$id/overview')({
 function RouteComponent() {
   const { id: attendanceId } = Route.useParams(); // attendanceId
   const [data, setData] = useState<AttendanceDaySetDto | null>(null);
-  const [loading, setLoading] = useState(true);
+  const ldgState = useLoadingState();
   const [studentFilter, setStudentFilter] = useState("");
   const navigate = useNavigate();
 
   const loadData = async () => {
     try {
-      setLoading(true);
+      ldgState.setLoading();
       const result = await attendanceService.getAttendanceSet(+attendanceId);
       setData(result);
+      ldgState.setDone();
     } catch (error) {
       console.error('Error loading attendance data:', error);
-    } finally {
-      setLoading(false);
+      ldgState.setError(error);
     }
   };
 
@@ -33,18 +36,18 @@ function RouteComponent() {
   // Funkce pro získání attendance hodnoty pro daného studenta a den
   const getAttendanceRecord = (studentId: number, attendanceDayId: number) => {
     if (!data) return null;
-    
+
     const record = data.items.find(
       item => item.studentId === studentId && item.attendanceDayId === attendanceDayId
     );
-    
+
     return record || null;
   };
 
   // Filtrování studentů podle zadaného filtru
   const filteredStudents = data?.students.filter((student) => {
     if (!studentFilter.trim()) return true;
-    
+
     const filterLower = studentFilter.toLowerCase().trim();
     return (
       (student.name || '').toLowerCase().includes(filterLower) ||
@@ -53,12 +56,12 @@ function RouteComponent() {
     );
   }) || [];
 
-  if (loading) {
-    return (
-      <div className="text-center py-8">
-        <p className="text-gray-500">Načítám přehled docházky...</p>
-      </div>
-    );
+  if (ldgState.loading) {
+    return <Loading message="Načítám data o docházce..." />;
+  }
+
+  if(ldgState.error) {
+    return <LoadingError message={ldgState.error} onRetry={loadData} />;
   }
 
   if (!data || data.students.length === 0) {
@@ -116,28 +119,28 @@ function RouteComponent() {
                 </td>
                 {data.attendanceDays.map((day) => {
                   const attendanceRecord = getAttendanceRecord(student.id, day.id);
-                  
+
                   // Výpočet barvy na základě weight (stejný přístup jako v attendanceDays/$id.tsx)
                   let backgroundColor = 'transparent';
                   let textColor = 'rgb(51, 51, 51)';
-                  
+
                   if (attendanceRecord) {
                     const normalizedValue = Math.max(0, Math.min(1, attendanceRecord.attendanceValueWeight)); // Omez na 0-1
-                    
+
                     // Světlejší barvy - mix s bílou (200-255 místo 0-255)
                     const red = Math.round(200 + 55 * (1 - normalizedValue));
                     const green = Math.round(200 + 55 * normalizedValue);
-                    
+
                     backgroundColor = `rgb(${red}, ${green}, 200)`;
                   }
-                  
+
                   return (
                     <td
                       key={`${student.id}-${day.id}`}
                       className="px-3 py-4 text-center text-sm"
                     >
                       {attendanceRecord ? (
-                        <span 
+                        <span
                           className="inline-flex px-8 py-2 text-xs font-semibold rounded-full"
                           style={{
                             backgroundColor: backgroundColor,
@@ -161,8 +164,8 @@ function RouteComponent() {
       {filteredStudents.length === 0 && !loading && data && (
         <div className="text-center py-8">
           <p className="text-gray-500">
-            {studentFilter.trim() 
-              ? "Žádní studenti nevyhovují zadaným kritériím vyhledávání." 
+            {studentFilter.trim()
+              ? "Žádní studenti nevyhovují zadaným kritériím vyhledávání."
               : "Žádní studenti nejsou zaregistrováni."
             }
           </p>

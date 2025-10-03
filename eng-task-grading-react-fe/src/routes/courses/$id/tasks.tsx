@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import type { TaskDto } from '../../../model/task-dto';
 import { taskService } from '../../../services/task-service';
 import { CreateTaskModal } from '../../../components/tasks';
+import { LoadingError } from '../../../ui/loadingError';
+import { useLoadingState } from '../../../types/loadingState';
 
 export const Route = createFileRoute('/courses/$id/tasks')({
   component: TasksPage,
@@ -15,22 +17,22 @@ function TasksPage() {
   const logger = useLogger("TasksTab");
   const navigate = useNavigate();
   const [tasks, setTasks] = useState<TaskDto[]>();
-  const [loading, setLoading] = useState<boolean>(false);
+  const ldgState = useLoadingState();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const loadTasks = async () => {
     logger.info("Loading tasks for course", { courseId });
-    setLoading(true);
+    ldgState.setLoading();
 
     try {
       const tasks = await taskService.getAllByCourseId(courseId);
       setTasks(tasks);
       logger.info("Tasks loaded", { taskCount: tasks.length });
+      ldgState.setDone();
     } catch (error) {
       logger.error("Failed to load tasks", { error });
       setTasks([]);
-    } finally {
-      setLoading(false);
+      ldgState.setError("Chyba při načítání úkolů");
     }
   };
 
@@ -72,7 +74,9 @@ function TasksPage() {
         courseId={courseId}
       />
 
-      {loading && <div className="text-center">Načítám úkoly...</div>}
+      {ldgState.loading && <div className="text-center">Načítám úkoly...</div>}
+
+      {ldgState.error && <LoadingError message={ldgState.error} onRetry={loadTasks} />}
 
       {tasks && tasks.length === 0 && (
         <div className="text-center py-8">

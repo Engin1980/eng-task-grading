@@ -1,15 +1,16 @@
-import { createFileRoute, Link, Outlet } from '@tanstack/react-router'
+import { createFileRoute, Outlet } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import { studentViewService } from '../../../services/student-view-service'
 import toast from 'react-hot-toast'
 import type { StudentViewCourseDto } from '../../../model/student-view-dto'
 import { StudentViewDataContext } from '../../../contexts/StudentViewDataContext'
 import { StudentInfo } from '../../../components/studentView'
-import { TabLabel } from '../../../ui/tabLabel'
 import { TaskIcon } from '../../../ui/icons/taskIcon'
 import { AttendanceIcon } from '../../../ui/icons/attendanceIcon'
 import { TabLabelLink } from '../../../ui/tabLabelLink'
 import { TabLabelBlock } from '../../../ui/tabLabelBlock'
+import { Loading } from '../../../ui/loading'
+import { LoadingError } from '../../../ui/loadingError'
 
 export const Route = createFileRoute('/studentView/courses/$id')({
   component: RouteComponent,
@@ -37,6 +38,7 @@ function RouteComponent() {
   const { id } = Route.useParams()
   const [courseData, setCourseData] = useState<StudentViewCourseDto | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const studentNumber = getStudentNumberFromJWT()
 
   const loadCourse = async () => {
@@ -56,16 +58,8 @@ function RouteComponent() {
     loadCourse()
   }, [id])
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Načítám detail kurzu...</p>
-        </div>
-      </div>
-    )
-  }
+  if (isLoading) { return (<Loading message="Načítám kurz..." />) }
+  if (error) { return (<LoadingError message={error} onRetry={loadCourse} />) }
 
   if (!courseData) {
     return (

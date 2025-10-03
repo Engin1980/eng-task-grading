@@ -3,6 +3,9 @@ import { CreateAttendanceDayModal } from '../../../components/attendances';
 import { useEffect, useState } from 'react';
 import type { AttendanceDayCreateDto, AttendanceDto } from '../../../model/attendance-dto';
 import { attendanceService } from '../../../services/attendance-service';
+import { useLoadingState } from '../../../types/loadingState';
+import { Loading } from '../../../ui/loading';
+import { LoadingError } from '../../../ui/loadingError';
 
 export const Route = createFileRoute('/attendances/$id/days')({
   component: RouteComponent,
@@ -11,21 +14,18 @@ export const Route = createFileRoute('/attendances/$id/days')({
 function RouteComponent() {
   const { id: attendanceId } = Route.useParams(); // attendanceId
   const [attendance, setAttendance] = useState<AttendanceDto | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const ldgState = useLoadingState();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const loadAttendance = async () => {
     try {
-      setLoading(true);
-      setError(null);
+      ldgState.setLoading();
       const data = await attendanceService.getById(parseInt(attendanceId));
       setAttendance(data);
+      ldgState.setDone();
     } catch (err) {
-      setError('Chyba při načítání docházky');
       console.error('Error loading attendance:', err);
-    } finally {
-      setLoading(false);
+      ldgState.setError('Chyba při načítání docházky');
     }
   };
 
@@ -47,33 +47,8 @@ function RouteComponent() {
     }
   };
 
-  if (loading) {
-    return (
-      <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">Zaznamenané dny</h2>
-        <div className="text-center py-8">
-          <p className="text-gray-500">Načítám data...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">Zaznamenané dny</h2>
-        <div className="text-center py-8">
-          <p className="text-red-500">{error}</p>
-          <button
-            onClick={loadAttendance}
-            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-          >
-            Zkusit znovu
-          </button>
-        </div>
-      </div>
-    );
-  }
+  if (ldgState.loading) { return (<Loading message="Načítám zaznamenané dny..." />); }
+  if (ldgState.error) { return (<LoadingError message={ldgState.error} onRetry={loadAttendance} />); }
 
   return (
     <div>

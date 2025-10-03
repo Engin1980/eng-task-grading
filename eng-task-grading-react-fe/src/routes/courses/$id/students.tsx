@@ -4,6 +4,9 @@ import { useEffect, useState } from 'react';
 import type { StudentAnalysisResultDto, StudentDto } from '../../../model/student-dto';
 import { studentService } from '../../../services/student-service';
 import { ImportStudentsWizardFirstModal, ImportStudentsWizardSecondModal } from '../../../components/courses';
+import { Loading } from '../../../ui/loading';
+import { LoadingError } from '../../../ui/loadingError';
+import { useLoadingState } from '../../../types/loadingState';
 
 export const Route = createFileRoute('/courses/$id/students')({
   component: StudentsPage,
@@ -17,7 +20,7 @@ function StudentsPage() {
   const [isImportSecondModalOpen, setIsImportSecondModalOpen] = useState(false);
   const [studentAnalysisResult, setStudentAnalysisResult] = useState<StudentAnalysisResultDto>();
   const [students, setStudents] = useState<StudentDto[]>();
-  const [loading, setLoading] = useState<boolean>(false);
+  const ldgState = useLoadingState();
   const [filterText, setFilterText] = useState<string>("");
 
   // Funkce pro filtrování studentů
@@ -36,12 +39,17 @@ function StudentsPage() {
 
   const loadStudents = async () => {
     logger.info("Loading students")
-    setLoading(true)
-    const students: StudentDto[] = await studentService.getAllByCourseId(courseId);
-    setStudents(students);
-    setLoading(false);
-    logger.info("Students loaded")
-  }
+    try {
+      ldgState.setLoading();
+      const students: StudentDto[] = await studentService.getAllByCourseId(courseId);
+      setStudents(students);
+      ldgState.setDone();
+      logger.info("Students loaded")
+    } catch (error) {
+      ldgState.setError(error);
+      logger.error("Error loading students:", error);
+    }
+  };
 
   const handleImportZero = () => {
     logger.info("Import Request Invoked");
@@ -116,7 +124,9 @@ function StudentsPage() {
         onImported={handleImported}
       />
 
-      {loading && <div className="text-center">Načítám studenty...</div>}
+      {ldgState.loading && <Loading message="Načítám studenty..." />}
+
+      {ldgState.error && <LoadingError message={ldgState.error} onRetry={loadStudents} />}
 
       {students && students.length === 0 && <div className="text-center py-8">
         <p className="text-gray-500 mb-4">Zatím nejsou přihlášení žádní studenti.</p>

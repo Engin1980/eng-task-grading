@@ -9,12 +9,26 @@ import { useNavigationContext } from '../../contexts/NavigationContext';
 import { useLoadingState } from '../../types/loadingState';
 import { LoadingError } from '../../ui/loadingError';
 import { Loading } from '../../ui/loading';
+import { EditIcon } from '../../ui/icons/editIcon';
+import { DeleteIcon } from '../../ui/icons/deleteIcon';
 
 export const Route = createFileRoute('/tasks/$id')({
   component: RouteComponent,
 })
 
 function RouteComponent() {
+  // Handler for edit and delete actions
+  const handleEditTask = () => {
+    // TODO: Open edit modal or navigate to edit page
+    alert('Editace úkolu zatím není implementována.');
+  };
+
+  const handleDeleteTask = () => {
+    // TODO: Open confirm dialog and delete task
+    if (window.confirm('Opravdu chcete smazat tento úkol?')) {
+      alert('Mazání úkolu zatím není implementováno.');
+    }
+  };
   const { id } = Route.useParams()
   const [set, setSet] = useState<NewGradeSetTaskDto | null>(null);
   const [task, setTask] = useState<TaskDto | null>(null);
@@ -166,7 +180,21 @@ function RouteComponent() {
     <div className="container mx-auto p-4">
       {/* Informace o úkolu */}
       <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6 shadow-sm">
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">{task.title}</h1>
+        <div className="flex items-center gap-2 mb-4">
+          <h1 className="text-3xl font-bold text-gray-900">{task.title}</h1>
+          <button
+            className="pl-3"
+            onClick={handleEditTask}
+          >
+            <EditIcon size="l" />
+          </button>
+          <button
+            className="pl-1"
+            onClick={handleDeleteTask}
+          >
+            <DeleteIcon />
+          </button>
+        </div>
 
         {task.description && (
           <div className="mb-4">

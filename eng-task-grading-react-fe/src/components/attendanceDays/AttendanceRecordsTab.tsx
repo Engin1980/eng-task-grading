@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react';
 import { attendanceService } from '../../services/attendance-service';
 import type { StudentDto } from '../../model/student-dto';
 import type { AttendanceValueDto, AttendanceRecordDto } from '../../model/attendance-dto';
+import { AttendanceValueLabelBlock } from '../../ui/attendanceValueLabelBlock';
+import { AttendanceValueLabel } from '../../ui/attendanceValueLabel';
+import { AttendanceValueUnsetLabel } from '../../ui/attendanceValueUnsetLabel';
 
 interface AttendanceRecordsTabProps {
   attendanceDayId: string;
@@ -133,55 +136,16 @@ export function AttendanceRecordsTab({ attendanceDayId }: AttendanceRecordsTabPr
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex flex-wrap gap-1">
-                        {/* Zobraz všechny dostupné attendance values */}
+                      <AttendanceValueLabelBlock>
                         {values.map((value) => {
-                          const isSelected = attendanceValue?.id === value.id;
-
-                          // Výpočet barvy na základě hodnoty (0-1, červená-zelená)
-                          const normalizedValue = Math.max(0, Math.min(1, value.weight)); // Omez na 0-1
-
-                          // Světlejší barvy - mix s bílou (170-255 místo 0-255)
-                          const red = Math.round(200 + 55 * (1 - normalizedValue));
-                          const redBorder = Math.round(255 * (1 - normalizedValue));
-                          const green = Math.round(200 + 55 * normalizedValue);
-                          const greenBorder = Math.round(255 * (normalizedValue));
-
-                          // RGB barvy
-                          const backgroundColor = `rgb(${red}, ${green}, 200)`;
-                          const borderColor = `rgb(${redBorder}, ${greenBorder}, 0)`;
-
-                          // Výpočet barvy textu pro lepší čitelnost
-                          const textColor = 'rgb(51, 51, 51)';
-
-                          return (
-                            <button
-                              key={value.id}
-                              onClick={() => handleSetRecord(student.id, value.id)}
-                              className="inline-flex px-8 py-2 text-xs font-semibold rounded-full cursor-pointer hover:!bg-yellow-200 transition-colors"
-                              style={{
-                                backgroundColor: backgroundColor,
-                                color: textColor,
-                                border: isSelected ? `3px solid ${borderColor}` : `none`
-                              }}
-                            >
-                              {value.title}
-                            </button>
-                          );
+                          return <AttendanceValueLabel
+                            key={value.id}
+                            attendanceValue={value}
+                            isSelected={attendanceValue?.id === value.id}
+                            onClick={() => handleSetRecord(student.id, value.id)} />
                         })}
-
-                        <button
-                          onClick={() => handleDeleteRecord(student.id)}
-                          className="inline-flex px-8 py-2 text-xs font-semibold rounded-full cursor-pointer hover:!bg-yellow-200 transition-colors"
-                          style={{
-                            backgroundColor: 'rgba(200, 200, 200, 0.3)',
-                            color: 'black',
-                            border: !attendanceValue ? `3px solid gray` : `none`
-                          }}
-                        >
-                          Neuvedeno
-                        </button>
-                      </div>
+                        <AttendanceValueUnsetLabel isSelected={!attendanceValue} onClick={() => handleDeleteRecord(student.id)} />
+                      </AttendanceValueLabelBlock>
                     </td>
                   </tr>
                 );

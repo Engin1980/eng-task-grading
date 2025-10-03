@@ -218,8 +218,8 @@ namespace EngTaskGradingNetBE.Controllers
     [HttpPost("self/for-day/{dayId}")]
     public async System.Threading.Tasks.Task SelfAssignStudentToDay([FromRoute] int dayId, AttendanceDaySelfSignCreateDto data)
     {
-      if (Request.Cookies.ContainsKey(SELF_SIGN_USED_COOKIE_NAME))
-        throw new CommonBadDataException(Lib.CommonErrorKind.SelfSignAlreadyUsed, "");
+      //if (Request.Cookies.ContainsKey(SELF_SIGN_USED_COOKIE_NAME))
+      //  throw new CommonBadDataException(Lib.CommonErrorKind.SelfSignAlreadyUsed, "");
 
       AttendanceDay atd = await attendanceService.GetDayByIdAsync(dayId, false);
       if (atd.SelfAssignKey == null || atd.SelfAssignKey.Length == 0 || atd.SelfAssignKey != data.Key)

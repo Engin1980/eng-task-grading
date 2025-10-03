@@ -28,7 +28,7 @@ export const AttendanceValueLabel: React.FC<AttendanceValueLabelProps> = ({ atte
     <button
       type="button"
       key={attendanceValue.id}
-      onClick={() => onClick?.()}
+      onClick={(e) => { e.preventDefault(); onClick?.(); }}
       className="inline-flex px-8 py-2 text-xs font-semibold rounded-full cursor-pointer hover:!bg-yellow-200 transition-colors"
       style={{
         backgroundColor: backgroundColor,

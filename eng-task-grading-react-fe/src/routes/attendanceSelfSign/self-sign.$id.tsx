@@ -115,7 +115,7 @@ function SelfSignComponent() {
               )}
               <p className="text-gray-500 text-xs mt-1">Formát: písmeno následované 5 číslicemi (např. A12345)</p>
             </div>
-            {!isSubmitted && !selfSignCookieValue && (
+            {!isSubmitted && !selfSignCookieValue && false || true && (
               <button
                 type="submit"
                 className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"

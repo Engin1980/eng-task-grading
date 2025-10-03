@@ -14,8 +14,13 @@ namespace EngTaskGradingNetBE.Controllers
   [ApiController]
   [Route("api/v1/[controller]")]
   [Authorize(Roles = Roles.TEACHER_ROLE)]
-  public class AttendanceController(AttendanceService attendanceService, StudentService studentService) : ControllerBase
+  public class AttendanceController(
+    AttendanceService attendanceService,
+    StudentService studentService,
+    AppSettingsService appSettingsService) : ControllerBase
   {
+    private const string SELF_SIGN_USED_COOKIE_NAME = "self-sign-used";
+
     [HttpGet("for-course/{courseId}")]
     public async Task<IEnumerable<AttendanceDto>> GetAll(int courseId)
     {
@@ -209,9 +214,13 @@ namespace EngTaskGradingNetBE.Controllers
       return ret;
     }
 
+    [AllowAnonymous]
     [HttpPost("self/for-day/{dayId}")]
     public async System.Threading.Tasks.Task SelfAssignStudentToDay([FromRoute] int dayId, AttendanceDaySelfSignCreateDto data)
     {
+      if (Request.Cookies.ContainsKey(SELF_SIGN_USED_COOKIE_NAME))
+        throw new CommonBadDataException(Lib.CommonErrorKind.SelfSignAlreadyUsed, "");
+
       AttendanceDay atd = await attendanceService.GetDayByIdAsync(dayId, false);
       if (atd.SelfAssignKey == null || atd.SelfAssignKey.Length == 0 || atd.SelfAssignKey != data.Key)
       {
@@ -228,6 +237,14 @@ namespace EngTaskGradingNetBE.Controllers
       };
 
       await attendanceService.AddAttendanceDaySelfSignAsync(entity);
+
+      Response.Cookies.Append(SELF_SIGN_USED_COOKIE_NAME, $"{dayId}-{data.Key}-{data.StudyNumber}",
+        new CookieOptions()
+        {
+          Expires = DateTime.UtcNow.AddMinutes(appSettingsService.GetSettings().SelfSignCookieExpirationInMinutes),
+          HttpOnly = false,
+          Secure = true
+        });
     }
 
     [HttpPost("self/{selfSignId}")]

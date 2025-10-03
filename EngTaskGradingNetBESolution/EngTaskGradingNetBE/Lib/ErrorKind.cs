@@ -50,7 +50,7 @@ public sealed class NotFoundErrorKind : IErrorKind
 public sealed class CommonErrorKind : IErrorKind
 {
   public static CommonErrorKind InvalidSelfSignKey { get; } = new CommonErrorKind("INVALID_SELF_SIGN_KEY");
-
+  public static CommonErrorKind SelfSignAlreadyUsed { get; } = new CommonErrorKind("SELF_SIGN_ALREADY_USED");
   public string Key { get; private set; }
   private CommonErrorKind(string key)
   {

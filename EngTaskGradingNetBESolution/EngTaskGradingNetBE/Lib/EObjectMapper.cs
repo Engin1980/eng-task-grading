@@ -9,6 +9,14 @@ public static class EObjectMapper
 {
   public static TeacherDto To(Teacher teacher) => new(teacher.Id, teacher.Email);
 
+  public static Task From(TaskUpdateDto dto) => new()
+  {
+    Aggregation = ConverTaskAggregationStringToEnum(dto.Aggregation),
+    Description = dto.Description,
+    Keywords = dto.Keywords,
+    MinGrade = dto.MinGrade,
+    Title = dto.Title
+  };
 
   public static Grade From(GradeCreateDto gradeDto, DateTime date) => new()
   {
@@ -35,8 +43,20 @@ public static class EObjectMapper
     Title = taskDto.Title,
     Description = taskDto.Description,
     Keywords = taskDto.Keywords,
-    MinGrade = taskDto.MinGrade
+    MinGrade = taskDto.MinGrade,
+    Aggregation = ConverTaskAggregationStringToEnum(taskDto.Aggregation)
   };
+
+  private static Task.AggregationType ConverTaskAggregationStringToEnum(string aggregation)
+  {
+    return aggregation.ToLower() switch
+    {
+      "min" => Task.AggregationType.Min,
+      "max" => Task.AggregationType.Max,
+      "avg" => Task.AggregationType.Avg,
+      _ => Task.AggregationType.Last
+    };
+  }
 
   public static StudentDto To(Student student) => new(
     student.Id, student.Number, student.Email, student.Name, student.Surname,

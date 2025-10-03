@@ -10,25 +10,13 @@ import { useLoadingState } from '../../types/loadingState';
 import { LoadingError } from '../../ui/loadingError';
 import { Loading } from '../../ui/loading';
 import { EditIcon } from '../../ui/icons/editIcon';
-import { DeleteIcon } from '../../ui/icons/deleteIcon';
+import { EditTaskModal } from '../../components/tasks/EditTaskModal';
 
 export const Route = createFileRoute('/tasks/$id')({
   component: RouteComponent,
 })
 
 function RouteComponent() {
-  // Handler for edit and delete actions
-  const handleEditTask = () => {
-    // TODO: Open edit modal or navigate to edit page
-    alert('Editace úkolu zatím není implementována.');
-  };
-
-  const handleDeleteTask = () => {
-    // TODO: Open confirm dialog and delete task
-    if (window.confirm('Opravdu chcete smazat tento úkol?')) {
-      alert('Mazání úkolu zatím není implementováno.');
-    }
-  };
   const { id } = Route.useParams()
   const [set, setSet] = useState<NewGradeSetTaskDto | null>(null);
   const [task, setTask] = useState<TaskDto | null>(null);
@@ -39,6 +27,18 @@ function RouteComponent() {
   const [selectedGrade, setSelectedGrade] = useState<GradeDto | null>(null);
   const ldgState = useLoadingState();
   const navCtx = useNavigationContext();
+  const [editModalVisible, setEditModalVisible] = useState(false);
+
+  const handleEditTask = () => {
+    setEditModalVisible(true);
+  };
+
+  const handleDeleteTask = () => {
+    // TODO: Open confirm dialog and delete task
+    if (window.confirm('Opravdu chcete smazat tento úkol?')) {
+      alert('Mazání úkolu zatím není implementováno.');
+    }
+  };
 
   // Funkce pro filtrování studentů
   const filteredStudentData = set?.students.filter(studentData => {
@@ -142,6 +142,13 @@ function RouteComponent() {
     setSelectedGrade(null);
   };
 
+  const handleCloseTaskEditModal = (updated: boolean) => {
+    setEditModalVisible(false);
+    if (updated) {
+      loadData();
+    }
+  };
+
   const handleDeleteGrade = async (gradeId: number) => {
     if (window.confirm('Opravdu chcete smazat tuto známku? Tato akce je nevratná.')) {
       try {
@@ -186,14 +193,21 @@ function RouteComponent() {
             className="pl-3"
             onClick={handleEditTask}
           >
-            <EditIcon size="l" />
+            <EditIcon size="m" />
           </button>
-          <button
-            className="pl-1"
+          <EditTaskModal
+            isOpen={editModalVisible}
+            task={task}
+            onClose={handleCloseTaskEditModal}
+          />
+
+          {/* //TODO implement delete */}
+          {/* <button
+            className="pl-m"
             onClick={handleDeleteTask}
           >
             <DeleteIcon />
-          </button>
+          </button> */}
         </div>
 
         {task.description && (

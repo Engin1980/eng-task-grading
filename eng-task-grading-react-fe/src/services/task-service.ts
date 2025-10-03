@@ -1,7 +1,7 @@
 import { apiHttp } from "./api-http";
 import { createLogger } from "./log-service";
 import type { StudentCreateDto } from "../model/student-dto";
-import type { TaskDto, TaskCreateDto } from "../model/task-dto";
+import type { TaskDto, TaskCreateDto, TaskUpdateDto } from "../model/task-dto";
 
 const logger = createLogger("TaskService");
 
@@ -30,5 +30,11 @@ export const taskService = {
     const { data } = await apiHttp.get<TaskDto>(`/v1/task/${taskId}`);
     logger.info("Task stažen", { taskId });
     return data;
+  },
+
+  async update(taskId: string, task: Partial<TaskUpdateDto>): Promise<void> {
+    logger.info("Aktualizuji task " + taskId, task);
+    await apiHttp.patch<TaskDto>(`/v1/task/${taskId}`, task);
+    logger.info("Task aktualizován", { taskId });
   }
 };

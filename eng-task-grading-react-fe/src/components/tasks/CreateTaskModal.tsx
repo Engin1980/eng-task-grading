@@ -1,68 +1,79 @@
 import { useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { useLogger } from '../../hooks/use-logger';
-import type { TaskCreateDto, TaskDto } from '../../model/task-dto';
+import type { TaskCreateDto } from '../../model/task-dto';
 import { taskService } from '../../services/task-service';
+import { TaskEditor, type TaskEditorData } from '../../ui/editors/TaskEditor';
+import toast from 'react-hot-toast';
+
 
 interface CreateTaskModalProps {
   isOpen: boolean;
-  onClose: () => void;
-  onTaskCreated: (task: TaskDto) => void;
-  courseId: string;
+  courseId: number;
+  onClose: (isCompleted: boolean) => void;
 }
 
-export function CreateTaskModal({ isOpen, onClose, onTaskCreated, courseId }: CreateTaskModalProps) {
+export function CreateTaskModal({ isOpen, onClose, courseId }: CreateTaskModalProps) {
   const logger = useLogger("CreateTaskModal");
-  const [formData, setFormData] = useState<TaskCreateDto>({
-    courseId: Number(courseId),
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [taskEditorData, setTaskEditorData] = useState<TaskEditorData>({
     title: '',
     description: '',
     keywords: '',
-    minGrade: undefined
+    minGrade: null,
+    aggregation: 'avg'
   });
 
-  const handleSubmit = async(e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.title.trim()) {
-      logger.warn("Název úkolu je povinný");
+    if (!taskEditorData.title.trim()) {
+      toast.error("Název úkolu je povinný.");
       return;
     }
 
-    logger.info("Vytvářím nový úkol", { title: formData.title });
-    const newTask: TaskCreateDto = {
-      courseId: Number(courseId),
-      title: formData.title,
-      description: formData.description,
-      keywords: formData.keywords,
-      minGrade: formData.minGrade
-    };
+    setIsSubmitting(true);
+    logger.info("Submitting new task", taskEditorData);
 
-    const ret = await taskService.create(newTask);
-    onTaskCreated(ret);
-    handleClose();
+    try {
+      const newTask: TaskCreateDto = {
+        courseId: courseId,
+        title: taskEditorData.title,
+        description: taskEditorData.description || null,
+        keywords: taskEditorData.keywords || null,
+        minGrade: taskEditorData.minGrade || null,
+        aggregation: taskEditorData.aggregation ?? "last"
+      };
+      const createdTask = await taskService.create(newTask);
+      logger.info("Task created successfully", createdTask);
+      toast.success("Úkol byl úspěšně vytvořen.");
+      clearData();
+      onClose(true);
+    } catch (err) {
+      logger.error("Error creating task", { error: err });
+      toast.error("Chyba při vytváření úkolu.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleClose = () => {
-    setFormData({
-      courseId: Number(courseId),
+  const clearData = () => {
+    setTaskEditorData({
       title: '',
       description: '',
       keywords: '',
-      minGrade: undefined
+      minGrade: null,
+      aggregation: 'last'
     });
-    onClose();
-  };
+  }
 
-  const handleInputChange = (field: keyof TaskCreateDto, value: string | number | boolean | undefined) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+  const handleClose = () => {
+    clearData();
+    onClose(false);
   };
 
   return (
-    <Dialog.Root open={isOpen} onOpenChange={handleClose}>
+    <Dialog.Root open={isOpen} onOpenChange={handleClose} >
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/50 z-40" />
         <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-lg bg-white p-6 shadow-lg">
@@ -71,68 +82,9 @@ export function CreateTaskModal({ isOpen, onClose, onTaskCreated, courseId }: Cr
           </Dialog.Title>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Název úkolu */}
-            <div>
-              <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
-                Název úkolu *
-              </label>
-              <input
-                id="title"
-                type="text"
-                required
-                value={formData.title}
-                onChange={(e) => handleInputChange('title', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Zadejte název úkolu"
-              />
-            </div>
-
-            {/* Popis */}
-            <div>
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-                Popis
-              </label>
-              <textarea
-                id="description"
-                rows={3}
-                value={formData.description}
-                onChange={(e) => handleInputChange('description', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Zadejte popis úkolu"
-              />
-            </div>
-
-            {/* Klíčová slova */}
-            <div>
-              <label htmlFor="keywords" className="block text-sm font-medium text-gray-700 mb-1">
-                Klíčová slova
-              </label>
-              <input
-                id="keywords"
-                type="text"
-                value={formData.keywords}
-                onChange={(e) => handleInputChange('keywords', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Zadejte klíčová slova oddělená čárkami"
-              />
-            </div>
-
-            {/* Minimální známka */}
-            <div>
-              <label htmlFor="minGrade" className="block text-sm font-medium text-gray-700 mb-1">
-                Minimální hodnota úkolu
-              </label>
-              <input
-                id="minGrade"
-                type="number"
-                min="0"
-                max="1000"
-                value={formData.minGrade || ''}
-                onChange={(e) => handleInputChange('minGrade', e.target.value ? parseInt(e.target.value) : undefined)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="0-1000"
-              />
-            </div>
+            <TaskEditor
+              taskData={taskEditorData}
+              onChange={setTaskEditorData} />
 
             {/* Tlačítka */}
             <div className="flex justify-end space-x-3 mt-6">
@@ -145,6 +97,7 @@ export function CreateTaskModal({ isOpen, onClose, onTaskCreated, courseId }: Cr
               </button>
               <button
                 type="submit"
+                disabled={isSubmitting}
                 className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
                 Vytvořit úkol
@@ -163,6 +116,6 @@ export function CreateTaskModal({ isOpen, onClose, onTaskCreated, courseId }: Cr
           </Dialog.Close>
         </Dialog.Content>
       </Dialog.Portal>
-    </Dialog.Root>
+    </Dialog.Root >
   );
 }

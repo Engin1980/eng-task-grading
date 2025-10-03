@@ -23,12 +23,17 @@ namespace EngTaskGradingNetBE.Controllers
     }
 
     [HttpPost()]
-    public async Task<TaskDto> CreateTaskAsync([FromBody] TaskCreateDto taskCreateDto)
+    public async System.Threading.Tasks.Task CreateTaskAsync([FromBody] TaskCreateDto taskCreateDto)
     {
       var task = EObjectMapper.From(taskCreateDto);
-      var createdTask = await taskService.CreateAsync(taskCreateDto.CourseId, task);
-      var taskDto = EObjectMapper.To(createdTask);
-      return taskDto;
+      await taskService.CreateAsync(taskCreateDto.CourseId, task);
+    }
+
+    [HttpPatch("{taskId}")]
+    public async System.Threading.Tasks.Task UpdateTaskAsync([FromRoute] int taskId, [FromBody] TaskUpdateDto taskUpdateDto)
+    {
+      var task = EObjectMapper.From(taskUpdateDto);
+      await taskService.UpdateAsync(taskId, task);
     }
 
     [HttpGet("{id}")]

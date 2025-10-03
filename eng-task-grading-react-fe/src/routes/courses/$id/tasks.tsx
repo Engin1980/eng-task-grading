@@ -36,18 +36,14 @@ function TasksPage() {
     }
   };
 
-  const handleCreateTask = () => {
-    logger.info("Create task button clicked");
-    setIsCreateModalOpen(true);
-  };
-
-  const handleTaskCreated = async (_: TaskDto) => {
-    await loadTasks(); // Reload tasks after creation
-  };
-
   const handleDetailTask = (taskId: number) => {
     logger.info("Navigate to task detail", { taskId });
     navigate({ to: `/tasks/${taskId}` });
+  };
+
+  const createTaskModalClosed = (completed: boolean) => {
+    setIsCreateModalOpen(false);
+    if (completed) loadTasks();
   };
 
   useEffect(() => {
@@ -59,7 +55,7 @@ function TasksPage() {
       {/* Hlavička s tlačítkem pro vytvoření úkolu */}
       <div className='flex justify-end mb-6'>
         <button
-          onClick={handleCreateTask}
+          onClick={() => setIsCreateModalOpen(true)}
           className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
         >
           Vytvořit úkol
@@ -69,9 +65,8 @@ function TasksPage() {
       {/* Create Task Modal */}
       <CreateTaskModal
         isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        onTaskCreated={handleTaskCreated}
-        courseId={courseId}
+        onClose={createTaskModalClosed}
+        courseId={+courseId}
       />
 
       {ldgState.loading && <div className="text-center">Načítám úkoly...</div>}

@@ -11,6 +11,7 @@ import { TabLabelLink } from '../../../ui/tabLabelLink'
 import { TabLabelBlock } from '../../../ui/tabLabelBlock'
 import { Loading } from '../../../ui/loading'
 import { LoadingError } from '../../../ui/loadingError'
+import { useLoadingState } from '../../../types/loadingState'
 
 export const Route = createFileRoute('/studentView/courses/$id')({
   component: RouteComponent,
@@ -37,20 +38,19 @@ function getStudentNumberFromJWT(): string | null {
 function RouteComponent() {
   const { id } = Route.useParams()
   const [courseData, setCourseData] = useState<StudentViewCourseDto | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const ldgState = useLoadingState();
   const studentNumber = getStudentNumberFromJWT()
 
   const loadCourse = async () => {
     try {
-      setIsLoading(true)
+      ldgState.setLoading()
       const courseData = await studentViewService.getCourse(parseInt(id))
       setCourseData(courseData)
+      ldgState.setDone();
     } catch (error) {
       console.error('Error loading course:', error)
       toast.error('Nepodařilo se načíst detail kurzu.')
-    } finally {
-      setIsLoading(false)
+      ldgState.setError(error);
     }
   }
 
@@ -58,8 +58,8 @@ function RouteComponent() {
     loadCourse()
   }, [id])
 
-  if (isLoading) { return (<Loading message="Načítám kurz..." />) }
-  if (error) { return (<LoadingError message={error} onRetry={loadCourse} />) }
+  if (ldgState.loading) { return (<Loading message="Načítám kurz..." />) }
+  if (ldgState.error) { return (<LoadingError message={ldgState.error} onRetry={loadCourse} />) }
 
   if (!courseData) {
     return (
@@ -94,10 +94,20 @@ function RouteComponent() {
                   </span>
                   {courseData.course.tasksCount > 0 && (
                     <div className="flex items-center text-sm text-gray-500">
-                      <svg className="w-4 h-4 text-gray-400 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      {/* <svg className="w-4 h-4 text-gray-400 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
+                      </svg> */}
+                      <TaskIcon />
                       {courseData.course.tasksCount} úkolů
+                    </div>
+                  )}
+                  {courseData.course.attendancesCount > 0 && (
+                    <div className="flex items-center text-sm text-gray-500">
+                      {/* <svg className="w-4 h-4 text-gray-400 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg> */}
+                      <AttendanceIcon />
+                      {courseData.course.attendancesCount} docházek
                     </div>
                   )}
                 </div>

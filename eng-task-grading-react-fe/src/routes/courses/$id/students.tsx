@@ -170,7 +170,7 @@ function StudentsPage() {
                     <button
                       className="text-blue-600 hover:text-blue-800 font-medium"
                       onClick={() => {
-                        // TODO: Implementovat detail studenta
+                        // TODO: Implementovat detail známek studenta
                         console.log('Detail studenta:', student.number);
                       }}
                     >

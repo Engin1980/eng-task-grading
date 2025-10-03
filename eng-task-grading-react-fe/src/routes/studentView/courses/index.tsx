@@ -6,6 +6,7 @@ import toast from 'react-hot-toast'
 import { StudentInfo } from '../../../components/studentView'
 import { Loading } from '../../../ui/loading';
 import { LoadingError } from '../../../ui/loadingError';
+import { useLoadingState } from '../../../types/loadingState';
 
 export const Route = createFileRoute('/studentView/courses/')({
   component: RouteComponent,
@@ -32,20 +33,19 @@ function getStudentNumberFromJWT(): string | null {
 function RouteComponent() {
   const navigate = useNavigate();
   const [courses, setCourses] = useState<CourseDto[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const ldgState = useLoadingState();
   const studentNumber = getStudentNumberFromJWT();
 
   const loadCourses = async () => {
     try {
-      setIsLoading(true);
+      ldgState.setLoading();
       const courses = await studentViewService.getCourses();
       setCourses(courses);
+      ldgState.setDone();
     } catch (error) {
       console.error('Error loading courses:', error);
       toast.error('Nepodařilo se načíst kurzy. Zkuste to prosím znovu.');
-    } finally {
-      setIsLoading(false);
+      ldgState.setError(error);
     }
   }
 
@@ -53,8 +53,8 @@ function RouteComponent() {
     loadCourses();
   }, []);
 
-  if (isLoading) { return (<Loading message="Načítám kurzy..." />); }
-  if (error) { return (<LoadingError message={error} onRetry={loadCourses} />); }
+  if (ldgState.loading) { return (<Loading message="Načítám kurzy..." />); }
+  if (ldgState.error) { return (<LoadingError message={ldgState.error} onRetry={loadCourses} />); }
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -101,9 +101,9 @@ function RouteComponent() {
                     <tr key={course.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <button
-                          className="text-left w-full"
+                          className="text-left w-full cursor-pointer"
                           onClick={() => {
-                            navigate({ to: `/studentView/courses/${course.id}` });
+                            navigate({ to: `/studentView/courses/${course.id}/tasks` });
                           }}
                         >
                           <div className="text-sm font-medium text-blue-600 hover:text-blue-900 transition-colors">

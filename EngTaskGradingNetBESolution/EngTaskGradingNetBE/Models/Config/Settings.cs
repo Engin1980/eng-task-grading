@@ -7,6 +7,7 @@ namespace EngTaskGradingNetBE.Models.Config
     public EmailSettings Email { get; set; } = new EmailSettings();
     //public KeycloakSettings Keycloak { get; set; } = new KeycloakSettings();
     public string FrontEndUrl { get; set; } = string.Empty;
+    public int SelfSignCookieExpirationInMinutes { get; set; } = 5;
   }
 
   public class SecuritySettings

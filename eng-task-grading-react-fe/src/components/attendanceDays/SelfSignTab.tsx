@@ -2,10 +2,16 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { attendanceService } from '../../services/attendance-service';
 import toast from 'react-hot-toast';
-import type { AttendanceDaySelfSignSetDto, AttendanceStudentAnalysisResultDto, AttendanceValueDto } from '../../model/attendance-dto';
+import type { AttendanceDaySelfSignSetDto, AttendanceValueDto } from '../../model/attendance-dto';
 import { useLogger } from '../../hooks/use-logger';
 import { ImportAttendanceWizardFirstModal } from './ImportAttendanceWizardFirstModal';
 import { ImportAttendanceWizardSecondModal } from './ImportAttendanceWizardSecondModal';
+import { AttendanceValueLabelBlock } from '../../ui/attendanceValueLabelBlock';
+import { AttendanceValueLabel } from '../../ui/attendanceValueLabel';
+import { useLoadingState } from '../../types/loadingState';
+import { Loading } from '../../ui/loading';
+import { LoadingError } from '../../ui/loadingError';
+import type { StudentAnalysisResultDtoWithAttendanceValue } from '../../model/student-dto';
 
 interface SelfSignTabProps {
   attendanceDayId: string;
@@ -15,17 +21,18 @@ export function SelfSignTab({ attendanceDayId }: SelfSignTabProps) {
   const navigate = useNavigate();
   const [key, setKey] = useState('');
   const [currentKey, setCurrentKey] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const ldgState = useLoadingState();
+  const [loadingKey, setLoadingKey] = useState<boolean>(false);
   const [set, setSet] = useState<AttendanceDaySelfSignSetDto | null>(null);
   const [values, setValues] = useState<AttendanceValueDto[]>([]);
   const logger = useLogger("SelfSignTab");
   const [isImportFirstModalOpen, setIsImportFirstModalOpen] = useState(false);
   const [isImportSecondModalOpen, setIsImportSecondModalOpen] = useState(false);
-  const [analysisResult, setAnalysisResult] = useState<AttendanceStudentAnalysisResultDto>();
+  const [analysisResult, setAnalysisResult] = useState<StudentAnalysisResultDtoWithAttendanceValue>();
 
   const loadDataAsync = async () => {
     try {
-      setLoading(true);
+      ldgState.setLoading();
 
       const tmpZ = await attendanceService.getAttendanceValues();
       setValues(tmpZ.sort((a, b) => b.weight - a.weight)); // Seřaď podle weight sestupně
@@ -45,15 +52,17 @@ export function SelfSignTab({ attendanceDayId }: SelfSignTabProps) {
 
       setSet(dataSet);
       setCurrentKey(dataSet.key);
+      ldgState.setDone();
     } catch (error) {
       console.error('Error loading data:', error);
-    } finally {
-      setLoading(false);
+      ldgState.setError(error);
     }
   }
 
   useEffect(() => {
+    console.log("### useeffect invoked");
     loadDataAsync();
+    console.log("### useeffect completed");
   }, [attendanceDayId]);
 
   const handleSetKey = async () => {
@@ -62,8 +71,8 @@ export function SelfSignTab({ attendanceDayId }: SelfSignTabProps) {
       return;
     }
 
+    setLoadingKey(true);
     try {
-      setLoading(true);
       await attendanceService.setDaySelfSignKey(parseInt(attendanceDayId), key.trim());
       setCurrentKey(key.trim());
       setKey('');
@@ -73,14 +82,13 @@ export function SelfSignTab({ attendanceDayId }: SelfSignTabProps) {
     } catch (error) {
       console.error('Error setting key:', error);
       toast.error('Chyba při nastavování klíče');
-    } finally {
-      setLoading(false);
     }
+    setLoadingKey(false);
   };
 
   const handleDeleteKey = async () => {
+    setLoadingKey(true);
     try {
-      setLoading(true);
       await attendanceService.deleteDaySelfSignKey(parseInt(attendanceDayId));
       setCurrentKey(null);
       toast.success('Klíč pro samo-zápis byl smazán.');
@@ -89,9 +97,8 @@ export function SelfSignTab({ attendanceDayId }: SelfSignTabProps) {
     } catch (error) {
       console.error('Error deleting key:', error);
       toast.error('Chyba při mazání klíče');
-    } finally {
-      setLoading(false);
     }
+    setLoadingKey(false);
   };
 
   const handleShowQR = () => {
@@ -108,7 +115,6 @@ export function SelfSignTab({ attendanceDayId }: SelfSignTabProps) {
 
   const resolveSelfSign = async (selfSignId: number, attendanceValueId: number) => {
     try {
-      setLoading(true);
       await attendanceService.resolveDaySelfSign(selfSignId, attendanceValueId);
       toast.success('Samo-zápis byl úspěšně vyřízen.');
 
@@ -124,8 +130,6 @@ export function SelfSignTab({ attendanceDayId }: SelfSignTabProps) {
     } catch (error) {
       console.error('Error resolving self-sign:', error);
       toast.error('Chyba při řešení samo-zápisu');
-    } finally {
-      setLoading(false);
     }
   }
 
@@ -134,7 +138,7 @@ export function SelfSignTab({ attendanceDayId }: SelfSignTabProps) {
     setIsImportFirstModalOpen(true);
   }
 
-  const handleAnalyzed = async (data: AttendanceStudentAnalysisResultDto) => {
+  const handleAnalyzed = async (data: StudentAnalysisResultDtoWithAttendanceValue) => {
     setAnalysisResult(data);
     setIsImportFirstModalOpen(false);
     setIsImportSecondModalOpen(true);
@@ -145,14 +149,8 @@ export function SelfSignTab({ attendanceDayId }: SelfSignTabProps) {
     await loadDataAsync();
   }
 
-  if (loading) {
-    return (
-      <div className="animate-pulse">
-        <div className="h-4 bg-gray-200 rounded mb-2"></div>
-        <div className="h-32 bg-gray-200 rounded"></div>
-      </div>
-    );
-  }
+  if (ldgState.loading) { return (<Loading message="Načítám data..." />); }
+  if (ldgState.error) { return (<LoadingError message={ldgState.error} onRetry={loadDataAsync} />); }
 
   return (
     <div>
@@ -211,17 +209,17 @@ export function SelfSignTab({ attendanceDayId }: SelfSignTabProps) {
                   <div className="flex gap-2">
                     <button
                       onClick={handleShowQR}
-                      disabled={loading}
+                      disabled={loadingKey}
                       className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
                     >
                       Ukaž QR
                     </button>
                     <button
                       onClick={handleDeleteKey}
-                      disabled={loading}
+                      disabled={loadingKey}
                       className="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-50"
                     >
-                      {loading ? 'Maže se...' : 'Smazat klíč'}
+                      {loadingKey ? 'Maže se...' : 'Smazat klíč'}
                     </button>
                   </div>
                 </div>
@@ -237,14 +235,14 @@ export function SelfSignTab({ attendanceDayId }: SelfSignTabProps) {
                     onChange={(e) => setKey(e.target.value)}
                     placeholder="Zadejte klíč pro samo-zápis"
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    disabled={loading}
+                    disabled={loadingKey}
                   />
                   <button
                     onClick={handleSetKey}
-                    disabled={loading || !key.trim()}
+                    disabled={loadingKey || !key.trim()}
                     className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
                   >
-                    {loading ? 'Nastavuje se...' : 'Nastavit klíč'}
+                    {loadingKey ? 'Nastavuje se...' : 'Nastavit klíč'}
                   </button>
                 </div>
               </div>
@@ -295,46 +293,18 @@ export function SelfSignTab({ attendanceDayId }: SelfSignTabProps) {
                             {selfSign.ip}
                           </td>
                           <td className="px-6 py-4">
-                            <div className="flex flex-wrap gap-1">
-                              {/* Zobraz všechny dostupné attendance values */}
+                            <AttendanceValueLabelBlock>
                               {values.map((value) => {
-                                const isSelected = false; // TODO here
-
-                                // Výpočet barvy na základě hodnoty (0-1, červená-zelená)
-                                const normalizedValue = Math.max(0, Math.min(1, value.weight)); // Omez na 0-1
-
-                                // Světlejší barvy - mix s bílou (170-255 místo 0-255)
-                                const red = Math.round(200 + 55 * (1 - normalizedValue));
-                                const redBorder = Math.round(255 * (1 - normalizedValue));
-                                const green = Math.round(200 + 55 * normalizedValue);
-                                const greenBorder = Math.round(255 * (normalizedValue));
-
-                                // RGB barvy
-                                const backgroundColor = `rgb(${red}, ${green}, 200)`;
-                                const borderColor = `rgb(${redBorder}, ${greenBorder}, 0)`;
-
-                                // Výpočet barvy textu pro lepší čitelnost
-                                const textColor = 'rgb(51, 51, 51)';
-
-                                return (
-                                  <button
-                                    key={value.id}
-                                    onClick={() => resolveSelfSign(selfSign.id, value.id)}
-                                    className="inline-flex px-8 py-2 text-xs font-semibold rounded-full cursor-pointer hover:!bg-yellow-200 transition-colors"
-                                    style={{
-                                      backgroundColor: backgroundColor,
-                                      color: textColor,
-                                      border: isSelected ? `3px solid ${borderColor}` : `none`
-                                    }}
-                                  >
-                                    {value.title}
-                                  </button>
-                                );
+                                return <AttendanceValueLabel
+                                  attendanceValue={value}
+                                  isSelected={false}
+                                  onClick={() => {
+                                    resolveSelfSign(selfSign.id, value.id);
+                                  }} />
                               })}
-                            </div>
+                            </AttendanceValueLabelBlock>
                           </td>
-                        </tr>
-                      );
+                        </tr>);
                     })}
                   </tbody>
                 </table>

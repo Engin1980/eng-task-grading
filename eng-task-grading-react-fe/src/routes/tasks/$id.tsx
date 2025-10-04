@@ -9,6 +9,8 @@ import { useNavigationContext } from '../../contexts/NavigationContext';
 import { useLoadingState } from '../../types/loadingState';
 import { LoadingError } from '../../ui/loadingError';
 import { Loading } from '../../ui/loading';
+import { EditIcon } from '../../ui/icons/editIcon';
+import { EditTaskModal } from '../../components/tasks/EditTaskModal';
 
 export const Route = createFileRoute('/tasks/$id')({
   component: RouteComponent,
@@ -25,6 +27,18 @@ function RouteComponent() {
   const [selectedGrade, setSelectedGrade] = useState<GradeDto | null>(null);
   const ldgState = useLoadingState();
   const navCtx = useNavigationContext();
+  const [editModalVisible, setEditModalVisible] = useState(false);
+
+  const handleEditTask = () => {
+    setEditModalVisible(true);
+  };
+
+  const handleDeleteTask = () => {
+    // TODO: Open confirm dialog and delete task
+    if (window.confirm('Opravdu chcete smazat tento úkol?')) {
+      alert('Mazání úkolu zatím není implementováno.');
+    }
+  };
 
   // Funkce pro filtrování studentů
   const filteredStudentData = set?.students.filter(studentData => {
@@ -128,6 +142,13 @@ function RouteComponent() {
     setSelectedGrade(null);
   };
 
+  const handleCloseTaskEditModal = (updated: boolean) => {
+    setEditModalVisible(false);
+    if (updated) {
+      loadData();
+    }
+  };
+
   const handleDeleteGrade = async (gradeId: number) => {
     if (window.confirm('Opravdu chcete smazat tuto známku? Tato akce je nevratná.')) {
       try {
@@ -166,7 +187,28 @@ function RouteComponent() {
     <div className="container mx-auto p-4">
       {/* Informace o úkolu */}
       <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6 shadow-sm">
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">{task.title}</h1>
+        <div className="flex items-center gap-2 mb-4">
+          <h1 className="text-3xl font-bold text-gray-900">{task.title}</h1>
+          <button
+            className="pl-3"
+            onClick={handleEditTask}
+          >
+            <EditIcon size="m" />
+          </button>
+          <EditTaskModal
+            isOpen={editModalVisible}
+            task={task}
+            onClose={handleCloseTaskEditModal}
+          />
+
+          {/* //TODO implement delete */}
+          {/* <button
+            className="pl-m"
+            onClick={handleDeleteTask}
+          >
+            <DeleteIcon />
+          </button> */}
+        </div>
 
         {task.description && (
           <div className="mb-4">

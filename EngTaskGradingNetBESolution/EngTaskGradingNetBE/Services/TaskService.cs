@@ -11,13 +11,12 @@ namespace EngTaskGradingNetBE.Services
         .Where(t => t.CourseId == courseId)
         .ToListAsync();
     }
-    public async Task<Models.DbModel.Task> CreateAsync(int courseId, Models.DbModel.Task task)
+    public async System.Threading.Tasks.Task CreateAsync(int courseId, Models.DbModel.Task task)
     {
       task.CourseId = courseId;
       task.CourseId = courseId;
       await Db.Tasks.AddAsync(task);
       await Db.SaveChangesAsync();
-      return task;
     }
 
     public async Task<Models.DbModel.Task> GetByIdAsync(int id)
@@ -25,16 +24,17 @@ namespace EngTaskGradingNetBE.Services
       return await Db.Tasks.FindAsync(id) ?? throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.TaskNotFound, id);
     }
 
-    public async Task<Models.DbModel.Task> UpdateAsync(int id, Models.DbModel.Task updatedTask)
+    public async Task<Models.DbModel.Task> UpdateAsync(int taskId, Models.DbModel.Task updatedTask)
     {
-      var existingTask = await Db.Tasks.FirstOrDefaultAsync(q => q.Id == id)
-        ?? throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.TaskNotFound, id);
-      
+      var existingTask = await Db.Tasks.FirstOrDefaultAsync(q => q.Id == taskId)
+        ?? throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.TaskNotFound, taskId);
+
       existingTask.Title = updatedTask.Title;
       existingTask.Description = updatedTask.Description;
       existingTask.Keywords = updatedTask.Keywords;
       existingTask.MinGrade = updatedTask.MinGrade;
-      
+      existingTask.Aggregation = updatedTask.Aggregation;
+
       await Db.SaveChangesAsync();
       return existingTask;
     }

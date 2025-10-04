@@ -7,8 +7,8 @@ export const Route = createFileRoute('/attendanceSelfSign/view-info/$id/$key')({
 
 function ViewInfoComponent() {
   const { id, key } = Route.useParams()
-  const selfSignUrl = `http://localhost:3000/attendanceSelfSign/self-sign/${id}?key=${key}`
-  
+  const selfSignUrl = window.location.origin + `/attendanceSelfSign/self-sign/${id}?key=${key}`
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="bg-white shadow-lg rounded-lg overflow-hidden">
@@ -20,7 +20,7 @@ function ViewInfoComponent() {
             Informace pro studenty
           </p>
         </div>
-        
+
         <div className="px-6 py-4">
           <div className="space-y-6">
             <div>
@@ -31,7 +31,7 @@ function ViewInfoComponent() {
                 <span className="font-mono text-lg text-gray-900">{key}</span>
               </div>
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Odkaz pro studenty:
@@ -43,17 +43,17 @@ function ViewInfoComponent() {
                   search={{ key }}
                   className="text-blue-600 hover:text-blue-800 underline font-medium"
                 >
-                  http://localhost:3000/attendanceSelfSign/self-sign/{id}?key={key}
+                  {selfSignUrl}
                 </Link>
               </div>
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 QR kód:
               </label>
               <div className="bg-white border-2 border-gray-200 rounded-md p-4 flex justify-center">
-                <QRCodeSVG 
+                <QRCodeSVG
                   value={selfSignUrl}
                   size={200}
                   level="M"

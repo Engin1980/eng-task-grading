@@ -36,5 +36,11 @@ export const taskService = {
     logger.info("Aktualizuji task " + taskId, task);
     await apiHttp.patch<TaskDto>(`/v1/task/${taskId}`, task);
     logger.info("Task aktualizován", { taskId });
+  },
+
+  async delete(taskId: number): Promise<void> {
+    logger.info("Mažu task " + taskId);
+    await apiHttp.delete<void>(`/v1/task/${taskId}`);
+    logger.info("Task smazán", { taskId });
   }
 };

@@ -25,8 +25,10 @@ export function DeleteModal(props: DeleteModalProps) {
   return (
     <AppDialog
       title={props.title}
+      titleColor='red'
       isOpen={props.isOpen}
       confirmButtonText="Nevratně smazat"
+      confirmButtonColor='red'
       confirmButtonEnabled={() => enteredVerification === props.verification}
       onClose={(isConfirmed) => props.onClose(isConfirmed)}
     >

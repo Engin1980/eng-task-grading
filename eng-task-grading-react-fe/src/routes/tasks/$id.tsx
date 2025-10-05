@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react';
 import type { TaskDto } from '../../model/task-dto';
 import type { StudentDto } from '../../model/student-dto';
@@ -13,6 +13,7 @@ import { EditIcon } from '../../ui/icons/editIcon';
 import { EditTaskModal } from '../../components/tasks/EditTaskModal';
 import { DeleteIcon } from '../../ui/icons/deleteIcon';
 import { DeleteModal } from '../../components/global/DeleteModal';
+import { taskService } from '../../services/task-service';
 
 export const Route = createFileRoute('/tasks/$id')({
   component: RouteComponent,
@@ -31,6 +32,7 @@ function RouteComponent() {
   const navCtx = useNavigationContext();
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const navigate = useNavigate();
 
   // Funkce pro filtrování studentů
   const filteredStudentData = set?.students.filter(studentData => {
@@ -65,7 +67,13 @@ function RouteComponent() {
     }
   }
 
-  const handleCloseTaskDeleteModal = (confirmed: boolean) => {
+  const handleCloseTaskDeleteModal = async (confirmed: boolean) => {
+    if (confirmed && task) {
+      console.log("### deleting!");
+      await taskService.delete(task.id);
+      navigate({ to: "/courses" });
+    }
+    console.log("### delete ended");
     setDeleteModalVisible(false);
   }
 

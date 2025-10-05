@@ -43,5 +43,11 @@ namespace EngTaskGradingNetBE.Controllers
       var taskDto = EObjectMapper.To(task);
       return taskDto;
     }
+
+    [HttpDelete("{id}")]
+    public async System.Threading.Tasks.Task Delete([FromRoute] int id)
+    {
+      await taskService.DeleteAsync(id);
+    }
   }
 }

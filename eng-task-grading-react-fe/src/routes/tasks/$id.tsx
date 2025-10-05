@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react';
 import type { TaskDto } from '../../model/task-dto';
 import type { StudentDto } from '../../model/student-dto';
@@ -11,6 +11,10 @@ import { LoadingError } from '../../ui/loadingError';
 import { Loading } from '../../ui/loading';
 import { EditIcon } from '../../ui/icons/editIcon';
 import { EditTaskModal } from '../../components/tasks/EditTaskModal';
+import { DeleteIcon } from '../../ui/icons/deleteIcon';
+import { DeleteModal } from '../../components/global/DeleteModal';
+import { taskService } from '../../services/task-service';
+import toast from 'react-hot-toast';
 
 export const Route = createFileRoute('/tasks/$id')({
   component: RouteComponent,
@@ -28,17 +32,8 @@ function RouteComponent() {
   const ldgState = useLoadingState();
   const navCtx = useNavigationContext();
   const [editModalVisible, setEditModalVisible] = useState(false);
-
-  const handleEditTask = () => {
-    setEditModalVisible(true);
-  };
-
-  const handleDeleteTask = () => {
-    // TODO: Open confirm dialog and delete task
-    if (window.confirm('Opravdu chcete smazat tento úkol?')) {
-      alert('Mazání úkolu zatím není implementováno.');
-    }
-  };
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const navigate = useNavigate();
 
   // Funkce pro filtrování studentů
   const filteredStudentData = set?.students.filter(studentData => {
@@ -71,6 +66,18 @@ function RouteComponent() {
     } catch (err) {
       ldgState.setError(err);
     }
+  }
+
+  const handleCloseTaskDeleteModal = async (confirmed: boolean) => {
+    if (confirmed && task) {
+      taskService.delete(task.id).then(() => {
+        toast.success('Úkol byl úspěšně smazán.');
+        navigate({ to: `/courses/${task.courseId}/tasks` });
+      }).catch(() => {
+        toast.error('Úkol se nepodařilo smazat.');
+      });
+    }
+    setDeleteModalVisible(false);
   }
 
   const handleAddGrade = (student: StudentDto) => {
@@ -191,7 +198,7 @@ function RouteComponent() {
           <h1 className="text-3xl font-bold text-gray-900">{task.title}</h1>
           <button
             className="pl-3"
-            onClick={handleEditTask}
+            onClick={() => setEditModalVisible(true)}
           >
             <EditIcon size="m" />
           </button>
@@ -202,12 +209,19 @@ function RouteComponent() {
           />
 
           {/* //TODO implement delete */}
-          {/* <button
+          <button
             className="pl-m"
-            onClick={handleDeleteTask}
+            onClick={() => setDeleteModalVisible(true)}
           >
             <DeleteIcon />
-          </button> */}
+          </button>
+          <DeleteModal
+            title="Opravdu smazat úkol?"
+            question="Bude nevratně smazán úkol i všechna případná související ohodnocení!"
+            verification={task.title}
+            isOpen={deleteModalVisible}
+            onClose={handleCloseTaskDeleteModal}
+          />
         </div>
 
         {task.description && (

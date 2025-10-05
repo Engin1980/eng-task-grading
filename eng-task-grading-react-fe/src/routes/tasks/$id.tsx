@@ -205,8 +205,8 @@ function RouteComponent() {
             <DeleteIcon />
           </button>
           <DeleteModal
-            title="Smazat úkol?"
-            question="Bude smazán úkol i všechna případná související ohodnocení! Opravdu chcete smazat úkol?"
+            title="Opravdu smazat úkol?"
+            question="Bude nevratně smazán úkol i všechna případná související ohodnocení!"
             verification={task.title}
             isOpen={deleteModalVisible}
             onClose={handleCloseTaskDeleteModal}

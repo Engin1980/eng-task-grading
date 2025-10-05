@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import type { TaskDto, TaskUpdateDto } from '../../model/task-dto';
 import { taskService } from '../../services/task-service';
 import toast from 'react-hot-toast';

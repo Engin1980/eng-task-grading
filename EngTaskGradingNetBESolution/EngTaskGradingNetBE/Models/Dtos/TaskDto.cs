@@ -2,6 +2,7 @@
 {
   public record TaskDto(
           int Id,
+          int CourseId,
           string Title,
           string? Keywords,
           string? Description,

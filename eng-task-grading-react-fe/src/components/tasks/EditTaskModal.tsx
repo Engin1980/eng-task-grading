@@ -8,6 +8,7 @@ import { AppDialog } from '../../ui/AppDialog';
 export interface EditTaskModalProps {
   isOpen: boolean;
   task: TaskDto | null;
+  onSubmit(data: TaskUpdateDto): Promise<void>;
   onClose: (isUpdated: boolean) => void;
 }
 
@@ -44,7 +45,7 @@ export function EditTaskModal({ isOpen, task, onClose }: EditTaskModalProps) {
     } catch (error) {
       console.error('Error updating task:', error);
       toast.error('Chyba při aktualizaci úkolu.');
-    } 
+    }
   };
 
   const clearData = () => {

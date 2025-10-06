@@ -10,6 +10,10 @@ import { useNavigationContext } from '../../contexts/NavigationContext'
 import { useLoadingState } from '../../types/loadingState'
 import { Loading } from '../../ui/loading'
 import { LoadingError } from '../../ui/loadingError'
+import { EditIcon } from '../../ui/icons/editIcon'
+import { DeleteIcon } from '../../ui/icons/deleteIcon'
+import { DeleteModal } from '../../components/global/DeleteModal'
+import { EditAttendanceModal } from '../../components/attendances/EditAttendanceModal'
 
 export const Route = createFileRoute('/attendances/$id')({
   component: AttendanceDetailPage,
@@ -17,7 +21,9 @@ export const Route = createFileRoute('/attendances/$id')({
 
 function AttendanceDetailPage() {
   const { id } = Route.useParams() // attendanceId
-  const [attendance, setAttendance] = useState<AttendanceDto | null>(null)
+  const [attendance, setAttendance] = useState<AttendanceDto>(null!);
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const ldgState = useLoadingState();
   const navCtx = useNavigationContext();
 
@@ -48,6 +54,32 @@ function AttendanceDetailPage() {
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
           {attendance?.title || `Docházka ${id}`}
         </h1>
+        <button
+          className="pl-3"
+          onClick={() => setEditModalVisible(true)}
+        >
+          <EditIcon size="m" />
+        </button>
+        <EditAttendanceModal
+          isOpen={editModalVisible}
+          attendance={attendance!}
+          onClose={(changed) => { if (changed) loadAttendance(); setEditModalVisible(false) }}
+        />
+
+        <button
+          className="pl-m"
+          onClick={() => setDeleteModalVisible(true)}
+        >
+          <DeleteIcon />
+        </button>
+        <DeleteModal
+          title="Opravdu smazat docházku?"
+          question="Bude nevratně smazána docházka i všechna případná související ohodnocení!"
+          verification={attendance.title}
+          isOpen={deleteModalVisible}
+          onClose={handleCloseAttendanceDeleteModal}
+        />
+
         <p className="text-gray-600">ID docházky: {id}</p>
         {attendance && (
           <div className="text-sm text-gray-500 mt-2">

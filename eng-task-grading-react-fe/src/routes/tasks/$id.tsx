@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react';
-import type { TaskDto } from '../../model/task-dto';
+import type { TaskDto, TaskUpdateDto } from '../../model/task-dto';
 import type { StudentDto } from '../../model/student-dto';
 import type { GradeDto, NewGradeSetTaskDto } from '../../model/grade-dto';
 import { gradeService } from '../../services/grade-service';
@@ -23,7 +23,7 @@ export const Route = createFileRoute('/tasks/$id')({
 function RouteComponent() {
   const { id } = Route.useParams()
   const [set, setSet] = useState<NewGradeSetTaskDto | null>(null);
-  const [task, setTask] = useState<TaskDto | null>(null);
+  const [task, setTask] = useState<TaskDto>(null!);
   const [filterText, setFilterText] = useState<string>("");
   const [isAddGradeModalOpen, setIsAddGradeModalOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<StudentDto | null>(null);
@@ -68,18 +68,6 @@ function RouteComponent() {
     }
   }
 
-  const handleCloseTaskDeleteModal = async (confirmed: boolean) => {
-    if (confirmed && task) {
-      taskService.delete(task.id).then(() => {
-        toast.success('Úkol byl úspěšně smazán.');
-        navigate({ to: `/courses/${task.courseId}/tasks` });
-      }).catch(() => {
-        toast.error('Úkol se nepodařilo smazat.');
-      });
-    }
-    setDeleteModalVisible(false);
-  }
-
   const handleAddGrade = (student: StudentDto) => {
     setSelectedStudent(student);
     setIsAddGradeModalOpen(true);
@@ -107,7 +95,7 @@ function RouteComponent() {
     }
   };
 
-  const handleCloseModal = () => {
+  const handleCloseAddGradeModal = () => {
     setIsAddGradeModalOpen(false);
     setSelectedStudent(null);
   };
@@ -143,17 +131,10 @@ function RouteComponent() {
     }
   };
 
-  const handleCloseEditModal = () => {
+  const handleCloseEditGradeModal = () => {
     setIsEditGradeModalOpen(false);
     setSelectedStudent(null);
     setSelectedGrade(null);
-  };
-
-  const handleCloseTaskEditModal = (updated: boolean) => {
-    setEditModalVisible(false);
-    if (updated) {
-      loadData();
-    }
   };
 
   const handleDeleteGrade = async (gradeId: number) => {
@@ -180,6 +161,21 @@ function RouteComponent() {
     }
   };
 
+  const handleTaskEdit = async (data: TaskUpdateDto) => {
+    await taskService.update(task.id.toString(), data);
+    loadData();
+  };
+
+  const handleTaskDelete = async () => {
+    try {
+      await taskService.delete(task.id);
+      toast.success('Úkol byl úspěšně smazán.');
+      navigate({ to: `/courses/${task.courseId}/tasks` });
+    } catch (err) {
+      toast.error('Úkol se nepodařilo smazat.');
+    }
+  }
+
   useEffect(() => {
     loadData();
   }, [id]);
@@ -205,10 +201,10 @@ function RouteComponent() {
           <EditTaskModal
             isOpen={editModalVisible}
             task={task}
-            onClose={handleCloseTaskEditModal}
+            onSubmit={handleTaskEdit}
+            onClose={() => setEditModalVisible(false)}
           />
 
-          {/* //TODO implement delete */}
           <button
             className="pl-m"
             onClick={() => setDeleteModalVisible(true)}
@@ -220,7 +216,8 @@ function RouteComponent() {
             question="Bude nevratně smazán úkol i všechna případná související ohodnocení!"
             verification={task.title}
             isOpen={deleteModalVisible}
-            onClose={handleCloseTaskDeleteModal}
+            onDelete={handleTaskDelete}
+            onClose={() => setDeleteModalVisible(false)}
           />
         </div>
 
@@ -425,7 +422,7 @@ function RouteComponent() {
       {/* Add Grade Modal */}
       <AddGradeModal
         isOpen={isAddGradeModalOpen}
-        onClose={handleCloseModal}
+        onClose={handleCloseAddGradeModal}
         student={selectedStudent}
         taskId={id}
         onGradeAdded={handleGradeAdded}
@@ -434,7 +431,7 @@ function RouteComponent() {
       {/* Edit Grade Modal */}
       <EditGradeModal
         isOpen={isEditGradeModalOpen}
-        onClose={handleCloseEditModal}
+        onClose={handleCloseEditGradeModal}
         student={selectedStudent}
         grade={selectedGrade}
         onGradeUpdated={handleGradeUpdated}

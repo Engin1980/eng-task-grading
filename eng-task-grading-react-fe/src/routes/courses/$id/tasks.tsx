@@ -1,11 +1,12 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useLogger } from '../../../hooks/use-logger';
 import { useEffect, useState } from 'react';
-import type { TaskDto } from '../../../model/task-dto';
+import type { TaskCreateDto, TaskDto } from '../../../model/task-dto';
 import { taskService } from '../../../services/task-service';
 import { CreateTaskModal } from '../../../components/tasks';
 import { LoadingError } from '../../../ui/loadingError';
 import { useLoadingState } from '../../../types/loadingState';
+import toast from 'react-hot-toast';
 
 export const Route = createFileRoute('/courses/$id/tasks')({
   component: TasksPage,
@@ -41,10 +42,16 @@ function TasksPage() {
     navigate({ to: `/tasks/${taskId}` });
   };
 
-  const createTaskModalClosed = (completed: boolean) => {
-    setIsCreateModalOpen(false);
-    if (completed) loadTasks();
-  };
+  const handleCreateTaskSubmit = async (data: TaskCreateDto) => {
+    try {
+      await taskService.create(data);
+      await loadTasks();
+      toast.success("Úkol byl úspěšně vytvořen.");
+    } catch (err) {
+      toast.error("Chyba při vytváření úkolu.");
+      throw err;
+    }
+  }
 
   useEffect(() => {
     loadTasks();
@@ -65,7 +72,8 @@ function TasksPage() {
       {/* Create Task Modal */}
       <CreateTaskModal
         isOpen={isCreateModalOpen}
-        onClose={createTaskModalClosed}
+        onSubmit={handleCreateTaskSubmit}
+        onClose={() => setIsCreateModalOpen(false)}
         courseId={+courseId}
       />
 

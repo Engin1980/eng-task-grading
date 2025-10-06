@@ -18,7 +18,7 @@ export interface AttendanceDayUpdateDto {
 export interface AttendanceDto {
   id: number;
   title: string;
-  minWeight?: number;
+  minWeight: number | null;
   days: AttendanceDayDto[];
 }
 

@@ -20,9 +20,7 @@ export const taskService = {
   },
 
   async create(task: TaskCreateDto): Promise<void> {
-    logger.info("Vytvářím nový task", { title: task.title });
-    const { data } = await apiHttp.post<TaskDto>(`/v1/task`, task);
-    logger.info("Task vytvořen", { taskId: data.id });
+    await apiHttp.post<void>(`/v1/task`, task);
   },
 
   async get(taskId: string): Promise<TaskDto> {

@@ -12,7 +12,6 @@ export interface EditTaskModalProps {
 }
 
 export function EditTaskModal({ isOpen, task, onClose }: EditTaskModalProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [taskEditorData, setTaskEditorData] = useState<TaskEditorData>({
     title: task?.title ?? '',
     description: task?.description ?? '',
@@ -27,8 +26,6 @@ export function EditTaskModal({ isOpen, task, onClose }: EditTaskModalProps) {
       toast.error('Název úkolu je povinný.');
       return;
     }
-
-    setIsSubmitting(true);
 
     try {
       const updateData: TaskUpdateDto = {
@@ -47,9 +44,7 @@ export function EditTaskModal({ isOpen, task, onClose }: EditTaskModalProps) {
     } catch (error) {
       console.error('Error updating task:', error);
       toast.error('Chyba při aktualizaci úkolu.');
-    } finally {
-      setIsSubmitting(false);
-    }
+    } 
   };
 
   const clearData = () => {
@@ -64,7 +59,6 @@ export function EditTaskModal({ isOpen, task, onClose }: EditTaskModalProps) {
 
   const handleClose = () => {
     clearData();
-    setIsSubmitting(false);
     onClose(false);
   };
 

@@ -1,5 +1,4 @@
 import type { StudentDto } from "./student-dto";
-import type { TaskDto } from "./task-dto";
 
 export interface AttendanceDayDto {
   id: number;
@@ -25,13 +24,12 @@ export interface AttendanceDto {
 
 export interface AttendanceCreateDto {
   title: string;
-  minWeight?: number;
-  days: AttendanceDayDto[];
+  minWeight: number | null;
 }
 
 export interface AttendanceUpdateDto {
   title: string;
-  minWeight?: number;
+  minWeight: number | null;
 }
 
 export interface AttendanceRecordDto {

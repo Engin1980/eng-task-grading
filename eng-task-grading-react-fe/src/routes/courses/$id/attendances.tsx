@@ -69,6 +69,11 @@ function AttendancesPage() {
         >
           Přidat docházku
         </button>
+        <CreateAttendanceModal
+          isOpen={isCreateModalOpen}
+          onClose={(res) => { if (res) loadAttendances(); setIsCreateModalOpen(false); }}
+          courseId={parseInt(courseId)}
+        />
       </div>
 
       {attendances.length === 0 ? (
@@ -119,12 +124,6 @@ function AttendancesPage() {
           </table>
         </div>
       )}
-
-      <CreateAttendanceModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        onSubmit={handleCreateAttendance}
-      />
     </div>
   );
 }

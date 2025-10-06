@@ -7,7 +7,6 @@ export interface AttendanceDayDto {
 }
 
 export interface AttendanceDayCreateDto {
-  attendanceId: number;
   title: string;
 }
 

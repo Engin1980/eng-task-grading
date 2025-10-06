@@ -1,14 +1,16 @@
 import { useState } from 'react';
 import type { AttendanceDayCreateDto } from '../../model/attendance-dto';
 import { AppDialog } from '../../ui/AppDialog';
+import toast from 'react-hot-toast';
 
 interface CreateAttendanceDayModalProps {
   isOpen: boolean;
+  attendanceId: number;
   onClose: () => void;
   onSubmit: (attendanceDay: AttendanceDayCreateDto) => Promise<void>;
 }
 
-export function CreateAttendanceDayModal({ isOpen, onClose, onSubmit }: CreateAttendanceDayModalProps) {
+export function CreateAttendanceDayModal(props: CreateAttendanceDayModalProps) {
   const [title, setTitle] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
@@ -17,26 +19,32 @@ export function CreateAttendanceDayModal({ isOpen, onClose, onSubmit }: CreateAt
 
     setSubmitting(true);
     try {
-      await onSubmit({
+      const data: AttendanceDayCreateDto = {
         title: title.trim()
-      });
+      };
+
+      props.onSubmit(data);
+
+      toast.success("Den docházky byl úspěšně vytvořen.");
       setTitle('');
-      onClose();
+      props.onClose();
     } catch (error) {
-      console.error('Error creating attendance day:', error);
+      toast.error("Chyba při vytváření dne docházky.");
     } finally {
       setSubmitting(false);
     }
   };
 
   const handleClose = () => {
-    setTitle('');
-    onClose();
+    if (!submitting) {
+      setTitle('');
+      props.onClose();
+    }
   };
 
   return (
     <AppDialog
-      isOpen={isOpen}
+      isOpen={props.isOpen}
       onClose={handleClose}
       title="Nový den docházky"
       confirmButtonEnabled={() => !!title.trim() && !submitting}

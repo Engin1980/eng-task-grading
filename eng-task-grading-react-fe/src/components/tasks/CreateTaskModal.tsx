@@ -1,20 +1,17 @@
 import { useState } from 'react';
-import { useLogger } from '../../hooks/use-logger';
 import type { TaskCreateDto } from '../../model/task-dto';
-import { taskService } from '../../services/task-service';
 import { TaskEditor, type TaskEditorData } from '../../ui/editors/TaskEditor';
 import toast from 'react-hot-toast';
 import { AppDialog } from '../../ui/AppDialog';
 
-
 interface CreateTaskModalProps {
   isOpen: boolean;
   courseId: number;
-  onClose: (isCompleted: boolean) => void;
+  onSubmit: (data: TaskCreateDto) => void;
+  onClose: (taskCreated: boolean) => void;
 }
 
-export function CreateTaskModal({ isOpen, onClose, courseId }: CreateTaskModalProps) {
-  const logger = useLogger("CreateTaskModal");
+export function CreateTaskModal(props: CreateTaskModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [taskEditorData, setTaskEditorData] = useState<TaskEditorData>({
     title: '',
@@ -24,33 +21,33 @@ export function CreateTaskModal({ isOpen, onClose, courseId }: CreateTaskModalPr
     aggregation: 'avg'
   });
 
-  const handleSubmit = async () => {
+  const validateTask = () => {
     if (!taskEditorData.title.trim()) {
       toast.error("Název úkolu je povinný.");
-      return;
-    }
+      return false;
+    } else return true;
+  }
+
+  const handleSubmit = async () => {
+
+    if (!validateTask()) return;
 
     setIsSubmitting(true);
-    logger.info("Submitting new task", taskEditorData);
 
     try {
-      const newTask: TaskCreateDto = {
-        courseId: courseId,
+      const data: TaskCreateDto = {
+        courseId: props.courseId,
         title: taskEditorData.title,
         description: taskEditorData.description || null,
         keywords: taskEditorData.keywords || null,
         minGrade: taskEditorData.minGrade || null,
         aggregation: taskEditorData.aggregation ?? "last"
       };
-      const createdTask = await taskService.create(newTask);
-      logger.info("Task created successfully", createdTask);
-      toast.success("Úkol byl úspěšně vytvořen.");
+      props.onSubmit(data);
       clearData();
-      onClose(true);
-    } catch (err) {
-      logger.error("Error creating task", { error: err });
-      toast.error("Chyba při vytváření úkolu.");
-      return;
+      props.onClose(true);
+    }
+    catch (err) {
     } finally {
       setIsSubmitting(false);
     }
@@ -68,13 +65,13 @@ export function CreateTaskModal({ isOpen, onClose, courseId }: CreateTaskModalPr
 
   const handleClose = () => {
     clearData();
-    onClose(false);
+    props.onClose(false);
   };
 
   return (
     <div>
       <AppDialog
-        isOpen={isOpen}
+        isOpen={props.isOpen}
         confirmButtonText='Vytvořit úkol'
         title="Vytvořit nový úkol"
         confirmButtonEnabled={() => taskEditorData.title.trim().length > 0 && !isSubmitting}
@@ -85,6 +82,6 @@ export function CreateTaskModal({ isOpen, onClose, courseId }: CreateTaskModalPr
           taskData={taskEditorData}
           onChange={setTaskEditorData} />
       </AppDialog>
-    </div>
+    </div >
   );
 }

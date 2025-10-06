@@ -1,7 +1,7 @@
-import { createFileRoute, Outlet } from '@tanstack/react-router'
+import { createFileRoute, Outlet, useNavigate } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import { attendanceService } from '../../services/attendance-service'
-import type { AttendanceDto } from '../../model/attendance-dto'
+import type { AttendanceDto, AttendanceUpdateDto } from '../../model/attendance-dto'
 import { TabLabelBlock } from '../../ui/tabLabelBlock'
 import { TabLabelLink } from '../../ui/tabLabelLink'
 import { AttendanceIcon } from '../../ui/icons/attendanceIcon'
@@ -10,6 +10,11 @@ import { useNavigationContext } from '../../contexts/NavigationContext'
 import { useLoadingState } from '../../types/loadingState'
 import { Loading } from '../../ui/loading'
 import { LoadingError } from '../../ui/loadingError'
+import { EditIcon } from '../../ui/icons/editIcon'
+import { DeleteIcon } from '../../ui/icons/deleteIcon'
+import { DeleteModal } from '../../components/global/DeleteModal'
+import { EditAttendanceModal } from '../../components/attendances/EditAttendanceModal'
+import toast from 'react-hot-toast'
 
 export const Route = createFileRoute('/attendances/$id')({
   component: AttendanceDetailPage,
@@ -17,9 +22,12 @@ export const Route = createFileRoute('/attendances/$id')({
 
 function AttendanceDetailPage() {
   const { id } = Route.useParams() // attendanceId
-  const [attendance, setAttendance] = useState<AttendanceDto | null>(null)
+  const [attendance, setAttendance] = useState<AttendanceDto>(null!);
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const ldgState = useLoadingState();
   const navCtx = useNavigationContext();
+  const navigate = useNavigate();
 
   const loadAttendance = async () => {
     try {
@@ -34,6 +42,26 @@ function AttendanceDetailPage() {
     }
   }
 
+  const handleAttendanceDelete = async () => {
+    try {
+      await attendanceService.delete(attendance.id);
+      toast.success("Docházka byla úspěšně smazána.");
+      navigate({ to: `/courses/${attendance.courseId}/attendances` });
+    } catch (err) {
+      toast.error("Chyba při mazání docházky.");
+      throw err;
+    }
+  }
+
+  const handleAttendanceEdit = async (updatedAttendance: AttendanceUpdateDto) => {
+    await attendanceService.update(attendance.id, updatedAttendance);
+    //TODO update so let all data are downloaded in request
+    // like in Task, via one Set object
+    // in meantime, hard refresh is required here
+    window.location.reload();
+    //await loadAttendance();
+  }
+
   useEffect(() => {
     loadAttendance()
   }, [id])
@@ -45,9 +73,39 @@ function AttendanceDetailPage() {
     <div className="container mx-auto p-4">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          {attendance?.title || `Docházka ${id}`}
-        </h1>
+        <div className="flex items-center gap-2 mb-4">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            {attendance?.title || `Docházka ${id}`}
+          </h1>
+          <button
+            className="pl-3"
+            onClick={() => setEditModalVisible(true)}
+          >
+            <EditIcon size="m" />
+          </button>
+          <EditAttendanceModal
+            isOpen={editModalVisible}
+            attendance={attendance!}
+            onSubmit={handleAttendanceEdit}
+            onClose={() => setEditModalVisible(false)}
+          />
+
+          <button
+            className="pl-m"
+            onClick={() => setDeleteModalVisible(true)}
+          >
+            <DeleteIcon />
+          </button>
+          <DeleteModal
+            title="Opravdu smazat docházku?"
+            question="Bude nevratně smazána docházka i všechna případná související ohodnocení!"
+            verification={attendance.title}
+            onDelete={handleAttendanceDelete}
+            isOpen={deleteModalVisible}
+            onClose={() => setDeleteModalVisible(false)}
+          />
+        </div>
+
         <p className="text-gray-600">ID docházky: {id}</p>
         {attendance && (
           <div className="text-sm text-gray-500 mt-2">

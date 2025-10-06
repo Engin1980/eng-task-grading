@@ -17,12 +17,14 @@ public record AttendanceRecordDto(
 
 public record AttendanceDayDto(
   int Id,
+  int AttendanceId,
   string Title,
   string? SelfAssignKey
 );
 
 public record AttendanceDto(
   int Id,
+  int CourseId,
   string Title,
   double? MinWeight,
   ICollection<AttendanceDayDto> Days
@@ -41,6 +43,12 @@ public record AttendanceDayUpdateDto(
 public record AttendanceCreateDto(
   string Title,
   double? MinWeight
+);
+
+public record AttendanceUpdateDto
+(
+  string Title,
+  int? MinWeight
 );
 
 public record AttendanceOverviewDto(

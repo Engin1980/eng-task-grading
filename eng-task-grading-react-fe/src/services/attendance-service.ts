@@ -1,4 +1,4 @@
-import type { AttendanceCreateDto, AttendanceDayCreateDto, AttendanceDaySelfSignCreateDto, AttendanceDaySelfSignSetDto, AttendanceDaySetDto, AttendanceDayUpdateDto, AttendanceDto, AttendanceRecordDayByStudentCreate, AttendanceRecordDto, AttendanceSetDto, AttendanceUpdateDto, AttendanceValueDto } from "../model/attendance-dto";
+import type { AttendanceCreateDto, AttendanceDayCreateDto, AttendanceDayDto, AttendanceDaySelfSignCreateDto, AttendanceDaySelfSignSetDto, AttendanceDaySetDto, AttendanceDayUpdateDto, AttendanceDto, AttendanceRecordDayByStudentCreate, AttendanceRecordDto, AttendanceSetDto, AttendanceUpdateDto, AttendanceValueDto } from "../model/attendance-dto";
 import type { StudentAnalysisResultDto, StudentDto } from "../model/student-dto";
 import { apiHttp } from "./api-http";
 
@@ -32,6 +32,11 @@ export const attendanceService = {
     await apiHttp.post(`/v1/attendance/days`, attendanceDay);
   },
 
+  getDay: async (attendanceDayId: number) => {
+    const { data } = await apiHttp.get<AttendanceDayDto>(`/v1/attendance/days/${attendanceDayId}`);
+    return data;
+  },
+
   updateDay: async (attendanceDayId: number, attendanceDay: AttendanceDayUpdateDto) => {
     await apiHttp.patch(`/v1/attendance/days/${attendanceDayId}`, attendanceDay);
   },
@@ -50,7 +55,7 @@ export const attendanceService = {
     return data;
   },
 
-  getRecordsForDay: async (attendanceDayId: string) => {
+  getRecordsForDay: async (attendanceDayId: number) => {
     const { data } = await apiHttp.get<AttendanceRecordDto[]>(`/v1/attendance/records/for-day/${attendanceDayId}`, {});
     return data;
   },

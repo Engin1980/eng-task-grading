@@ -39,7 +39,7 @@ namespace EngTaskGradingNetBE.Controllers
     }
 
     [HttpPatch("{id}")]
-    public async Task<AttendanceDto> UpdateAsync(int id, [FromBody] AttendanceDto attendanceDto)
+    public async Task<AttendanceDto> UpdateAsync(int id, [FromBody] AttendanceUpdateDto attendanceDto)
     {
       Attendance att = EObjectMapper.From(attendanceDto);
       var updated = await attendanceService.UpdateAsync(id, att);
@@ -67,6 +67,14 @@ namespace EngTaskGradingNetBE.Controllers
     public async System.Threading.Tasks.Task DeleteAsync(int id)
     {
       await attendanceService.DeleteAsync(id);
+    }
+
+    [HttpGet("days/{id}")]
+    public async Task<AttendanceDayDto> GetDayByIdAsync(int id)
+    {
+      AttendanceDay tmp = await attendanceService.GetDayByIdAsync(id, false);
+      AttendanceDayDto ret = EObjectMapper.To(tmp);
+      return ret;
     }
 
     [HttpPost("days")]

@@ -6,7 +6,8 @@ interface DeleteModalProps {
   question: string;
   verification: string;
   isOpen: boolean;
-  onClose: (isCompleted: boolean) => void;
+  onDelete: (confirmed: boolean) => void;
+  onClose: () => void;
 }
 
 export function DeleteModal(props: DeleteModalProps) {
@@ -22,8 +23,8 @@ export function DeleteModal(props: DeleteModalProps) {
       confirmButtonText="Nevratně smazat"
       confirmButtonColor='red'
       confirmButtonEnabled={() => enteredVerification === props.verification}
-      onSubmit={() => props.onClose(true)}
-      onClose={() => props.onClose(false)}
+      onSubmit={() => props.onDelete(true)}
+      onClose={() => props.onClose()}
     >
       <div className="px-6 py-4">
 

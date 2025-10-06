@@ -13,13 +13,6 @@ interface DeleteModalProps {
 export function DeleteModal(props: DeleteModalProps) {
   const [enteredVerification, setEnteredVerification] = React.useState<string>('');
 
-  function handleClose() {
-    props.onClose(false);
-  }
-
-  function handleSubmit() {
-  }
-
   if (!props.isOpen || !props.verification) return null;
 
   return (

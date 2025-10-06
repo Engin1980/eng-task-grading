@@ -69,11 +69,8 @@ function RouteComponent() {
 
   const handleCloseTaskDeleteModal = async (confirmed: boolean) => {
     if (confirmed && task) {
-      console.log("### deleting!");
-      await taskService.delete(task.id);
-      navigate({ to: "/courses" });
+      taskService.delete(task.id).then(() => navigate({ to: "/courses" }));
     }
-    console.log("### delete ended");
     setDeleteModalVisible(false);
   }
 

@@ -14,7 +14,7 @@ import { LoadingError } from '../../ui/loadingError';
 import type { StudentAnalysisResultDtoWithAttendanceValue } from '../../model/student-dto';
 
 interface SelfSignTabProps {
-  attendanceDayId: string;
+  attendanceDayId: number;
 }
 
 export function SelfSignTab({ attendanceDayId }: SelfSignTabProps) {
@@ -37,11 +37,11 @@ export function SelfSignTab({ attendanceDayId }: SelfSignTabProps) {
       const tmpZ = await attendanceService.getAttendanceValues();
       setValues(tmpZ.sort((a, b) => b.weight - a.weight)); // Seřaď podle weight sestupně
 
-      const tmpA = await attendanceService.getSelfSignSet(+attendanceDayId);
+      const tmpA = await attendanceService.getSelfSignSet(attendanceDayId);
       setSet(tmpA);
       setCurrentKey(tmpA?.key || null); // Nastav aktuální klíč z dat
 
-      const dataSet = await attendanceService.getSelfSignSet(+attendanceDayId);
+      const dataSet = await attendanceService.getSelfSignSet(attendanceDayId);
 
       // Seřaď položky podle student.surname vzestupně
       dataSet.selfSigns.sort((a, b) => {
@@ -73,7 +73,7 @@ export function SelfSignTab({ attendanceDayId }: SelfSignTabProps) {
 
     setLoadingKey(true);
     try {
-      await attendanceService.setDaySelfSignKey(parseInt(attendanceDayId), key.trim());
+      await attendanceService.setDaySelfSignKey(attendanceDayId, key.trim());
       setCurrentKey(key.trim());
       setKey('');
       toast.success('Klíč pro samo-zápis byl nastaven.');
@@ -89,7 +89,7 @@ export function SelfSignTab({ attendanceDayId }: SelfSignTabProps) {
   const handleDeleteKey = async () => {
     setLoadingKey(true);
     try {
-      await attendanceService.deleteDaySelfSignKey(parseInt(attendanceDayId));
+      await attendanceService.deleteDaySelfSignKey(attendanceDayId);
       setCurrentKey(null);
       toast.success('Klíč pro samo-zápis byl smazán.');
       // Znovu načti data po změně
@@ -157,7 +157,7 @@ export function SelfSignTab({ attendanceDayId }: SelfSignTabProps) {
 
       <ImportAttendanceWizardFirstModal
         isOpen={isImportFirstModalOpen}
-        attendanceDayId={+attendanceDayId}
+        attendanceDayId={attendanceDayId}
         onClose={() => setIsImportFirstModalOpen(false)}
         onAnalyzed={handleAnalyzed}
       />
@@ -165,7 +165,7 @@ export function SelfSignTab({ attendanceDayId }: SelfSignTabProps) {
         isOpen={isImportSecondModalOpen}
         onClose={() => setIsImportSecondModalOpen(false)}
         analysisResult={analysisResult!}
-        attendanceDayId={+attendanceDayId}
+        attendanceDayId={attendanceDayId}
         onImported={handleImported}
       />
 

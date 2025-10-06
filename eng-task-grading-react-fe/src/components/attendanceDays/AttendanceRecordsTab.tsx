@@ -7,7 +7,7 @@ import { AttendanceValueLabel } from '../../ui/attendanceValueLabel';
 import { AttendanceValueUnsetLabel } from '../../ui/attendanceValueUnsetLabel';
 
 interface AttendanceRecordsTabProps {
-  attendanceDayId: string;
+  attendanceDayId: number;
 }
 
 export function AttendanceRecordsTab({ attendanceDayId }: AttendanceRecordsTabProps) {

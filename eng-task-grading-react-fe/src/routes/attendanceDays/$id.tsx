@@ -5,12 +5,13 @@ import { EditIcon } from '../../ui/icons/editIcon';
 import { DeleteIcon } from '../../ui/icons/deleteIcon';
 import { DeleteModal } from '../../components/global/DeleteModal';
 import toast from 'react-hot-toast';
-import type { AttendanceDayDto } from '../../model/attendance-dto';
+import type { AttendanceDayDto, AttendanceDayUpdateDto } from '../../model/attendance-dto';
 import { attendanceService } from '../../services/attendance-service';
 import { useNavigate } from '@tanstack/react-router';
 import { useLoadingState } from '../../types/loadingState';
 import { Loading } from '../../ui/loading';
 import { LoadingError } from '../../ui/loadingError';
+import { EditAttendanceDayModal } from '../../components/attendanceDays/EditAttendanceDayModal';
 
 export const Route = createFileRoute('/attendanceDays/$id')({
   component: AttendanceDayDetailPage,
@@ -52,6 +53,11 @@ function AttendanceDayDetailPage() {
     }
   }
 
+  const handleAttendanceEdit = async (data: AttendanceDayUpdateDto) => {
+    await attendanceService.updateDay(id, data);
+    await loadData();
+  }
+
   useEffect(() => { loadData(); }, [id]);
 
   if (ldgState.loading) { return (<Loading message='Načítám den docházky...' />) }
@@ -68,12 +74,12 @@ function AttendanceDayDetailPage() {
           >
             <EditIcon size="m" />
           </button>
-          {/* <EditAttendanceDayModal
+          <EditAttendanceDayModal
             isOpen={editModalVisible}
-            attendance={attendance!}
+            attendanceDay={attendanceDay}
             onSubmit={handleAttendanceEdit}
             onClose={() => setEditModalVisible(false)}
-          /> */}
+          />
 
           <button
             className="pl-m"

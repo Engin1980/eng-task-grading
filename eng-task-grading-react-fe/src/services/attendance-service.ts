@@ -55,7 +55,7 @@ export const attendanceService = {
     return data;
   },
 
-  getRecordsForDay: async (attendanceDayId: string) => {
+  getRecordsForDay: async (attendanceDayId: number) => {
     const { data } = await apiHttp.get<AttendanceRecordDto[]>(`/v1/attendance/records/for-day/${attendanceDayId}`, {});
     return data;
   },

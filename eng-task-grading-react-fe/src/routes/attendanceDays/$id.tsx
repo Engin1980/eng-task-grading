@@ -1,10 +1,16 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AttendanceRecordsTab, SelfSignTab } from '../../components/attendanceDays';
 import { EditIcon } from '../../ui/icons/editIcon';
 import { DeleteIcon } from '../../ui/icons/deleteIcon';
 import { DeleteModal } from '../../components/global/DeleteModal';
 import toast from 'react-hot-toast';
+import type { AttendanceDayDto } from '../../model/attendance-dto';
+import { attendanceService } from '../../services/attendance-service';
+import { useNavigate } from '@tanstack/react-router';
+import { useLoadingState } from '../../types/loadingState';
+import { Loading } from '../../ui/loading';
+import { LoadingError } from '../../ui/loadingError';
 
 export const Route = createFileRoute('/attendanceDays/$id')({
   component: AttendanceDayDetailPage,
@@ -13,19 +19,49 @@ export const Route = createFileRoute('/attendanceDays/$id')({
 function AttendanceDayDetailPage() {
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
-  const { id } = Route.useParams()
+  const { id: ids } = Route.useParams()
+  const id: number = +ids;
   const [activeTab, setActiveTab] = useState('records');
+  const [attendanceDay, setAttendanceDay] = useState<AttendanceDayDto>(null!);
+  const navigate = useNavigate();
+  const ldgState = useLoadingState();
+
+  const loadData = async () => {
+    try {
+      const data = await attendanceService.getDay(id);
+      setAttendanceDay(data);
+      ldgState.setDone();
+    } catch (err) {
+      ldgState.setError(err);
+    }
+  }
 
   const tabs = [
     { key: 'records', label: 'Záznamy docházky' },
     { key: 'self-sign', label: 'Pokročilé možnosti' }
   ];
 
+  const handleAttendanceDelete = () => {
+    try {
+      attendanceService.deleteDay(id);
+      toast.success("Den docházky byl úspěšně smazán.");
+      navigate({ to: `/attendances/${attendanceDay.attendanceId}/days` });
+    } catch (err) {
+      toast.error("Chyba při mazání dne docházky.");
+      throw err;
+    }
+  }
+
+  useEffect(() => { loadData(); }, [id]);
+
+  if (ldgState.loading) { return (<Loading message='Načítám den docházky...' />) }
+  if (ldgState.error) { return (<LoadingError message={`Chyba při načítání dne docházky: ${ldgState.error}`} />) }
+
   return (
     <div className="container mx-auto p-4">
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-4">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Detail dne docházky</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">{attendanceDay.title}</h1>
           <button
             className="pl-3"
             onClick={() => toast.error("Not implemented yet.")}
@@ -41,19 +77,20 @@ function AttendanceDayDetailPage() {
 
           <button
             className="pl-m"
-            onClick={() => toast.error("Not implemented yet.")}
+            onClick={() => setDeleteModalVisible(true)}
           >
             <DeleteIcon />
           </button>
-          {/* <DeleteModal
+          <DeleteModal
             title="Opravdu smazat docházku?"
             question="Bude nevratně smazána docházka i všechna případná související ohodnocení!"
-            verification={attendanceDay.title}
+            verification={attendanceDay?.title}
             onDelete={handleAttendanceDelete}
             isOpen={deleteModalVisible}
             onClose={() => setDeleteModalVisible(false)}
-          /> */}
+          />
         </div>
+        <p className="text-gray-600">Detail dne docházky</p>
         <p className="text-gray-600">ID dne: {id}</p>
       </div>
 

@@ -110,7 +110,7 @@ public static class EObjectMapper
     };
   }
   public static AttendanceDayDto To(AttendanceDay day) =>
-    new(day.Id, day.Title, day.SelfAssignKey);
+    new(day.Id, day.AttendanceId, day.Title, day.SelfAssignKey);
 
   internal static Attendance From(AttendanceUpdateDto attendanceDto)
   {

@@ -2,6 +2,7 @@ import type { StudentDto } from "./student-dto";
 
 export interface AttendanceDayDto {
   id: number;
+  attendanceId: number;
   title: string;
   selfAssignKey?: string;
 }

@@ -17,6 +17,7 @@ public record AttendanceRecordDto(
 
 public record AttendanceDayDto(
   int Id,
+  int AttendanceId,
   string Title,
   string? SelfAssignKey
 );

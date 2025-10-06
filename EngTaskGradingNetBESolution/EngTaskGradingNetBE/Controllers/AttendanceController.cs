@@ -69,6 +69,14 @@ namespace EngTaskGradingNetBE.Controllers
       await attendanceService.DeleteAsync(id);
     }
 
+    [HttpGet("days/{id}")]
+    public async Task<AttendanceDayDto> GetDayByIdAsync(int id)
+    {
+      AttendanceDay tmp = await attendanceService.GetDayByIdAsync(id, false);
+      AttendanceDayDto ret = EObjectMapper.To(tmp);
+      return ret;
+    }
+
     [HttpPost("days")]
     public async System.Threading.Tasks.Task AddDayAsync([FromBody] AttendanceDayCreateDto dayDto)
     {

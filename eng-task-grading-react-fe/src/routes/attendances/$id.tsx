@@ -1,7 +1,7 @@
 import { createFileRoute, Outlet, useNavigate } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import { attendanceService } from '../../services/attendance-service'
-import type { AttendanceDto } from '../../model/attendance-dto'
+import type { AttendanceDto, AttendanceUpdateDto } from '../../model/attendance-dto'
 import { TabLabelBlock } from '../../ui/tabLabelBlock'
 import { TabLabelLink } from '../../ui/tabLabelLink'
 import { AttendanceIcon } from '../../ui/icons/attendanceIcon'
@@ -53,7 +53,7 @@ function AttendanceDetailPage() {
     }
   }
 
-  const handleAttendanceEdit = async (updatedAttendance: AttendanceDto) => {
+  const handleAttendanceEdit = async (updatedAttendance: AttendanceUpdateDto) => {
     await attendanceService.update(attendance.id, updatedAttendance);
     //TODO update so let all data are downloaded in request
     // like in Task, via one Set object

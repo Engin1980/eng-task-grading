@@ -21,8 +21,7 @@ export function EditTaskModal({ isOpen, task, onClose }: EditTaskModalProps) {
     aggregation: task?.aggregation ?? 'last'
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
 
     if (!task || !taskEditorData.title.trim()) {
       toast.error('Název úkolu je povinný.');
@@ -41,9 +40,10 @@ export function EditTaskModal({ isOpen, task, onClose }: EditTaskModalProps) {
       };
 
       await taskService.update(task.id.toString(), updateData);
-
-      onClose(true);
+      toast.success('Úkol byl úspěšně aktualizován.');
       clearData();
+      onClose(true);
+
     } catch (error) {
       console.error('Error updating task:', error);
       toast.error('Chyba při aktualizaci úkolu.');
@@ -73,10 +73,11 @@ export function EditTaskModal({ isOpen, task, onClose }: EditTaskModalProps) {
   return (
     <AppDialog
       isOpen={isOpen}
-      onClose={handleClose}
       title="Upravit úkol"
       confirmButtonText='Aktualizovat úkol'
-      confirmButtonEnabled={() => !!taskEditorData.title.trim()}>
+      confirmButtonEnabled={() => !!taskEditorData.title.trim()}
+      onSubmit={handleSubmit}
+      onClose={handleClose} >
       <TaskEditor
         taskData={taskEditorData}
         onChange={setTaskEditorData}

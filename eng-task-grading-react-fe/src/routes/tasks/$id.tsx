@@ -14,6 +14,7 @@ import { EditTaskModal } from '../../components/tasks/EditTaskModal';
 import { DeleteIcon } from '../../ui/icons/deleteIcon';
 import { DeleteModal } from '../../components/global/DeleteModal';
 import { taskService } from '../../services/task-service';
+import toast from 'react-hot-toast';
 
 export const Route = createFileRoute('/tasks/$id')({
   component: RouteComponent,
@@ -69,7 +70,12 @@ function RouteComponent() {
 
   const handleCloseTaskDeleteModal = async (confirmed: boolean) => {
     if (confirmed && task) {
-      taskService.delete(task.id).then(() => navigate({ to: `/courses/${task.courseId}/tasks` }));
+      taskService.delete(task.id).then(() => {
+        toast.success('Úkol byl úspěšně smazán.');
+        navigate({ to: `/courses/${task.courseId}/tasks` });
+      }).catch(() => {
+        toast.error('Úkol se nepodařilo smazat.');
+      });
     }
     setDeleteModalVisible(false);
   }

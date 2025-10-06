@@ -1,4 +1,3 @@
-import * as Dialog from '@radix-ui/react-dialog';
 import React from 'react';
 import { AppDialog } from '../../ui/AppDialog';
 
@@ -23,7 +22,8 @@ export function DeleteModal(props: DeleteModalProps) {
       confirmButtonText="Nevratně smazat"
       confirmButtonColor='red'
       confirmButtonEnabled={() => enteredVerification === props.verification}
-      onClose={(isConfirmed) => props.onClose(isConfirmed)}
+      onSubmit={() => props.onClose(true)}
+      onClose={() => props.onClose(false)}
     >
       <div className="px-6 py-4">
 

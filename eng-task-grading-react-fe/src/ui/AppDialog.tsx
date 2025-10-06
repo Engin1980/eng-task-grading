@@ -8,7 +8,8 @@ interface AppDialogProps {
   confirmButtonText: string;
   confirmButtonColor?: string;
   confirmButtonEnabled: () => boolean;
-  onClose: (isConfirmed: boolean) => void;
+  onSubmit: () => void;
+  onClose: () => void;
   children: React.ReactNode;
 }
 
@@ -20,11 +21,17 @@ export function AppDialog(props: AppDialogProps) {
     props = { ...props, confirmButtonColor: "blue" };
 
   function handleClose() {
-    props.onClose(false);
+    props.onClose();
   }
 
-  function handleSubmit() {
-    props.onClose(true);
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    try {
+      props.onSubmit();
+    } catch (err) {
+      return;
+    }
+    props.onClose();
   }
 
   if (!props.isOpen) return null;

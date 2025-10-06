@@ -39,7 +39,7 @@ namespace EngTaskGradingNetBE.Controllers
     }
 
     [HttpPatch("{id}")]
-    public async Task<AttendanceDto> UpdateAsync(int id, [FromBody] AttendanceDto attendanceDto)
+    public async Task<AttendanceDto> UpdateAsync(int id, [FromBody] AttendanceUpdateDto attendanceDto)
     {
       Attendance att = EObjectMapper.From(attendanceDto);
       var updated = await attendanceService.UpdateAsync(id, att);

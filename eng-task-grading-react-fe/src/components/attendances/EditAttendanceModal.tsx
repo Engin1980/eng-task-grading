@@ -1,18 +1,18 @@
 import { useState } from 'react';
-import type { AttendanceCreateDto, AttendanceDto } from '../../model/attendance-dto';
+import type { AttendanceDto, AttendanceUpdateDto } from '../../model/attendance-dto';
 import { AppDialog } from '../../ui/AppDialog';
 import { AttendanceEditor, type AttendanceEditorData } from '../../ui/editors/AttendanceEditor';
-import { attendanceService } from '../../services/attendance-service';
 import toast from 'react-hot-toast';
 
 interface EditAttendanceModalProps {
   isOpen: boolean;
   attendance: AttendanceDto;
-  onClose: (changed: boolean) => void;
+  onSubmit: (data: AttendanceUpdateDto) => void;
+  onClose: () => void;
 }
 
-export function EditAttendanceModal({ isOpen, onClose, attendance }: EditAttendanceModalProps) {
-  const cleanData: AttendanceEditorData = { title: attendance.title ?? '', minWeight: attendance.minWeight };
+export function EditAttendanceModal(props: EditAttendanceModalProps) {
+  const cleanData: AttendanceEditorData = { title: props.attendance.title ?? '', minWeight: props.attendance.minWeight };
   const [attendanceEditorData, setAttendanceEditorData] = useState<AttendanceEditorData>(cleanData);
   const [submitting, setSubmitting] = useState(false);
 
@@ -21,18 +21,19 @@ export function EditAttendanceModal({ isOpen, onClose, attendance }: EditAttenda
 
     setSubmitting(true);
     try {
-      const attendanceData: AttendanceCreateDto = {
+      const attendanceData: AttendanceUpdateDto = {
         title: attendanceEditorData.title.trim(),
         minWeight: attendanceEditorData.minWeight ?? null
       };
 
-      await attendanceService.update(courseId, attendanceData);
-      toast.success("Docházka byla úspěšně vytvořena.");
+      props.onSubmit(attendanceData);
+
+      toast.success("Docházka byla úspěšně upravena.");
       setAttendanceEditorData(cleanData);
-      onClose(true);
+      props.onClose();
     } catch (error) {
       console.error('Error creating attendance:', error);
-      toast.error("Chyba při vytváření docházky.");
+      toast.error("Chyba při úpravě docházky.");
     } finally {
       setSubmitting(false);
     }
@@ -41,13 +42,13 @@ export function EditAttendanceModal({ isOpen, onClose, attendance }: EditAttenda
   const handleClose = () => {
     if (!submitting) {
       setAttendanceEditorData(cleanData);
-      onClose(false);
+      props.onClose();
     }
   };
 
   return (
     <AppDialog
-      isOpen={isOpen}
+      isOpen={props.isOpen}
       confirmButtonEnabled={() => !submitting && !!attendanceEditorData.title.trim()}
       confirmButtonText='Upravit'
       title='Úprava docházky'

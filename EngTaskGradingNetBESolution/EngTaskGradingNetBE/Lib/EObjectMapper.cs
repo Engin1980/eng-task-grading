@@ -93,7 +93,7 @@ public static class EObjectMapper
   }
 
   public static AttendanceDto To(Attendance attendance)
-    => new(attendance.Id, attendance.Title, attendance.MinWeight, attendance.Days.OrderBy(q => q.Title).Select(To).ToList());
+    => new(attendance.Id, attendance.CourseId, attendance.Title, attendance.MinWeight, attendance.Days.OrderBy(q => q.Title).Select(To).ToList());
 
   public static AttendanceDay From(AttendanceDayCreateDto dto)
   {
@@ -112,7 +112,7 @@ public static class EObjectMapper
   public static AttendanceDayDto To(AttendanceDay day) =>
     new(day.Id, day.Title, day.SelfAssignKey);
 
-  internal static Attendance From(AttendanceDto attendanceDto)
+  internal static Attendance From(AttendanceUpdateDto attendanceDto)
   {
     return new Attendance()
     {

@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet } from '@tanstack/react-router'
+import { createFileRoute, Outlet, useNavigate } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import { attendanceService } from '../../services/attendance-service'
 import type { AttendanceDto } from '../../model/attendance-dto'
@@ -14,6 +14,7 @@ import { EditIcon } from '../../ui/icons/editIcon'
 import { DeleteIcon } from '../../ui/icons/deleteIcon'
 import { DeleteModal } from '../../components/global/DeleteModal'
 import { EditAttendanceModal } from '../../components/attendances/EditAttendanceModal'
+import toast from 'react-hot-toast'
 
 export const Route = createFileRoute('/attendances/$id')({
   component: AttendanceDetailPage,
@@ -26,6 +27,7 @@ function AttendanceDetailPage() {
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const ldgState = useLoadingState();
   const navCtx = useNavigationContext();
+  const navigate = useNavigate();
 
   const loadAttendance = async () => {
     try {
@@ -40,6 +42,26 @@ function AttendanceDetailPage() {
     }
   }
 
+  const handleAttendanceDelete = async () => {
+    try {
+      await attendanceService.delete(attendance.id);
+      toast.success("Docházka byla úspěšně smazána.");
+      navigate({ to: `/courses/${attendance.courseId}/attendances` });
+    } catch (err) {
+      toast.error("Chyba při mazání docházky.");
+      throw err;
+    }
+  }
+
+  const handleAttendanceEdit = async (updatedAttendance: AttendanceDto) => {
+    await attendanceService.update(attendance.id, updatedAttendance);
+    //TODO update so let all data are downloaded in request
+    // like in Task, via one Set object
+    // in meantime, hard refresh is required here
+    window.location.reload();
+    //await loadAttendance();
+  }
+
   useEffect(() => {
     loadAttendance()
   }, [id])
@@ -51,34 +73,38 @@ function AttendanceDetailPage() {
     <div className="container mx-auto p-4">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          {attendance?.title || `Docházka ${id}`}
-        </h1>
-        <button
-          className="pl-3"
-          onClick={() => setEditModalVisible(true)}
-        >
-          <EditIcon size="m" />
-        </button>
-        <EditAttendanceModal
-          isOpen={editModalVisible}
-          attendance={attendance!}
-          onClose={(changed) => { if (changed) loadAttendance(); setEditModalVisible(false) }}
-        />
+        <div className="flex items-center gap-2 mb-4">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            {attendance?.title || `Docházka ${id}`}
+          </h1>
+          <button
+            className="pl-3"
+            onClick={() => setEditModalVisible(true)}
+          >
+            <EditIcon size="m" />
+          </button>
+          <EditAttendanceModal
+            isOpen={editModalVisible}
+            attendance={attendance!}
+            onSubmit={handleAttendanceEdit}
+            onClose={() => setEditModalVisible(false)}
+          />
 
-        <button
-          className="pl-m"
-          onClick={() => setDeleteModalVisible(true)}
-        >
-          <DeleteIcon />
-        </button>
-        <DeleteModal
-          title="Opravdu smazat docházku?"
-          question="Bude nevratně smazána docházka i všechna případná související ohodnocení!"
-          verification={attendance.title}
-          isOpen={deleteModalVisible}
-          onClose={handleCloseAttendanceDeleteModal}
-        />
+          <button
+            className="pl-m"
+            onClick={() => setDeleteModalVisible(true)}
+          >
+            <DeleteIcon />
+          </button>
+          <DeleteModal
+            title="Opravdu smazat docházku?"
+            question="Bude nevratně smazána docházka i všechna případná související ohodnocení!"
+            verification={attendance.title}
+            onDelete={handleAttendanceDelete}
+            isOpen={deleteModalVisible}
+            onClose={() => setDeleteModalVisible(false)}
+          />
+        </div>
 
         <p className="text-gray-600">ID docházky: {id}</p>
         {attendance && (

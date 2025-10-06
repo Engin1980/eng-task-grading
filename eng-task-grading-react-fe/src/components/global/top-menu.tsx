@@ -29,7 +29,7 @@ const TopMenu: React.FC = () => {
                   <Link to="/logs" className="ml-8 text-blue-600">📝 App-Log</Link>
                 </>)}
                 {loggedUser && loggedUser.role == "ROLE_STUDENT" && (<>
-                  <Link to="/courses" className="mr-4 text-blue-600">Kurzy</Link>
+                  <Link to="/studentView/courses" className="mr-4 text-blue-600">Kurzy</Link>
                 </>)}
               </div>
             </div>

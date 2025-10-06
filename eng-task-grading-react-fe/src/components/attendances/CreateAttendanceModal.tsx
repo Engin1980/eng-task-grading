@@ -8,10 +8,11 @@ import toast from 'react-hot-toast';
 interface CreateAttendanceModalProps {
   isOpen: boolean;
   courseId: number;
-  onClose: (created:boolean) => void;
+  onSubmit: (data: AttendanceCreateDto) => void;
+  onClose: () => void;
 }
 
-export function CreateAttendanceModal({ isOpen, onClose, courseId }: CreateAttendanceModalProps) {
+export function CreateAttendanceModal(props: CreateAttendanceModalProps) {
   const cleanData: AttendanceEditorData = { title: '', minWeight: null };
   const [attendanceEditorData, setAttendanceEditorData] = useState<AttendanceEditorData>(cleanData);
   const [submitting, setSubmitting] = useState(false);
@@ -26,10 +27,10 @@ export function CreateAttendanceModal({ isOpen, onClose, courseId }: CreateAtten
         minWeight: attendanceEditorData.minWeight ?? null
       };
 
-      await attendanceService.create(courseId, attendanceData);
+      props.onSubmit(attendanceData);
       toast.success("Docházka byla úspěšně vytvořena.");
       setAttendanceEditorData(cleanData);
-      onClose(true);
+      props.onClose();
     } catch (error) {
       console.error('Error creating attendance:', error);
       toast.error("Chyba při vytváření docházky.");
@@ -41,13 +42,13 @@ export function CreateAttendanceModal({ isOpen, onClose, courseId }: CreateAtten
   const handleClose = () => {
     if (!submitting) {
       setAttendanceEditorData(cleanData);
-      onClose(false);
+      props.onClose();
     }
   };
 
   return (
     <AppDialog
-      isOpen={isOpen}
+      isOpen={props.isOpen}
       confirmButtonEnabled={() => !submitting && !!attendanceEditorData.title.trim()}
       confirmButtonText='Vytvořit docházku'
       title='Nová docházka'

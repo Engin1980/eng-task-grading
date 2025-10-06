@@ -68,7 +68,6 @@ function TasksPage() {
           Vytvořit úkol
         </button>
       </div>
-
       {/* Create Task Modal */}
       <CreateTaskModal
         isOpen={isCreateModalOpen}

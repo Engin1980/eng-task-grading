@@ -14,7 +14,7 @@ export const Route = createFileRoute('/courses/$id/attendances')({
 
 function AttendancesPage() {
   const { id } = Route.useParams()
-  const courseId = id;
+  const courseId:number = +id;
   const logger = useLogger("AttendancesPage");
   const [attendances, setAttendances] = useState<AttendanceDto[]>([]);
   const ldgState = useLoadingState();
@@ -24,7 +24,7 @@ function AttendancesPage() {
   const loadAttendances = async () => {
     try {
       ldgState.setLoading();
-      const data = await attendanceService.getAllByCourseId(parseInt(courseId));
+      const data = await attendanceService.getAllByCourseId(courseId);
       setAttendances(data);
       ldgState.setDone();
     } catch (err) {
@@ -37,14 +37,9 @@ function AttendancesPage() {
     loadAttendances();
   }, [courseId]);
 
-  const handleCreateAttendance = async (attendance: AttendanceCreateDto) => {
-    try {
-      await attendanceService.create(parseInt(courseId), attendance);
-      await loadAttendances(); // Refresh the list
-    } catch (err) {
-      logger.error('Error creating attendance:', err);
-      throw err; // Re-throw to let modal handle the error
-    }
+  const handleCreateAttendanceSubmit = async (attendance: AttendanceCreateDto) => {
+    await attendanceService.create(courseId, attendance);
+    loadAttendances();
   };
 
   if (ldgState.loading) {
@@ -71,8 +66,9 @@ function AttendancesPage() {
         </button>
         <CreateAttendanceModal
           isOpen={isCreateModalOpen}
-          onClose={(res) => { if (res) loadAttendances(); setIsCreateModalOpen(false); }}
-          courseId={parseInt(courseId)}
+          onSubmit={handleCreateAttendanceSubmit}
+          onClose={() => setIsCreateModalOpen(false)}
+          courseId={courseId}
         />
       </div>
 

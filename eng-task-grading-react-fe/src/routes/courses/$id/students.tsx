@@ -1,12 +1,14 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useLogger } from '../../../hooks/use-logger';
 import { useEffect, useState } from 'react';
-import type { StudentAnalysisResultDto, StudentDto } from '../../../model/student-dto';
+import type { StudentAnalysisResultDto, StudentCreateDto, StudentDto } from '../../../model/student-dto';
 import { studentService } from '../../../services/student-service';
 import { ImportStudentsWizardFirstModal, ImportStudentsWizardSecondModal } from '../../../components/courses';
 import { Loading } from '../../../ui/loading';
 import { LoadingError } from '../../../ui/loadingError';
 import { useLoadingState } from '../../../types/loadingState';
+import { CreateStudentModal } from '../../../components/courses/CreateStudentModal';
+import { courseService } from '../../../services/course-service';
 
 export const Route = createFileRoute('/courses/$id/students')({
   component: StudentsPage,
@@ -18,13 +20,14 @@ function StudentsPage() {
   const logger = useLogger("StudentsTab");
   const [isImportFirstModalOpen, setIsImportFirstModalOpen] = useState(false);
   const [isImportSecondModalOpen, setIsImportSecondModalOpen] = useState(false);
+  const [isCreateStudentModalOpen, setIsCreateStudentModalOpen] = useState(false);
   const [studentAnalysisResult, setStudentAnalysisResult] = useState<StudentAnalysisResultDto>();
-  const [students, setStudents] = useState<StudentDto[]>();
+  const [students, setStudents] = useState<StudentDto[]>([]);
   const ldgState = useLoadingState();
   const [filterText, setFilterText] = useState<string>("");
 
   // Funkce pro filtrování studentů
-  const filteredStudents = students?.filter(student => {
+  const filteredStudents = students.filter(student => {
     if (!filterText.trim()) return true;
 
     const searchText = filterText.toLowerCase();
@@ -56,6 +59,12 @@ function StudentsPage() {
     setIsImportFirstModalOpen(true);
   }
 
+  const handleStudentCreate = async (student: StudentCreateDto) => {
+    const tmp = [student];
+    await courseService.importStudentsToCourse(courseId, tmp);
+    await loadStudents();
+  }
+
   const handleAnalyzed = async (data: StudentAnalysisResultDto) => {
     setStudentAnalysisResult(data);
     setIsImportFirstModalOpen(false);
@@ -71,12 +80,15 @@ function StudentsPage() {
     loadStudents();
   }, [courseId]);
 
+  if (ldgState.loading) return <Loading message="Načítám studenty..." />;
+  if (ldgState.error) return <LoadingError message={ldgState.error} onRetry={loadStudents} />;
+
   return (
     <div>
       {/* Hlavní řádek s filtrováním a tlačítkem */}
-      {students && students.length > 0 && (
-        <div className="flex justify-between items-end mb-6 gap-4">
-          <div className="flex-1 max-w-md">
+      <div className="flex justify-between items-end mb-6 gap-4">
+        <div className="flex-1 max-w-md">
+          {students.length > 0 && (
             <input
               id="student-filter"
               type="text"
@@ -90,7 +102,15 @@ function StudentsPage() {
               }}
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
-          </div>
+          )}
+        </div>
+        <div className="flex justify-end gap-2">
+          <button
+            onClick={() => setIsCreateStudentModalOpen(true)}
+            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 whitespace-nowrap"
+          >
+            Vytvořit studenta
+          </button>
           <button
             onClick={handleImportZero}
             className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 whitespace-nowrap"
@@ -98,18 +118,14 @@ function StudentsPage() {
             Importovat studenty
           </button>
         </div>
-      )}
+      </div>
 
-      {(!students || students.length === 0) && (
-        <div className='flex justify-end mb-6'>
-          <button
-            onClick={handleImportZero}
-            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-          >
-            Importovat studenty
-          </button>
-        </div>
-      )}
+      <CreateStudentModal
+        isOpen={isCreateStudentModalOpen}
+        onClose={() => setIsCreateStudentModalOpen(false)}
+        onSubmit={handleStudentCreate}
+        courseId={courseId}
+      />
 
       <ImportStudentsWizardFirstModal
         isOpen={isImportFirstModalOpen}

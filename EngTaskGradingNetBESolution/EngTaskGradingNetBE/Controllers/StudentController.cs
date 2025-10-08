@@ -1,4 +1,5 @@
 ﻿using EngTaskGradingNetBE.Lib;
+using EngTaskGradingNetBE.Models.DbModel;
 using EngTaskGradingNetBE.Models.Dtos;
 using EngTaskGradingNetBE.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -35,15 +36,6 @@ namespace EngTaskGradingNetBE.Controllers
     {
       var result = studentService.AnalyseStagExport(data);
       return result;
-    }
-
-    [HttpPost("create-students")]
-    public async Task CreateStudentsAsync([FromBody] List<StudentCreateDto> students)
-    {
-      var entities = students
-        .Select(EObjectMapper.From)
-        .ToList();
-      await studentService.CreateAsync(entities);
     }
   }
 }

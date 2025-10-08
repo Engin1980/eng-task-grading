@@ -22,7 +22,7 @@ export interface StudentCreateDto {
 }
 
 export interface StudentAnalysisResultDto {
-  students: StudentDto[];
+  students: StudentCreateDto[];
   errors: string[];
 }
 

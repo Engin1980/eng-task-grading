@@ -1,8 +1,8 @@
 import { apiHttp } from "./api-http";
 import { createLogger } from "./log-service";
-import type { CourseCreateDto, CourseDto } from "../model/course-dto";
+import type { CourseCreateDto, CourseDto, CourseEditDto } from "../model/course-dto";
 import type { StudentCreateDto } from "../model/student-dto";
-import type { GSetCourse, GSetCourseDto } from "../model/gset";
+import type { GSetCourseDto } from "../model/gset";
 
 const logger = createLogger("CourseService");
 
@@ -22,6 +22,12 @@ export const courseService = {
     logger.info("Vytvářím nový kurz", courseData);
     const { data } = await apiHttp.post<CourseDto>("/v1/course", courseData);
     logger.info("Kurz byl úspěšně vytvořen", { course: data });
+  },
+
+  async update(courseId: string, courseData: CourseEditDto): Promise<void> {
+    logger.info("Aktualizuji kurz", { courseId, courseData });
+    await apiHttp.patch(`/v1/course/${courseId}`, courseData);
+    logger.info("Kurz byl úspěšně aktualizován", { courseId });
   },
 
   async importStudentsToCourse(courseId: string, students: StudentCreateDto[]): Promise<void> {

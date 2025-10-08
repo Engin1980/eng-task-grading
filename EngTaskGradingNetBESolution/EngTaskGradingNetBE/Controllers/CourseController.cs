@@ -16,13 +16,17 @@ namespace EngTaskGradingNetBE.Controllers
     [HttpPost]
     public async Task<ActionResult<Course>> CreateCourseAsync([FromBody] CourseCreateDto courseCreateDto)
     {
-      if (courseCreateDto == null)
-        return BadRequest("Course data is required.");
-
       Course course = EObjectMapper.From(courseCreateDto);
       var createdCourse = await courseService.CreateAsync(course);
       var courseDto = EObjectMapper.To(createdCourse);
       return CreatedAtAction(nameof(CreateCourseAsync), courseDto.Id, courseDto);
+    }
+
+    [HttpPatch("{courseId}")]
+    public async System.Threading.Tasks.Task UpdateCourseAsync([FromRoute] int courseId, [FromBody] CourseUpdateDto courseDto)
+    {
+      Course course = EObjectMapper.From(courseDto);
+      await courseService.UpdateAsync(courseId, course);
     }
 
     [HttpGet]

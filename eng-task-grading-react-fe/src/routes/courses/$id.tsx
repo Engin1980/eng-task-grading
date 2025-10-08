@@ -2,7 +2,7 @@ import { createFileRoute, Link, Outlet, useNavigate } from '@tanstack/react-rout
 import { useState, useEffect } from 'react'
 import { useLogger } from '../../hooks/use-logger'
 import { courseService } from '../../services/course-service'
-import type { CourseDto } from '../../model/course-dto'
+import type { CourseDto, CourseEditDto } from '../../model/course-dto'
 import { TabLabelBlock } from '../../ui/tabLabelBlock'
 import { TabLabelLink } from '../../ui/tabLabelLink'
 import { TaskIcon } from '../../ui/icons/taskIcon'
@@ -13,6 +13,11 @@ import { useNavigationContext } from '../../contexts/NavigationContext'
 import { Loading } from '../../ui/loading'
 import { LoadingError } from '../../ui/loadingError'
 import { useLoadingState } from '../../types/loadingState'
+import { EditIcon } from '../../ui/icons/editIcon'
+import { DeleteIcon } from '../../ui/icons/deleteIcon'
+import { DeleteModal } from '../../components/global/DeleteModal'
+import toast from 'react-hot-toast'
+import { EditCourseModal } from '../../components/courses/EditCourseModal'
 
 export const Route = createFileRoute('/courses/$id')({
   component: CourseDetailPage,
@@ -21,7 +26,9 @@ export const Route = createFileRoute('/courses/$id')({
 function CourseDetailPage() {
   const { id } = Route.useParams()
   const logger = useLogger("CourseDetailPage")
-  const [course, setCourse] = useState<CourseDto | null>(null)
+  const [course, setCourse] = useState<CourseDto>(null!)
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const ldgState = useLoadingState();
   const navigate = useNavigate();
   const navCtx = useNavigationContext();
@@ -41,11 +48,18 @@ function CourseDetailPage() {
     }
   }
 
+  const handleCourseDelete = async () => {
+    toast.error("Funkce mazání kurzů ještě není implementována");
+  }
+
+  const handleCourseEdit = async (courseData: CourseEditDto) => {
+    await courseService.update(id, courseData);
+    setCourse({ ...course, ...courseData });
+  }
+
   useEffect(() => {
     loadCourse();
   }, [id, navigate])
-
-  logger.debug(`Rendering course detail page for course ID: ${id}`)
 
   if (ldgState.loading) { return (<Loading message="Načítám kurz..." />) }
   if (ldgState.error) { return (<LoadingError message={ldgState.error} onRetry={loadCourse} />) }
@@ -54,9 +68,38 @@ function CourseDetailPage() {
     <div className="container mx-auto p-4">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          {course?.name || course?.code || `Kurz ${id}`}
-        </h1>
+        <div className="flex items-center gap-2 mb-4">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            {course?.name || course?.code || `Kurz ${id}`}
+          </h1>
+          <button
+            className="pl-3"
+            onClick={() => setEditModalVisible(true)}
+          >
+            <EditIcon size="m" />
+          </button>
+          <EditCourseModal
+            isOpen={editModalVisible}
+            course={course}
+            onSubmit={handleCourseEdit}
+            onClose={() => setEditModalVisible(false)}
+          />
+
+          <button
+            className="pl-m"
+            onClick={() => setDeleteModalVisible(true)}
+          >
+            <DeleteIcon />
+          </button>
+          <DeleteModal
+            title="Opravdu smazat kurz?"
+            question="Bude nevratně smazán kurz i všechna případná související hodnocení a docházky!"
+            verification={course?.name || course?.code || ''}
+            isOpen={deleteModalVisible}
+            onDelete={handleCourseDelete}
+            onClose={() => setDeleteModalVisible(false)}
+          />
+        </div>
         {course?.name && course?.code && (
           <p className="text-gray-600">Kód kurzu: {course.code}</p>
         )}

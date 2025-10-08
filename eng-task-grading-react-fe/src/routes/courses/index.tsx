@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { courseService } from '../../services/course-service'
 import { useLogger } from '../../hooks/use-logger'
 import { CreateCourseModal } from '../../components/courses'
-import type { CourseDto } from '../../model/course-dto'
+import type { CourseCreateDto, CourseDto } from '../../model/course-dto'
 import { Loading } from '../../ui/loading'
 import { LoadingError } from '../../ui/loadingError'
 import { useLoadingState } from '../../types/loadingState'
@@ -38,9 +38,8 @@ function CoursesPage() {
     _loadCourses()
   }, [])
 
-  const handleCourseCreated = () => {
-    logger.info('Kurz byl vytvořen, obnovuji seznam')
-    _loadCourses()
+  const handleCourseCreated = async (courseData: CourseCreateDto) => {
+    await courseService.createCourse(courseData);
   }
 
   return (
@@ -58,8 +57,8 @@ function CoursesPage() {
 
       <CreateCourseModal
         isOpen={isModalOpen}
-        onOpenChange={setIsModalOpen}
-        onCourseCreated={handleCourseCreated}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={handleCourseCreated}
       />
 
       {ldgState.loading && (<Loading message="Načítám kurzy..." />)}

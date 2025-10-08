@@ -36,6 +36,12 @@ public static class EObjectMapper
     Name = courseDto.Name
   };
 
+  public static Course From(CourseUpdateDto courseDto) => new()
+  {
+    Code = courseDto.Code,
+    Name = courseDto.Name
+  };
+
 
   public static TaskDto To(Task task) => new(task.Id, task.CourseId, task.Title, task.Keywords, task.Description, task.MinGrade, task.Aggregation.ToString());
   public static Task From(TaskCreateDto taskDto) => new()

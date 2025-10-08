@@ -1,33 +1,37 @@
 import { useState } from 'react'
-import type { CourseCreateDto } from '../../model/course-dto'
+import type { CourseDto, CourseEditDto } from '../../model/course-dto'
 import { AppDialog } from '../../ui/AppDialog'
 import { CourseEditor, type CourseEditorData } from '../../ui/editors/CourseEditor'
 import { toast } from 'react-hot-toast'
 import { isCourseCodeValid } from '../../types/validations'
 
-interface CreateCourseModalProps {
+interface EditCourseModalProps {
   isOpen: boolean
+  course: CourseDto
   onClose: () => void
-  onSubmit: (course: CourseCreateDto) => void
+  onSubmit: (course: CourseEditDto) => void
 }
 
 
-export function CreateCourseModal(props: CreateCourseModalProps) {
-  const [courseEditorData, setCourseEditorData] = useState<CourseEditorData>({ code: '', name: '' })
+export function EditCourseModal(props: EditCourseModalProps) {
+  const [courseEditorData, setCourseEditorData] = useState<CourseEditorData>({
+    code: props.course.code ?? '',
+    name: props.course.name ?? ''
+  });
 
-  const handleCreateCourse = async () => {
-    const courseData: CourseCreateDto = {
+  const handleEditCourse = async () => {
+    const courseData: CourseEditDto = {
       code: courseEditorData.code,
       name: courseEditorData.name
     }
 
     try {
       props.onSubmit(courseData);
-      toast.success(`Kurz ${courseData.code} byl úspěšně vytvořen.`);
+      toast.success(`Kurz ${courseData.code} byl úspěšně upraven.`);
       setCourseEditorData({ code: '', name: '' });
       props.onClose();
     } catch (err) {
-      toast.error(`Chyba při vytváření kurzu.`);
+      toast.error(`Chyba při úpravě kurzu.`);
     }
   }
 
@@ -39,9 +43,9 @@ export function CreateCourseModal(props: CreateCourseModalProps) {
   return (
     <AppDialog
       isOpen={props.isOpen}
-      title="Přidat nový kurz"
-      confirmButtonText='Vytvořit kurz'
-      onSubmit={handleCreateCourse}
+      title="Upravit kurz"
+      confirmButtonText='Upravit kurz'
+      onSubmit={handleEditCourse}
       confirmButtonEnabled={() => isCourseCodeValid(courseEditorData.code)}
       onClose={handleClose}
     >

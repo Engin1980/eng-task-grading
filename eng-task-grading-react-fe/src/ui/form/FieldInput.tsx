@@ -15,7 +15,7 @@ export function FieldInput(props: FieldInputProps) {
     <input
       id={props.id}
       type={props.type}
-      name={props.name}
+      name={props.name ?? props.id}
       value={props.value}
       onChange={props.onChange}
       placeholder={props.placeholder}

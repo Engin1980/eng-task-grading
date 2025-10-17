@@ -20,6 +20,10 @@ function Login() {
   const logger = useLogger("LoginPage");
   const navigate = useNavigate();
   const { loginTeacher } = useAuthContext();
+  // Optional next page from query string (?nextPage=/some/path)
+  const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams();
+  const rawNextPage = searchParams.get('nextPage') || undefined;
+  const nextPage = rawNextPage ? decodeURIComponent(rawNextPage) : undefined;
 
   // Cloudflare konfigurace z AppSettings
   const isCloudflareEnabled = AppSettings.cloudflare.enabled
@@ -58,7 +62,12 @@ function Login() {
     try {
       await loginTeacher(data);
       toast.success("Učitel úspěšně přihlášen.");
-      navigate({ to: '/courses' });
+      // If nextPage provided and appears to be a safe internal path, redirect there.
+      if (nextPage && nextPage.startsWith('/')) {
+        navigate({ to: nextPage });
+      } else {
+        navigate({ to: '/courses' });
+      }
     } catch (ex) {
       logger.error("Přihlášení selhalo", { email, error: ex });
       toast.error("Přihlášení selhalo: " + ex);
@@ -139,6 +148,9 @@ function Login() {
           <a href="/register" className="text-blue-500 hover:underline">
             Zaregistrujte se
           </a>.
+        </p>
+        <p className="text-center text-gray-500 text-sm mt-1">
+          Jste student? Přihlašte se <a href="/studentView/login" className="text-blue-500 hover:underline">zde</a>.
         </p>
       </div>
     </div>

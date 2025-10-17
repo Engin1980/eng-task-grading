@@ -2,6 +2,7 @@ import axios from "axios";
 import type { AxiosInstance, AxiosResponse } from "axios";
 import { createLogger } from "./log-service";
 import AppSettings from "../config/app-settings";
+import toast from "react-hot-toast";
 
 const logger = createLogger("ApiHttp");
 const BASE_URL = AppSettings.backendUrl; //backendUrl; "https://localhost:55556/api";
@@ -66,9 +67,22 @@ axiosInstance.interceptors.response.use(
           originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
           return axiosInstance(originalRequest);
         }
-        else
+        else {
+          // refresh did not return a token -> redirect to login with nextPage
+          toast.error("Přihlášení vypršelo. Prosím přihlaste se znovu.");
+          if (typeof window !== 'undefined') {
+            const next = encodeURIComponent(window.location.pathname + window.location.search);
+            window.location.href = `/login?nextPage=${next}`;
+          }
           return Promise.reject(error);
+        }
       } catch (refreshError) {
+        // refresh attempt threw -> redirect to login with nextPage
+        toast.error("Neznámá interní chyba při zpracování požadavku.");
+        if (typeof window !== 'undefined') {
+          const next = encodeURIComponent(window.location.pathname + window.location.search);
+          window.location.href = `/login?nextPage=${next}`;
+        }
         return Promise.reject(refreshError);
       }
     }

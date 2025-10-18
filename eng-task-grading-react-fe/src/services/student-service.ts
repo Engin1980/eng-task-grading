@@ -1,14 +1,14 @@
 import { apiHttp } from "./api-http";
 import { createLogger } from "./log-service";
-import type { StudentAnalysisResultDto, StudentCreateDto, StudentDto } from "../model/student-dto";
+import type { StudentImportAnalysisResultDto, StudentCreateDto, StudentDto } from "../model/student-dto";
 
 const logger = createLogger("StudentService");
 
 export const studentService = {
 
-  async analyseForImport(data: string): Promise<StudentAnalysisResultDto> {
+  async analyseForImport(data: string): Promise<StudentImportAnalysisResultDto> {
     logger.info("Analyzing data for import", { data });
-    const { data: result } = await apiHttp.post<StudentAnalysisResultDto>("/v1/student/analyse-stag-export", data);
+    const { data: result } = await apiHttp.post<StudentImportAnalysisResultDto>("/v1/student/analyse-stag-export", data);
     logger.info("Data analysis complete", { result });
     return result;
   },

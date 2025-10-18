@@ -90,7 +90,7 @@ function GradesPage() {
   };
 
   // Funkce pro barevné označení attendance podle minWeight
-  const getAttendanceColor = (value: number, minWeight?: number) => {
+  const getAttendanceColor = (value: number, minWeight: number | null | undefined) => {
     if (minWeight === undefined || minWeight === null) {
       // Pokud není minWeight nastavena, použij neutrální modrou barvu
       return 'bg-blue-100 text-blue-800';

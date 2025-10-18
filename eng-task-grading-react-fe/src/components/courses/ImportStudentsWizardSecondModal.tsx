@@ -1,6 +1,6 @@
 import * as Dialog from '@radix-ui/react-dialog';
 import { useLogger } from '../../hooks/use-logger';
-import type { StudentAnalysisResultDto, StudentCreateDto } from '../../model/student-dto';
+import type { StudentCreateDto, StudentImportAnalysisResultDto } from '../../model/student-dto';
 import { courseService } from '../../services/course-service';
 import toast from 'react-hot-toast';
 
@@ -8,7 +8,7 @@ interface ImportStudentsWizardSecondModalProps {
   isOpen: boolean;
   onClose: () => void;
   onImported: (students: StudentCreateDto[]) => void;
-  analysisResult: StudentAnalysisResultDto | null;
+  analysisResult: StudentImportAnalysisResultDto | null;
   courseId: string;
 }
 

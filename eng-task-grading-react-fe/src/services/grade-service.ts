@@ -1,4 +1,4 @@
-import type { GradeCreateDto, GradeDto, GradeSet, GradeUpdateDto, NewGradeSetDto, NewGradeSetTaskDto } from "../model/grade-dto";
+import type { GradeCreateDto, GradeDto, GradeUpdateDto, NewGradeSetTaskDto } from "../model/grade-dto";
 import type { FinalGradeDto } from "../model/gset";
 import { apiHttp } from "./api-http"
 import { createLogger } from "./log-service";

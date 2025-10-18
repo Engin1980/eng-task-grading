@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useLogger } from '../../../hooks/use-logger';
 import { useEffect, useState } from 'react';
-import type { StudentAnalysisResultDto, StudentCreateDto, StudentDto } from '../../../model/student-dto';
+import type { StudentImportAnalysisResultDto, StudentCreateDto, StudentDto } from '../../../model/student-dto';
 import { studentService } from '../../../services/student-service';
 import { ImportStudentsWizardFirstModal, ImportStudentsWizardSecondModal } from '../../../components/courses';
 import { Loading } from '../../../ui/loading';
@@ -21,7 +21,7 @@ function StudentsPage() {
   const [isImportFirstModalOpen, setIsImportFirstModalOpen] = useState(false);
   const [isImportSecondModalOpen, setIsImportSecondModalOpen] = useState(false);
   const [isCreateStudentModalOpen, setIsCreateStudentModalOpen] = useState(false);
-  const [studentAnalysisResult, setStudentAnalysisResult] = useState<StudentAnalysisResultDto>();
+  const [studentAnalysisResult, setStudentAnalysisResult] = useState<StudentImportAnalysisResultDto>();
   const [students, setStudents] = useState<StudentDto[]>([]);
   const ldgState = useLoadingState();
   const [filterText, setFilterText] = useState<string>("");
@@ -65,7 +65,7 @@ function StudentsPage() {
     await loadStudents();
   }
 
-  const handleAnalyzed = async (data: StudentAnalysisResultDto) => {
+  const handleAnalyzed = async (data: StudentImportAnalysisResultDto) => {
     setStudentAnalysisResult(data);
     setIsImportFirstModalOpen(false);
     setIsImportSecondModalOpen(true);

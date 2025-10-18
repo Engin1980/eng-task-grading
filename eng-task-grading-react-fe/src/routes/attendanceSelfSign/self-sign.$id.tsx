@@ -25,7 +25,7 @@ function SelfSignComponent() {
   const [studyNumber, setStudyNumber] = useState('')
   const [errors, setErrors] = useState<{ studyNumber?: string; key?: string }>({})
   const [isSubmitted, setIsSubmitted] = useState(false)
-  const selfSignCookieValue: string | null = Cookies.get(SELF_SIGN_USED_COOKIE_NAME);
+  const selfSignCookieValue: string | undefined = Cookies.get(SELF_SIGN_USED_COOKIE_NAME);
 
   const validateStudyNumber = (value: string): boolean => {
     const pattern = /^[A-Za-z]\d{5}$/

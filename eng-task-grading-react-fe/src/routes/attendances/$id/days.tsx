@@ -12,7 +12,8 @@ export const Route = createFileRoute('/attendances/$id/days')({
 })
 
 function RouteComponent() {
-  const { id: attendanceId } = Route.useParams(); // attendanceId
+  const { id } = Route.useParams(); // attendanceId
+  const attendanceId = +id;
   const [attendance, setAttendance] = useState<AttendanceDto | null>(null);
   const ldgState = useLoadingState();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -20,7 +21,7 @@ function RouteComponent() {
   const loadAttendance = async () => {
     try {
       ldgState.setLoading();
-      const data = await attendanceService.getById(parseInt(attendanceId));
+      const data = await attendanceService.getById(attendanceId);
       setAttendance(data);
       ldgState.setDone();
     } catch (err) {
@@ -37,7 +38,7 @@ function RouteComponent() {
     try {
       const attendanceDayWithId = {
         ...attendanceDay,
-        attendanceId: parseInt(attendanceId)
+        attendanceId: attendanceId
       };
       await attendanceService.createDay(attendanceDayWithId);
       await loadAttendance(); // Refresh the data
@@ -108,6 +109,7 @@ function RouteComponent() {
       )}
 
       <CreateAttendanceDayModal
+        attendanceId={attendanceId}
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onSubmit={handleCreateAttendanceDay}

@@ -19,7 +19,7 @@ services:
       context: .
       dockerfile: EngTaskGradingNetBE/Dockerfile
     environment:
-      - DB_PASSWORD=Bublinka#1
+      DB_PASSWORD: Bublinka#1
     ports:
       - "55555:8080"
       - "55556:8081"

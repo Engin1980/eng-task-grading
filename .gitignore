@@ -4,3 +4,7 @@ Logs/
 bin/
 obj/
 publish/
+EngTaskGradingNetBESolution/certs/aspnetapp.pfx
+EngTaskGradingNetBESolution/EngTaskGradingNetBE/appsettings.Release.json
+EngTaskGradingNetBESolution/docker-compose.release.yml
+EngTaskGradingNetBESolution/docker-compose-release-build.bat

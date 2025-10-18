@@ -2,14 +2,14 @@ import * as Dialog from '@radix-ui/react-dialog';
 import { useLogger } from '../../hooks/use-logger';
 import toast from 'react-hot-toast';
 import { attendanceService } from '../../services/attendance-service';
-import type { StudentAnalysisResultDtoWithAttendanceValue } from '../../model/student-dto';
 import { AttendanceValueLabel } from '../../ui/attendanceValueLabel';
+import type { AttendanceImportAnalysisResultWithAttendanceValueDto } from '../../model/attendance-dto';
 
 interface ImportAttendanceWizardSecondModalProps {
   isOpen: boolean;
   onClose: () => void;
   onImported: () => void;
-  analysisResult: StudentAnalysisResultDtoWithAttendanceValue | null;
+  analysisResult: AttendanceImportAnalysisResultWithAttendanceValueDto | null;
   attendanceDayId: number;
 }
 

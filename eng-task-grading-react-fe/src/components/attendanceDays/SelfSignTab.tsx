@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { attendanceService } from '../../services/attendance-service';
 import toast from 'react-hot-toast';
-import type { AttendanceDaySelfSignSetDto, AttendanceValueDto } from '../../model/attendance-dto';
+import type { AttendanceDaySelfSignSetDto, AttendanceImportAnalysisResultWithAttendanceValueDto, AttendanceValueDto } from '../../model/attendance-dto';
 import { useLogger } from '../../hooks/use-logger';
 import { ImportAttendanceWizardFirstModal } from './ImportAttendanceWizardFirstModal';
 import { ImportAttendanceWizardSecondModal } from './ImportAttendanceWizardSecondModal';
@@ -11,7 +11,6 @@ import { AttendanceValueLabel } from '../../ui/attendanceValueLabel';
 import { useLoadingState } from '../../types/loadingState';
 import { Loading } from '../../ui/loading';
 import { LoadingError } from '../../ui/loadingError';
-import type { StudentAnalysisResultDtoWithAttendanceValue } from '../../model/student-dto';
 
 interface SelfSignTabProps {
   attendanceDayId: number;
@@ -28,7 +27,7 @@ export function SelfSignTab({ attendanceDayId }: SelfSignTabProps) {
   const logger = useLogger("SelfSignTab");
   const [isImportFirstModalOpen, setIsImportFirstModalOpen] = useState(false);
   const [isImportSecondModalOpen, setIsImportSecondModalOpen] = useState(false);
-  const [analysisResult, setAnalysisResult] = useState<StudentAnalysisResultDtoWithAttendanceValue>();
+  const [analysisResult, setAnalysisResult] = useState<AttendanceImportAnalysisResultWithAttendanceValueDto>();
 
   const loadDataAsync = async () => {
     try {
@@ -106,7 +105,7 @@ export function SelfSignTab({ attendanceDayId }: SelfSignTabProps) {
       navigate({
         to: '/attendanceSelfSign/view-info/$id/$key',
         params: {
-          id: attendanceDayId,
+          id: attendanceDayId.toString(),
           key: currentKey
         }
       });
@@ -138,7 +137,7 @@ export function SelfSignTab({ attendanceDayId }: SelfSignTabProps) {
     setIsImportFirstModalOpen(true);
   }
 
-  const handleAnalyzed = async (data: StudentAnalysisResultDtoWithAttendanceValue) => {
+  const handleAnalyzed = async (data: AttendanceImportAnalysisResultWithAttendanceValueDto) => {
     setAnalysisResult(data);
     setIsImportFirstModalOpen(false);
     setIsImportSecondModalOpen(true);

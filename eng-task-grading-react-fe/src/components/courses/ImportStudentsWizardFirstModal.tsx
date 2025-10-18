@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { useLogger } from '../../hooks/use-logger';
-import type { StudentAnalysisResultDto } from '../../model/student-dto';
 import { studentService } from '../../services/student-service';
 import toast from 'react-hot-toast';
+import type { StudentImportAnalysisResultDto } from '../../model/student-dto';
 
 interface ImportStudentsWizardFirstModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAnalyzed: (data: StudentAnalysisResultDto) => void;
+  onAnalyzed: (data: StudentImportAnalysisResultDto) => void;
 }
 
 export function ImportStudentsWizardFirstModal({ isOpen, onClose, onAnalyzed }: ImportStudentsWizardFirstModalProps) {
@@ -26,7 +26,7 @@ export function ImportStudentsWizardFirstModal({ isOpen, onClose, onAnalyzed }: 
 
     setIsLoading(true);
     try {
-      const data: StudentAnalysisResultDto = await studentService.analyseForImport(importText);
+      const data: StudentImportAnalysisResultDto = await studentService.analyseForImport(importText);
       onAnalyzed(data);
     } catch {
       toast.error('Chyba při analýze textu pro import studentů.');

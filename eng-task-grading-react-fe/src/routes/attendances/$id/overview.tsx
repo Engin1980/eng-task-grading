@@ -161,7 +161,7 @@ function RouteComponent() {
         </table>
       </div>
 
-      {filteredStudents.length === 0 && !loading && data && (
+      {filteredStudents.length === 0 && data && (
         <div className="text-center py-8">
           <p className="text-gray-500">
             {studentFilter.trim()

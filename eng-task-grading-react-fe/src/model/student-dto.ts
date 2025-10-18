@@ -1,5 +1,3 @@
-import type { AttendanceValueDto } from "./attendance-dto";
-
 export interface StudentDto {
   id: number;
   number: string;
@@ -21,12 +19,7 @@ export interface StudentCreateDto {
   studyForm: string;
 }
 
-export interface StudentAnalysisResultDto {
+export interface StudentImportAnalysisResultDto {
   students: StudentCreateDto[];
   errors: string[];
-}
-
-export interface StudentAnalysisResultDtoWithAttendanceValue {
-  result: StudentAnalysisResultDto;
-  attendanceValue: AttendanceValueDto;
 }

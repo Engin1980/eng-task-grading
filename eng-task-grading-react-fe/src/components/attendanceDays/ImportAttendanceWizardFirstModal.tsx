@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { useLogger } from '../../hooks/use-logger';
-import type { StudentAnalysisResultDto, StudentAnalysisResultDtoWithAttendanceValue } from '../../model/student-dto';
 import { attendanceService } from '../../services/attendance-service';
 import toast from 'react-hot-toast';
-import type { AttendanceValueDto } from '../../model/attendance-dto';
+import type { AttendanceImportAnalysisResultDto, AttendanceImportAnalysisResultWithAttendanceValueDto, AttendanceValueDto } from '../../model/attendance-dto';
 import { AttendanceValueLabelBlock } from '../../ui/attendanceValueLabelBlock';
 import { AttendanceValueLabel } from '../../ui/attendanceValueLabel';
 
@@ -12,7 +11,7 @@ interface ImportAttendanceWizardFirstModalProps {
   isOpen: boolean;
   attendanceDayId: number;
   onClose: () => void;
-  onAnalyzed: (result: StudentAnalysisResultDtoWithAttendanceValue) => void;
+  onAnalyzed: (result: AttendanceImportAnalysisResultWithAttendanceValueDto) => void;
 }
 
 export function ImportAttendanceWizardFirstModal({ isOpen, onClose, onAnalyzed, attendanceDayId }: ImportAttendanceWizardFirstModalProps) {
@@ -42,9 +41,9 @@ export function ImportAttendanceWizardFirstModal({ isOpen, onClose, onAnalyzed, 
 
     setIsLoading(true);
     try {
-      const data: StudentAnalysisResultDto = await attendanceService.analyseForImport(attendanceDayId, importText);
+      const data: AttendanceImportAnalysisResultDto = await attendanceService.analyseForImport(attendanceDayId, importText);
       const selectedAttendanceValue = attendanceValues?.find(av => av.id === selectedAttendanceValueId);
-      const result: StudentAnalysisResultDtoWithAttendanceValue = {
+      const result: AttendanceImportAnalysisResultWithAttendanceValueDto = {
         result: data,
         attendanceValue: selectedAttendanceValue!,
       };

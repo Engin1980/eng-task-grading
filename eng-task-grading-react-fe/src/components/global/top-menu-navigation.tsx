@@ -16,21 +16,30 @@ export function TopMenuNavigation() {
       <span className="translate-y-0.5">
         <CourseIcon />
       </span>
-      <Link to={`/courses/${navCtx.course.id}/grades`} className="mx-1 text-blue-600">{navCtx.course.title}</Link>
+      <Link
+        to="/courses/$id/grades"
+        params={{ id: navCtx.course.id.toString() }}
+        className="mx-1 text-blue-600">{navCtx.course.title}</Link>
     </>}
     {navCtx?.task && <>
       <span className="text-gray-600 mr-1">{separator}</span>
       <span className="translate-y-0.5">
         <TaskIcon />
       </span>
-      <Link to={`/tasks/${navCtx.task.id}`} className="mr-1 text-blue-600">{navCtx.task.title}</Link>
+      <Link
+        to="/tasks/$id"
+        params={{ id: navCtx.task?.id?.toString() || "-1" }}
+        className="mr-1 text-blue-600">{navCtx.task.title}</Link>
     </>}
     {navCtx?.attendance && <>
       <span className="text-gray-600 mr-1">{separator}</span>
       <span className="translate-y-0.5">
         <AttendanceIcon />
       </span>
-      <Link to={`/attendances/${navCtx.attendance.id}/days`} className="mr-1 text-blue-600">{navCtx.attendance.title}</Link>
+      <Link
+       to="/attendances/$id/days"
+        params={{ id: navCtx.attendance.id.toString() }}
+        className="mr-1 text-blue-600">{navCtx.attendance.title}</Link>
     </>}
   </>);
 }

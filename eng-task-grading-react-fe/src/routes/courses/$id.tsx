@@ -1,4 +1,4 @@
-import { createFileRoute, Link, Outlet, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, Outlet, useNavigate } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import { useLogger } from '../../hooks/use-logger'
 import { courseService } from '../../services/course-service'

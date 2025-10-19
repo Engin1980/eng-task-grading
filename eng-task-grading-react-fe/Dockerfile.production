@@ -6,7 +6,8 @@ COPY package*.json ./
 RUN npm ci
 
 COPY . .
-RUN npm run build
+RUN npm run build 
+# loads .env.production automatically
 
 # --- Stage 2: serve ---
 FROM nginx:1.25-alpine

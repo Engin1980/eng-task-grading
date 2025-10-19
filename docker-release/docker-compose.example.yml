@@ -2,7 +2,9 @@ services:
   eng-task-grading-fe:
     container_name: eng-task-grading-fe
     build: 
-      context: ../eng-task-grading-react-fe   
+      context: ../eng-task-grading-react-fe  
+      dockerfile: ../eng-task-grading-react-fe/Dockerfile.production  
+      # remember to set .env.production in the react app folder! 
     environment:
       BACKEND_URL: https://78.128.134.148:55556/api
       CLOUDFLARE_ENABLED: false 

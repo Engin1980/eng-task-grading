@@ -9,7 +9,7 @@ EXPOSE 8081
 
 ENV DB_PASSWORD=Bublinka#1
 
-COPY ../certs/aspnetapp.pfx /https/aspnetapp.pfx
+# COPY ../../certs/78.128.134.148.pfx /certs/78.128.134.148.pfx
 ENV DOTNET_RUNNING_IN_CONTAINER=true
 
 # This stage is used to build the service project

@@ -9,3 +9,7 @@ EngTaskGradingNetBESolution/EngTaskGradingNetBE/appsettings.Release.json
 EngTaskGradingNetBESolution/docker-compose.release.yml
 EngTaskGradingNetBESolution/docker-compose-release-build.bat
 docker-release/docker-compose.yml
+certs/http-certs-78.128.134.148-key.pem
+certs/http-certs-78.128.134.148.pem
+certs/http-certs-78.128.134.148.pfx
+eng-task-grading-react-fe/.env.production

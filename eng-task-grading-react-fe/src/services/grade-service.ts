@@ -46,7 +46,7 @@ export const gradeService = {
     // Ošetření extrémních případů a dělení nulou
     if (maxGrade <= 0) return NaN;
     if (maxGrade <= minGrade) return NaN;
-    if (finalValue <= 0) return NaN;
+    if (finalValue < 0) return NaN;
     if (finalValue >= maxGrade) return 100;
 
     let percentage: number;

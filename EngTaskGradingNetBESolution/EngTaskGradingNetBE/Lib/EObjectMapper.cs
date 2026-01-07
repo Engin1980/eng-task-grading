@@ -14,6 +14,7 @@ public static class EObjectMapper
     Aggregation = ConverTaskAggregationStringToEnum(dto.Aggregation),
     Description = dto.Description,
     Keywords = dto.Keywords,
+    MaxGrade = dto.MaxGrade,
     MinGrade = dto.MinGrade,
     Title = dto.Title
   };
@@ -43,12 +44,13 @@ public static class EObjectMapper
   };
 
 
-  public static TaskDto To(Task task) => new(task.Id, task.CourseId, task.Title, task.Keywords, task.Description, task.MinGrade, task.Aggregation.ToString());
+  public static TaskDto To(Task task) => new(task.Id, task.CourseId, task.Title, task.Keywords, task.Description, task.MaxGrade, task.MinGrade, task.Aggregation.ToString());
   public static Task From(TaskCreateDto taskDto) => new()
   {
     Title = taskDto.Title,
     Description = taskDto.Description,
     Keywords = taskDto.Keywords,
+    MaxGrade = taskDto.MaxGrade,
     MinGrade = taskDto.MinGrade,
     Aggregation = ConverTaskAggregationStringToEnum(taskDto.Aggregation)
   };

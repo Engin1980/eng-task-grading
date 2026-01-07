@@ -40,6 +40,31 @@ export const gradeService = {
     await apiHttp.delete(`/v1/grade/${gradeId}`);
   },
 
+  calculateFinalGradePercentage(finalValue: number | null, minGrade: number | null, maxGrade: number | null): number | null {
+    if (finalValue === null || minGrade === null || maxGrade === null) return null;
+
+    // Ošetření extrémních případů a dělení nulou
+    if (maxGrade <= 0) return NaN;
+    if (maxGrade <= minGrade) return NaN;
+    if (finalValue <= 0) return NaN;
+    if (finalValue >= maxGrade) return 100;
+
+    let percentage: number;
+
+    if (finalValue <= minGrade) {
+      percentage = minGrade > 0
+        ? (finalValue / minGrade) * 50
+        : 50;
+    } else {
+      const range = maxGrade - minGrade;
+      percentage = range > 0
+        ? 50 + ((finalValue - minGrade) / range) * 50
+        : 100;
+    }
+
+    return Math.ceil(percentage);
+  },
+
   evaluateFinalGrade(type: "min" | "max" | "avg" | "last", grades: GradeDto[]): FinalGradeDto | null {
     if (grades.length === 0) return null;
 

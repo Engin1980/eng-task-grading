@@ -5,6 +5,7 @@ export interface TaskEditorData {
   description: string;
   keywords: string;
   minGrade: number | null;
+  maxGrade: number | null;
   aggregation: 'min' | 'max' | 'avg' | 'last';
 }
 
@@ -75,10 +76,28 @@ export function TaskEditor({ taskData, onChange }: TaskEditorProps) {
         />
       </div>
 
+      {/* Max Grade */}
+      <div className="mb-4">
+        <label htmlFor="maxGrade" className="block text-sm font-medium text-gray-700 mb-2">
+          Maximální známka (0-1000)
+        </label>
+        <input
+          id="maxGrade"
+          name="maxGrade"
+          type="number"
+          min="0"
+          max="1000"
+          value={taskData.maxGrade ?? ''}
+          onChange={(e) => onChange({ ...taskData, maxGrade: e.target.value ? Number(e.target.value) : null })}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          placeholder="Zadejte maximální známku..."
+        />
+      </div>
+
       {/* Min Grade */}
       <div className="mb-4">
         <label htmlFor="minGrade" className="block text-sm font-medium text-gray-700 mb-2">
-          Minimální známka (0-1000)
+          Minimální úspěšná známka (0-1000)
         </label>
         <input
           id="minGrade"
@@ -89,7 +108,7 @@ export function TaskEditor({ taskData, onChange }: TaskEditorProps) {
           value={taskData.minGrade ?? ''}
           onChange={(e) => onChange({ ...taskData, minGrade: e.target.value ? Number(e.target.value) : null })}
           className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          placeholder="Zadejte minimální známku..."
+          placeholder="Zadejte minimální známku pro úspěch..."
         />
       </div>
 

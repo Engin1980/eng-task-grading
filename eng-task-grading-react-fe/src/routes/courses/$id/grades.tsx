@@ -31,6 +31,11 @@ function GradesPage() {
     data.students.forEach(student => {
       student.tasks.forEach(taskDto => {
         const finalGrade: FinalGradeDto | null = gradeService.evaluateFinalGrade(data.tasks.find(t => t.id === taskDto.taskId)?.aggregation!, taskDto.grades);
+        if (finalGrade != null) {
+          const task = data.tasks.find(t => t.id === taskDto.taskId);
+          const finalPercentage = gradeService.calculateFinalGradePercentage(finalGrade?.value ?? null, task?.minGrade ?? null, task?.maxGrade ?? null);
+          finalGrade.percentage = finalPercentage;
+        }
         taskDto.final = finalGrade;
       });
     });
@@ -332,7 +337,7 @@ function GradesPage() {
                           <span
                             className="inline-flex px-2 text-xs font-semibold rounded-full"
                           >
-                            {mainGrade?.value ?? "-"}
+                            {mainGrade?.value ?? "-"} {mainGrade.percentage !== null && `/ ${mainGrade.percentage} %`}
                           </span>
                           {otherGrades.length > 0 && (
                             <div className="text-xs opacity-60">

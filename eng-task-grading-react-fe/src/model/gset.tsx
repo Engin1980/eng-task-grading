@@ -25,6 +25,7 @@ export interface GSetCourseStudentTaskDto {
 
 export interface FinalGradeDto {
   value: number;
+  percentage: number | null;
   date: Date;
 }
 

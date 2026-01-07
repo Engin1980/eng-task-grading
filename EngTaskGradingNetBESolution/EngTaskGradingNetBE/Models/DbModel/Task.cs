@@ -28,6 +28,8 @@ public class Task
 
   public int? MinGrade { get; set; }
 
+  public int? MaxGrade { get; set; }
+
   public AggregationType Aggregation { get; set; } = AggregationType.Last;
 
   public List<Grade> Grades { get; set; } = null!;

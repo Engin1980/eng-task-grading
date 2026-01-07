@@ -5,6 +5,7 @@ import type { StudentDto } from "./student-dto";
 export interface NewGradeSetStudentDto {
   student: StudentDto;
   finalValue: number | null;
+  finalPercentage: number | null; 
   grades: GradeDto[];
 }
 

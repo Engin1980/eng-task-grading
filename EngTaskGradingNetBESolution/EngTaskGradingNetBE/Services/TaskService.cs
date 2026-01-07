@@ -32,6 +32,7 @@ namespace EngTaskGradingNetBE.Services
       existingTask.Title = updatedTask.Title;
       existingTask.Description = updatedTask.Description;
       existingTask.Keywords = updatedTask.Keywords;
+      existingTask.MaxGrade = updatedTask.MaxGrade;
       existingTask.MinGrade = updatedTask.MinGrade;
       existingTask.Aggregation = updatedTask.Aggregation;
 

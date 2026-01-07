@@ -51,6 +51,7 @@ function RouteComponent() {
   const setSetFinalValues = (set: NewGradeSetTaskDto, taskReduceType: "min" | "max" | "avg" | "last"): void => {
     set.students.forEach(studentData => {
       studentData.finalValue = gradeService.evaluateFinalGrade(taskReduceType, studentData.grades)?.value ?? null;
+      studentData.finalPercentage = gradeService.calculateFinalGradePercentage(studentData.finalValue, set.task.minGrade, set.task.maxGrade);
     });
   }
 
@@ -79,9 +80,11 @@ function RouteComponent() {
         if (studentData.student.id === newGrade.studentId) {
           const newGrades = [newGrade, ...studentData.grades];
           const finalValue = gradeService.evaluateFinalGrade(set.task.aggregation!, newGrades)?.value ?? null;
+          const finalPercentage = gradeService.calculateFinalGradePercentage(finalValue, set.task.minGrade, set.task.maxGrade);
           return {
             ...studentData,
             finalValue,
+            finalPercentage,
             grades: newGrades.sort((a, b) => {
               const dateA = new Date(a.date);
               const dateB = new Date(b.date);
@@ -113,9 +116,11 @@ function RouteComponent() {
         if (studentData.student.id === updatedGrade.studentId) {
           const newGrades = [updatedGrade, ...studentData.grades];
           const finalValue = gradeService.evaluateFinalGrade(set.task.aggregation!, newGrades)?.value ?? null;
+          const finalPercentage = gradeService.calculateFinalGradePercentage(finalValue, set.task.minGrade, set.task.maxGrade);
           return {
             ...studentData,
             finalValue,
+            finalPercentage,
             grades: studentData.grades.map(grade =>
               grade.id === updatedGrade.id ? updatedGrade : grade
             ).sort((a, b) => {
@@ -146,9 +151,11 @@ function RouteComponent() {
         if (set) {
           const updatedStudentDatas = set.students.map(studentData => {
             const finalValue = gradeService.evaluateFinalGrade(set.task.aggregation!, studentData.grades)?.value ?? null;
+            const finalPercentage = gradeService.calculateFinalGradePercentage(finalValue, set.task.minGrade, set.task.maxGrade);
             return {
               ...studentData,
               finalValue,
+              finalPercentage,
               grades: studentData.grades.filter(grade => grade.id !== gradeId)
             };
           });
@@ -235,8 +242,8 @@ function RouteComponent() {
           </div>
 
           <div>
-            <strong className="text-gray-700">Minimální hodnota:</strong>
-            <span className="ml-2 text-gray-600">{task.minGrade || '-'}</span>
+            <strong className="text-gray-700">Maximální/Minimální hodnota:</strong>
+            <span className="ml-2 text-gray-600">{task.maxGrade || '-'} / {task.minGrade || '-'}</span>
           </div>
 
           <div>
@@ -362,7 +369,7 @@ function RouteComponent() {
                                 ? 'bg-green-100 text-green-800'
                                 : 'bg-red-100 text-red-800'
                                 }`}>
-                                {studentData.finalValue}
+                                {studentData.finalValue} {studentData.finalPercentage ? `/ ${studentData.finalPercentage}%` : ''}
                               </span>
                             </td>
                           )}

@@ -18,6 +18,7 @@ export function EditTaskModal({ isOpen, task, onClose }: EditTaskModalProps) {
     description: task?.description ?? '',
     keywords: task?.keywords ?? '',
     minGrade: task?.minGrade ?? null,
+    maxGrade: task?.maxGrade ?? null,
     aggregation: task?.aggregation ?? 'last'
   });
 
@@ -34,6 +35,7 @@ export function EditTaskModal({ isOpen, task, onClose }: EditTaskModalProps) {
         description: taskEditorData.description,
         keywords: taskEditorData.keywords,
         minGrade: taskEditorData.minGrade,
+        maxGrade: taskEditorData.maxGrade,
         aggregation: taskEditorData.aggregation
       };
 
@@ -54,6 +56,7 @@ export function EditTaskModal({ isOpen, task, onClose }: EditTaskModalProps) {
       description: '',
       keywords: '',
       minGrade: null,
+      maxGrade: null,
       aggregation: 'last'
     });
   }

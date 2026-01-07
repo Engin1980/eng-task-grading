@@ -5,6 +5,7 @@ export interface TaskDto {
   description?: string;
   keywords: string | null;
   minGrade: number | null;
+  maxGrade: number | null;
   aggregation: "min" | "max" | "avg" | "last";
 }
 
@@ -22,5 +23,6 @@ export interface TaskUpdateDto {
   description: string | null;
   keywords: string | null;
   minGrade: number | null;
+  maxGrade: number | null;
   aggregation: "min" | "max" | "avg" | "last";
 }

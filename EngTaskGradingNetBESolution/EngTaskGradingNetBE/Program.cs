@@ -7,6 +7,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using System.Text;
+using System.Diagnostics;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
+using EngTaskGradingNetBE.Exceptions;
 
 
 
@@ -77,6 +80,16 @@ static void BuildServices(WebApplicationBuilder builder)
   builder.Services.AddControllers();
 }
 
+static string GetConnectionString(WebApplicationBuilder builder)
+{
+  string DB_ENV_KEY = "DB_PASSWORD";
+  string DB_ENV_KEY_REF = "{" + DB_ENV_KEY + "}";
+  string cs = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new ApplicationException("Default connection not found in app properties.");
+  string pass = Environment.GetEnvironmentVariable(DB_ENV_KEY) ?? throw new ApplicationException("DB_PASSWORD not found in environmental variables.");
+  string ret = cs.Replace(DB_ENV_KEY_REF, pass);
+  return ret;
+}
+
 static void BuildLogging(WebApplicationBuilder builder)
 {
   Log.Logger = new LoggerConfiguration()
@@ -84,7 +97,7 @@ static void BuildLogging(WebApplicationBuilder builder)
       .WriteTo.File("Logs/app.log", rollingInterval: RollingInterval.Day)
       //TODO remove following when DB is working
       .WriteTo.MSSqlServer(
-          connectionString: builder.Configuration.GetConnectionString("DefaultConnection"),
+          connectionString: GetConnectionString(builder),
           sinkOptions: new Serilog.Sinks.MSSqlServer.MSSqlServerSinkOptions
           {
             TableName = "AppLog",
@@ -99,7 +112,7 @@ static void BuildLogging(WebApplicationBuilder builder)
 static void BuildDb(WebApplicationBuilder builder)
 {
   // Add DbContext
-  var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+  var connectionString = GetConnectionString(builder);
   if (string.IsNullOrEmpty(connectionString))
   {
     Log.Fatal("No connection string found");
@@ -113,8 +126,6 @@ static void InitDb(WebApplication app)
 {
   using var scope = app.Services.CreateScope();
   using var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-  //db.Database.EnsureDeleted();
-  //db.Database.EnsureCreated();
   db.Database.Migrate();
   Log.Information("Database migrated.");
 }

@@ -1,0 +1,56 @@
+services:
+  eng-task-grading-fe:
+    container_name: eng-task-grading-fe
+    build: 
+      context: ../eng-task-grading-react-fe   
+    environment:
+      BACKEND_URL: https://78.128.134.148:55556/api
+      CLOUDFLARE_ENABLED: false 
+    ports:
+      - "5001:80"
+      - "5000:443"
+    networks:
+      - eng-task-grading-net      
+    
+  eng-task-grading-be:
+    # image: ${DOCKER_REGISTRY-}engtaskgradingnetbe
+    container_name: eng-task-grading-be
+    build:
+      context: ../EngTaskGradingNetBESolution
+      dockerfile: ../EngTaskGradingNetBESolution/EngTaskgradingNetBE/Dockerfile
+      # image: eng-task-grading-be:latest
+    environment:
+      DOTNET_ENVIRONMENT: Release
+      ASPNETCORE_ENVIRONMENT: Release
+      ASPNETCORE_HTTP_PORTS: 8080
+      ASPNETCORE_HTTPS_PORTS: 443      
+      AppSettings__Security__AccessTokenJwtSecretKey: TODO
+      AppSettings__Emails__Configs__Osu__SenderEmail: TODO
+      AppSettings__Emails__Configs__Osu__SenderPassword: TODO
+      DB_PASSWORD: TODO_X
+    ports:
+      - "55555:8080"
+      - "55556:443"
+    networks:
+      - eng-task-grading-net
+
+  eng-task-grading-db:
+    container_name: eng-task-grading-db
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: Y
+      SA_PASSWORD: TODO_X
+    ports:
+      - "1433:1433"
+    networks:
+      - eng-task-grading-net
+    volumes:
+      - eng-task-grading-db-data:/var/opt/mssql         
+
+networks:
+  eng-task-grading-net:
+    driver: bridge
+
+volumes:
+  eng-task-grading-db-data:
+

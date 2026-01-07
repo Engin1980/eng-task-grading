@@ -2,7 +2,6 @@ import { useState } from 'react';
 import type { AttendanceCreateDto } from '../../model/attendance-dto';
 import { AppDialog } from '../../ui/AppDialog';
 import { AttendanceEditor, type AttendanceEditorData } from '../../ui/editors/AttendanceEditor';
-import { attendanceService } from '../../services/attendance-service';
 import toast from 'react-hot-toast';
 
 interface CreateAttendanceModalProps {

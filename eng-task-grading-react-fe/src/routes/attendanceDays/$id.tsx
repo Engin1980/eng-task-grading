@@ -70,7 +70,7 @@ function AttendanceDayDetailPage() {
           <h1 className="text-3xl font-bold text-gray-900 mb-2">{attendanceDay.title}</h1>
           <button
             className="pl-3"
-            onClick={() => toast.error("Not implemented yet.")}
+            onClick={() => setEditModalVisible(true)}
           >
             <EditIcon size="m" />
           </button>

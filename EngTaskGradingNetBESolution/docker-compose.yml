@@ -1,6 +1,6 @@
 services:
 
-  mssql:
+  eng-task-grading-db:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: mssql
     environment:
@@ -13,11 +13,13 @@ services:
     volumes:
       - mssql-data:/var/opt/mssql   
 
-  engtaskgradingnetbe:
+  eng-task-grading-be:
     image: ${DOCKER_REGISTRY-}engtaskgradingnetbe
     build:
       context: .
       dockerfile: EngTaskGradingNetBE/Dockerfile
+    environment:
+      DB_PASSWORD: Bublinka#1
     ports:
       - "55555:8080"
       - "55556:8081"

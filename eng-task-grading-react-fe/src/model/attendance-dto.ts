@@ -100,3 +100,13 @@ export interface AttendanceDaySelfSignDto {
   creationDateTime: Date;
   ip: string;
 }
+
+export interface AttendanceImportAnalysisResultDto {
+  students: StudentDto[];
+  errors: string[];
+}
+
+export interface AttendanceImportAnalysisResultWithAttendanceValueDto {
+  result: AttendanceImportAnalysisResultDto;
+  attendanceValue: AttendanceValueDto;
+}

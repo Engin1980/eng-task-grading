@@ -101,7 +101,7 @@ function TasksPage() {
                   Klíčová slova
                 </th>
                 <th className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Min. hodnota
+                  Max. / Min. hodnota
                 </th>
               </tr>
             </thead>
@@ -127,6 +127,8 @@ function TasksPage() {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {task.maxGrade !== null && task.maxGrade !== undefined ? task.maxGrade : '-'}
+                    /
                     {task.minGrade !== null && task.minGrade !== undefined ? task.minGrade : '-'}
                   </td>
                 </tr>

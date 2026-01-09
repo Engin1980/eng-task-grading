@@ -62,6 +62,40 @@ public class StudentViewController(
     return ret;
   }
 
+  [HttpGet("tokens")]
+  public async Task<List<StudentTokenInfoDto>> GetActiveTokens()
+  {
+    string studyNumber;
+    try
+    {
+      studyNumber = GetStudyNumberFromJwt();
+    }
+    catch (Exception ex)
+    {
+      throw new UnauthorizedAccessException(ex.Message);
+    }
+
+    var tokens = await studentViewService.GetActiveTokensForStudentAsync(studyNumber);
+    var tokenInfos = EObjectMapper.To(tokens);
+    return tokenInfos;
+  }
+
+  [HttpDelete("tokens")]
+  public async Task DeleteActiveTokens()
+  {
+    string studyNumber;
+    try
+    {
+      studyNumber = GetStudyNumberFromJwt();
+    }
+    catch (Exception ex)
+    {
+      throw new UnauthorizedAccessException(ex.Message);
+    }
+
+    await studentViewService.DeleteActiveTokensForStudentAsync(studyNumber);
+  }
+
   private string GetStudyNumberFromJwt()
   {
     // Extract JWT token from Authorization header

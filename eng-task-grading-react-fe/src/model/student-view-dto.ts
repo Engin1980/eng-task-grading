@@ -20,3 +20,9 @@ export interface StudentViewCourseDto{
   grades: GradeDto[];
   attendanceRecords: AttendanceDaySetRecordDto[];
 }
+
+export interface StudentTokenInfoDto{
+    id : number,
+    createdAt: Date,
+    expiresAt: Date
+}

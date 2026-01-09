@@ -129,5 +129,20 @@ namespace EngTaskGradingNetBE.Services
       return ret;
     }
 
+    internal async Task<List<StudentViewToken>> GetActiveTokensForStudentAsync(string studyNumber)
+    {
+      var now = DateTime.UtcNow;
+      var tokens = await Db.StudentViewTokens
+        .Where(q => q.Student.Number == studyNumber && q.ExpiresAt > now)
+        .ToListAsync();
+      return tokens;
+    }
+
+    internal async System.Threading.Tasks.Task DeleteActiveTokensForStudentAsync(string studyNumber)
+    {
+      await Db.StudentViewTokens
+        .Where(q => q.Student.Number == studyNumber)
+        .ExecuteDeleteAsync();
+    }
   }
 };

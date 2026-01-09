@@ -30,6 +30,7 @@ const TopMenu: React.FC = () => {
                 </>)}
                 {loggedUser && loggedUser.role == "ROLE_STUDENT" && (<>
                   <Link to="/studentView/courses" className="mr-4 text-blue-600">Kurzy</Link>
+                  <Link to="/studentView/login-management" className="mr-4 text-blue-600">Správa přihlášení</Link>
                 </>)}
               </div>
             </div>

@@ -20,6 +20,7 @@ import { Route as StudentViewHomeRouteImport } from './routes/studentView/home'
 import { Route as CoursesIdRouteImport } from './routes/courses/$id'
 import { Route as AttendancesIdRouteImport } from './routes/attendances/$id'
 import { Route as AttendanceDaysIdRouteImport } from './routes/attendanceDays/$id'
+import { Route as StudentViewLoginManagementIndexRouteImport } from './routes/studentView/login-management/index'
 import { Route as StudentViewCoursesIndexRouteImport } from './routes/studentView/courses/index'
 import { Route as StudentViewVerifyTokenRouteImport } from './routes/studentView/verify/$token'
 import { Route as StudentViewCoursesIdRouteImport } from './routes/studentView/courses/$id'
@@ -89,6 +90,12 @@ const AttendanceDaysIdRoute = AttendanceDaysIdRouteImport.update({
   path: '/attendanceDays/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StudentViewLoginManagementIndexRoute =
+  StudentViewLoginManagementIndexRouteImport.update({
+    id: '/studentView/login-management/',
+    path: '/studentView/login-management/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const StudentViewCoursesIndexRoute = StudentViewCoursesIndexRouteImport.update({
   id: '/studentView/courses/',
   path: '/studentView/courses/',
@@ -181,6 +188,7 @@ export interface FileRoutesByFullPath {
   '/studentView/courses/$id': typeof StudentViewCoursesIdRouteWithChildren
   '/studentView/verify/$token': typeof StudentViewVerifyTokenRoute
   '/studentView/courses': typeof StudentViewCoursesIndexRoute
+  '/studentView/login-management': typeof StudentViewLoginManagementIndexRoute
   '/attendanceSelfSign/view-info/$id/$key': typeof AttendanceSelfSignViewInfoIdKeyRoute
   '/studentView/courses/$id/attendance': typeof StudentViewCoursesIdAttendanceRoute
   '/studentView/courses/$id/tasks': typeof StudentViewCoursesIdTasksRoute
@@ -207,6 +215,7 @@ export interface FileRoutesByTo {
   '/studentView/courses/$id': typeof StudentViewCoursesIdRouteWithChildren
   '/studentView/verify/$token': typeof StudentViewVerifyTokenRoute
   '/studentView/courses': typeof StudentViewCoursesIndexRoute
+  '/studentView/login-management': typeof StudentViewLoginManagementIndexRoute
   '/attendanceSelfSign/view-info/$id/$key': typeof AttendanceSelfSignViewInfoIdKeyRoute
   '/studentView/courses/$id/attendance': typeof StudentViewCoursesIdAttendanceRoute
   '/studentView/courses/$id/tasks': typeof StudentViewCoursesIdTasksRoute
@@ -234,6 +243,7 @@ export interface FileRoutesById {
   '/studentView/courses/$id': typeof StudentViewCoursesIdRouteWithChildren
   '/studentView/verify/$token': typeof StudentViewVerifyTokenRoute
   '/studentView/courses/': typeof StudentViewCoursesIndexRoute
+  '/studentView/login-management/': typeof StudentViewLoginManagementIndexRoute
   '/attendanceSelfSign/view-info/$id/$key': typeof AttendanceSelfSignViewInfoIdKeyRoute
   '/studentView/courses/$id/attendance': typeof StudentViewCoursesIdAttendanceRoute
   '/studentView/courses/$id/tasks': typeof StudentViewCoursesIdTasksRoute
@@ -262,6 +272,7 @@ export interface FileRouteTypes {
     | '/studentView/courses/$id'
     | '/studentView/verify/$token'
     | '/studentView/courses'
+    | '/studentView/login-management'
     | '/attendanceSelfSign/view-info/$id/$key'
     | '/studentView/courses/$id/attendance'
     | '/studentView/courses/$id/tasks'
@@ -288,6 +299,7 @@ export interface FileRouteTypes {
     | '/studentView/courses/$id'
     | '/studentView/verify/$token'
     | '/studentView/courses'
+    | '/studentView/login-management'
     | '/attendanceSelfSign/view-info/$id/$key'
     | '/studentView/courses/$id/attendance'
     | '/studentView/courses/$id/tasks'
@@ -314,6 +326,7 @@ export interface FileRouteTypes {
     | '/studentView/courses/$id'
     | '/studentView/verify/$token'
     | '/studentView/courses/'
+    | '/studentView/login-management/'
     | '/attendanceSelfSign/view-info/$id/$key'
     | '/studentView/courses/$id/attendance'
     | '/studentView/courses/$id/tasks'
@@ -335,6 +348,7 @@ export interface RootRouteChildren {
   StudentViewCoursesIdRoute: typeof StudentViewCoursesIdRouteWithChildren
   StudentViewVerifyTokenRoute: typeof StudentViewVerifyTokenRoute
   StudentViewCoursesIndexRoute: typeof StudentViewCoursesIndexRoute
+  StudentViewLoginManagementIndexRoute: typeof StudentViewLoginManagementIndexRoute
   AttendanceSelfSignViewInfoIdKeyRoute: typeof AttendanceSelfSignViewInfoIdKeyRoute
 }
 
@@ -415,6 +429,13 @@ declare module '@tanstack/react-router' {
       path: '/attendanceDays/$id'
       fullPath: '/attendanceDays/$id'
       preLoaderRoute: typeof AttendanceDaysIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/studentView/login-management/': {
+      id: '/studentView/login-management/'
+      path: '/studentView/login-management'
+      fullPath: '/studentView/login-management'
+      preLoaderRoute: typeof StudentViewLoginManagementIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/studentView/courses/': {
@@ -572,6 +593,7 @@ const rootRouteChildren: RootRouteChildren = {
   StudentViewCoursesIdRoute: StudentViewCoursesIdRouteWithChildren,
   StudentViewVerifyTokenRoute: StudentViewVerifyTokenRoute,
   StudentViewCoursesIndexRoute: StudentViewCoursesIndexRoute,
+  StudentViewLoginManagementIndexRoute: StudentViewLoginManagementIndexRoute,
   AttendanceSelfSignViewInfoIdKeyRoute: AttendanceSelfSignViewInfoIdKeyRoute,
 }
 export const routeTree = rootRouteImport

@@ -16,6 +16,7 @@ export const Route = createFileRoute('/studentView/courses/')({
 function getStudentNumberFromJWT(): string | null {
   try {
     const token = localStorage.getItem('studentViewAccessJWT');
+    console.log('JWT Student Token:', token);
     if (!token) return null;
 
     // Decode JWT payload (base64url decode)

@@ -1,5 +1,5 @@
 import type { CourseDto } from "../model/course-dto";
-import type { StudentViewCourseDto, StudentViewTokenDto } from "../model/student-view-dto";
+import type { StudentTokenInfoDto, StudentViewCourseDto, StudentViewTokenDto } from "../model/student-view-dto";
 import type { StudentViewLoginDto } from "../model/student-view-dto";
 import { apiHttp } from "./api-http";
 
@@ -31,5 +31,15 @@ export const studentViewService = {
   getCourses: async (): Promise<CourseDto[]> => {
     const { data } = await apiHttp.get<CourseDto[]>('/v1/studentView/courses');
     return data;
+  },
+
+  getActiveTokens: async (): Promise<StudentTokenInfoDto[]> => {
+    const { data } = await apiHttp.get<StudentTokenInfoDto[]>('/v1/studentView/tokens');
+    return data;
+  },
+
+  deleteTokens: async (): Promise<void> => {
+    await apiHttp.delete('/v1/studentView/tokens');
+    return Promise.resolve();
   }
 }

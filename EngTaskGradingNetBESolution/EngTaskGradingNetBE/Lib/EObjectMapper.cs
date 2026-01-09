@@ -157,4 +157,9 @@ public static class EObjectMapper
       IsActive = false
     };
   }
+
+  internal static List<StudentTokenInfoDto> To(List<StudentViewToken> tokens)
+  {
+    return tokens.Select(q => new StudentTokenInfoDto(q.Id, q.CreatedAt, q.ExpiresAt)).ToList();
+  }
 }

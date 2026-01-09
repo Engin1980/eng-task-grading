@@ -8,10 +8,12 @@ interface EditGradeModalProps {
   onClose: () => void;
   student: StudentDto | null;
   grade: GradeDto | null;
+  taskMinGrade: number | null;
+  taskMaxGrade: number | null;
   onGradeUpdated: (updatedGrade: GradeDto) => void;
 }
 
-export function EditGradeModal({ isOpen, onClose, student, grade, onGradeUpdated }: EditGradeModalProps) {
+export function EditGradeModal({ isOpen, onClose, student, grade, taskMinGrade, taskMaxGrade, onGradeUpdated }: EditGradeModalProps) {
   const [value, setValue] = useState<string>('');
   const [comment, setComment] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -29,7 +31,7 @@ export function EditGradeModal({ isOpen, onClose, student, grade, onGradeUpdated
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!grade || !student || !value.trim()) return;
 
     const gradeValue = parseInt(value);
@@ -74,7 +76,7 @@ export function EditGradeModal({ isOpen, onClose, student, grade, onGradeUpdated
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
       {/* Background overlay */}
-      <div 
+      <div
         className="fixed inset-0 bg-white/20 backdrop-blur-sm"
         onClick={handleClose}
       />
@@ -86,13 +88,13 @@ export function EditGradeModal({ isOpen, onClose, student, grade, onGradeUpdated
             <h3 className="text-lg font-medium text-gray-900 mb-4">
               Upravit známku
             </h3>
-            
+
             {/* Student info */}
             <div className="mb-4 p-3 bg-gray-50 rounded-lg">
               <div className="text-sm text-gray-600">Student:</div>
               <div className="font-medium text-gray-900">
-                {student.name && student.surname 
-                  ? `${student.surname} ${student.name}` 
+                {student.name && student.surname
+                  ? `${student.surname} ${student.name}`
                   : student.userName || '-'}
               </div>
               <div className="text-sm text-gray-600">{student.number}</div>
@@ -113,13 +115,13 @@ export function EditGradeModal({ isOpen, onClose, student, grade, onGradeUpdated
             {/* New grade value */}
             <div className="mb-4">
               <label htmlFor="grade-value" className="block text-sm font-medium text-gray-700 mb-2">
-                Nová známka (0-100) <span className="text-red-500">*</span>
+                Nová známka (0-{taskMaxGrade ?? "?"}, min {taskMinGrade ?? "?"}) <span className="text-red-500">*</span>
               </label>
               <input
                 id="grade-value"
                 type="number"
                 min="0"
-                max="100"
+                max={taskMaxGrade ?? 100}
                 value={value}
                 onChange={(e) => setValue(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"

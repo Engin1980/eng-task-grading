@@ -432,6 +432,8 @@ function RouteComponent() {
         onClose={handleCloseAddGradeModal}
         student={selectedStudent}
         taskId={id}
+        taskMinGrade={task.minGrade}
+        taskMaxGrade={task.maxGrade}
         onGradeAdded={handleGradeAdded}
       />
 
@@ -441,6 +443,8 @@ function RouteComponent() {
         onClose={handleCloseEditGradeModal}
         student={selectedStudent}
         grade={selectedGrade}
+        taskMinGrade={task.minGrade}
+        taskMaxGrade={task.maxGrade}
         onGradeUpdated={handleGradeUpdated}
       />
     </div>

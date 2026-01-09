@@ -8,14 +8,23 @@ interface AddGradeModalProps {
   onClose: () => void;
   student: StudentDto | null;
   taskId: string;
+  taskMinGrade: number | null;
+  taskMaxGrade: number | null;
   onGradeAdded: (grade: GradeDto) => void;
 }
 
-export function AddGradeModal({ isOpen, onClose, student, taskId, onGradeAdded }: AddGradeModalProps) {
+export function AddGradeModal({ isOpen, onClose, student, taskId, taskMinGrade, taskMaxGrade, onGradeAdded }: AddGradeModalProps) {
   const [value, setValue] = useState<string>('');
   const [comment, setComment] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const quickSelectValues: number[] = [0, 5, 25, 35, 45, 55, 60, 65, 70, 75, 80, 85, 90, 95, 98, 100];
+  const quickSelectPercentages: number[] = [0, 5, 25, 35, 45, 55, 60, 65, 70, 75, 80, 85, 90, 95, 98, 100];
+  const quickSelectValues: number[] = Array.from(
+    new Set(
+      quickSelectPercentages.map(p =>
+        Math.ceil((p / 100) * (taskMaxGrade ?? 100))
+      )
+    )
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,7 +85,7 @@ export function AddGradeModal({ isOpen, onClose, student, taskId, onGradeAdded }
 
             {/* Student info */}
             <div className="mb-4 p-3 bg-gray-50 rounded-lg">
-              <div className="text-sm text-gray-600">Student:</div>
+              <div className="text-sm text-gray-600">Student</div>
               <div className="font-medium text-gray-900">
                 {student.name && student.surname
                   ? `${student.surname} ${student.name}`
@@ -88,13 +97,13 @@ export function AddGradeModal({ isOpen, onClose, student, taskId, onGradeAdded }
             {/* Grade value */}
             <div className="mb-4">
               <label htmlFor="grade-value" className="block text-sm font-medium text-gray-700 mb-2">
-                Známka (0-100) <span className="text-red-500">*</span>
+                Známka (0-{taskMaxGrade ?? "?"}, min {taskMinGrade ?? "?"}) <span className="text-red-500">*</span>
               </label>
               <input
                 id="grade-value"
                 type="number"
                 min="0"
-                max="100"
+                max={taskMaxGrade ?? 100}
                 value={value}
                 onChange={(e) => setValue(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -105,19 +114,25 @@ export function AddGradeModal({ isOpen, onClose, student, taskId, onGradeAdded }
 
               {/* Quick select buttons */}
               <div className="mt-2 flex flex-wrap gap-2">
-                {quickSelectValues.map((quickValue) => (
-                  <button
-                    key={quickValue}
-                    type="button"
-                    onClick={() => setValue(quickValue.toString())}
-                    className={`px-2 py-1 text-xs font-medium rounded border transition-colors ${value === quickValue.toString()
-                        ? 'bg-blue-100 text-blue-800 border-blue-300'
-                        : 'bg-gray-50 text-gray-700 border-gray-300 hover:bg-gray-100'
-                      }`}
-                  >
-                    {quickValue}
-                  </button>
-                ))}
+                {quickSelectValues.map((quickValue) => {
+                  const isFail = taskMinGrade != null && quickValue < taskMinGrade;
+                  const isSuccess = taskMinGrade != null && quickValue >= taskMinGrade;
+                  return (
+                    <button
+                      key={quickValue}
+                      type="button"
+                      onClick={() => setValue(quickValue.toString())}
+                      className={`px-2 py-1 text-xs font-medium rounded border transition-colors 
+                        ${value === quickValue.toString()
+                          ? 'bg-blue-100 text-blue-800 border-blue-300'
+                          : 'bg-gray-50 text-gray-700 border-gray-300 hover:bg-gray-100'
+                        } ${isFail ? 'text-red-800' : ''} 
+                          ${isSuccess ? 'text-green-800' : ''
+                        }`}
+                    >
+                      {quickValue}
+                    </button>)
+                })}
               </div>
             </div>
 

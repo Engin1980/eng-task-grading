@@ -1,14 +1,18 @@
 import { createFileRoute } from '@tanstack/react-router'
 import type { StudentViewCourseDto } from '../../../../model/student-view-dto';
 import { useStudentViewData } from '../../../../contexts/StudentViewDataContext';
+import { gradeService } from '../../../../services/grade-service';
 
 interface TaskWithGrades {
   id: number;
   title: string;
   minGrade: number | null;
+  maxGrade: number | null;
   grades: {
     date: string;
     rating: number | null;
+    isSuccess: boolean | null;
+    percentage: number | null;
     comment: string | null;
   }[];
 }
@@ -28,9 +32,12 @@ function RouteComponent() {
       id: task.id,
       title: task.title,
       minGrade: task.minGrade,
+      maxGrade: task.maxGrade,
       grades: taskGrades.map(grade => ({
         date: grade.date.toString(),
         rating: grade.value,
+        isSuccess : task.minGrade == null || grade.value >= task.minGrade,
+        percentage: gradeService.calculateFinalGradePercentage(grade.value, task.minGrade, task.maxGrade),
         comment: grade.comment
       }))
     };
@@ -71,11 +78,14 @@ function RouteComponent() {
                   <div className="text-sm font-medium text-gray-900">
                     {task.title}
                   </div>
-                  {task.minGrade !== null && (
-                    <div className="text-xs text-gray-500 mt-1">
-                      Min body: {task.minGrade}
+                  <div className="text-xs text-gray-500 mt-1">
+                    <div>
+                      Max body: {task.maxGrade ?? "N/A"}
                     </div>
-                  )}
+                    <div>
+                      Min body: {task.minGrade ?? "N/A"}
+                    </div>
+                  </div>
                 </td>
                 <td className="px-6 py-4">
                   {task.grades.length > 0 ? (
@@ -102,11 +112,12 @@ function RouteComponent() {
                               </td>
                               <td className="px-4 py-2 whitespace-nowrap text-sm">
                                 {grade.rating !== null ? (
-                                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${grade.rating >= 90 ? 'bg-green-100 text-green-800' :
-                                    grade.rating >= 70 ? 'bg-yellow-100 text-yellow-800' :
-                                      'bg-red-100 text-red-800'
+                                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium 
+                                    ${grade.isSuccess 
+                                      ? 'bg-green-100 text-green-800' 
+                                      : 'bg-red-100 text-red-800'
                                     }`}>
-                                    {grade.rating}%
+                                    {grade.rating} / {grade.percentage} %
                                   </span>
                                 ) : (
                                   <span className="text-gray-400">Neohodnoceno</span>

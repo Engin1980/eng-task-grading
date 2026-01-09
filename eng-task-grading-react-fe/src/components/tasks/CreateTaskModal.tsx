@@ -18,6 +18,7 @@ export function CreateTaskModal(props: CreateTaskModalProps) {
     description: '',
     keywords: '',
     minGrade: null,
+    maxGrade: null,
     aggregation: 'avg'
   });
 
@@ -41,6 +42,7 @@ export function CreateTaskModal(props: CreateTaskModalProps) {
         description: taskEditorData.description || null,
         keywords: taskEditorData.keywords || null,
         minGrade: taskEditorData.minGrade || null,
+        maxGrade: taskEditorData.maxGrade || null,
         aggregation: taskEditorData.aggregation ?? "last"
       };
       props.onSubmit(data);
@@ -59,6 +61,7 @@ export function CreateTaskModal(props: CreateTaskModalProps) {
       description: '',
       keywords: '',
       minGrade: null,
+      maxGrade: null,
       aggregation: 'last'
     });
   }

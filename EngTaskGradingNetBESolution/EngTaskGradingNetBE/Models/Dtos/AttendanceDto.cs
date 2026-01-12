@@ -55,6 +55,11 @@ public record AttendanceOverviewDto(
   int AttendanceId,
   Dictionary<StudentDto, double> StudentResults);
 
+public record AttendanceResultDto(
+  int AttendanceId,
+  int StudentId,
+  double Value);
+
 public record AttendanceSetItemDto(int AttendanceId, int StudentId, double Value);
 
 public record AttendanceSetDto(

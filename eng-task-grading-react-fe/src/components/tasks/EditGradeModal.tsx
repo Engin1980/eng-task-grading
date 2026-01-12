@@ -35,8 +35,8 @@ export function EditGradeModal({ isOpen, onClose, student, grade, taskMinGrade, 
     if (!grade || !student || !value.trim()) return;
 
     const gradeValue = parseInt(value);
-    if (isNaN(gradeValue) || gradeValue < 0 || gradeValue > 100) {
-      alert('Známka musí být číslo mezi 0 a 100');
+    if (isNaN(gradeValue) ) {
+      alert('Známka musí být validní celé číslo.');
       return;
     }
 

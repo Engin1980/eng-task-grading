@@ -20,6 +20,8 @@ namespace EngTaskGradingNetBE.Models.DbModel
 
     public DbSet<AttendanceDaySelfSign> AttendanceDaySelfSign => Set<AttendanceDaySelfSign>();
 
+    public DbSet<FinalGrade> FinalGrades => Set<FinalGrade>();
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -61,6 +63,10 @@ namespace EngTaskGradingNetBE.Models.DbModel
         e.HasIndex(t => new { t.StudentId, t.ExpiresAt }).IsUnique();
         e.HasIndex(t => t.Token);
       });
+
+      modelBuilder.Entity<FinalGrade>()
+        .HasIndex(fg => new { fg.CourseId, fg.StudentId })
+        .IsUnique();
     }
   }
 }

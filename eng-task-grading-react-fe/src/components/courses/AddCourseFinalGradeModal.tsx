@@ -1,30 +1,21 @@
 import { useState } from 'react';
+import { courseService } from '../../services/course-service';
+import type { FinalGradeDto } from '../../model/course-dto';
 import type { StudentDto } from '../../model/student-dto';
-import type { GradeCreateDto, GradeDto } from '../../model/grade-dto';
-import { gradeService } from '../../services/grade-service';
 
-interface AddGradeModalProps {
+interface AddCourseFinalGradeModalProps {
   isOpen: boolean;
   onClose: () => void;
   student: StudentDto | null;
-  taskId: string;
-  taskMinGrade: number | null;
-  taskMaxGrade: number | null;
-  onGradeAdded: (grade: GradeDto) => void;
+  courseId: string;
+  onGradeAdded: (grade: FinalGradeDto) => void;
 }
 
-export function AddGradeModal({ isOpen, onClose, student, taskId, taskMinGrade, taskMaxGrade, onGradeAdded }: AddGradeModalProps) {
+export function AddCourseFinalGradeModal({ isOpen, onClose, student, courseId, onGradeAdded }: AddCourseFinalGradeModalProps) {
   const [value, setValue] = useState<string>('');
   const [comment, setComment] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const quickSelectPercentages: number[] = [0, 5, 25, 35, 45, 55, 60, 65, 70, 75, 80, 85, 90, 95, 98, 100];
-  const quickSelectValues: number[] = Array.from(
-    new Set(
-      quickSelectPercentages.map(p =>
-        Math.ceil((p / 100) * (taskMaxGrade ?? 100))
-      )
-    )
-  );
+  const quickSelectValues: number[] = [0, 5, 25, 35, 45, 55, 60, 65, 70, 75, 80, 85, 90, 95, 98, 100];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,22 +23,15 @@ export function AddGradeModal({ isOpen, onClose, student, taskId, taskMinGrade, 
     if (!student || !value.trim()) return;
 
     const gradeValue = parseInt(value);
-    if (isNaN(gradeValue)) {
-      alert('Známka musí být platné celé číslo.');
+    if (isNaN(gradeValue) || gradeValue < 0 || gradeValue > 100) {
+      alert('Finální známka kurzu musí být číslo mezi 0 a 100');
       return;
     }
 
     setIsSubmitting(true);
 
     try {
-      const newGrade: GradeCreateDto = {
-        taskId: parseInt(taskId),
-        studentId: student.id,
-        value: gradeValue,
-        comment: comment.trim() || null
-      };
-
-      const grade = await gradeService.createGrade(newGrade);
+      const grade = await courseService.addFinalGrade(+courseId, student.id, gradeValue, comment.trim() || null);
       onGradeAdded(grade);
       handleClose();
     } catch (error) {
@@ -97,13 +81,13 @@ export function AddGradeModal({ isOpen, onClose, student, taskId, taskMinGrade, 
             {/* Grade value */}
             <div className="mb-4">
               <label htmlFor="grade-value" className="block text-sm font-medium text-gray-700 mb-2">
-                Známka (0-{taskMaxGrade ?? "?"}, min {taskMinGrade ?? "?"}) <span className="text-red-500">*</span>
+                Známka (0-100, min 50) <span className="text-red-500">*</span>
               </label>
               <input
                 id="grade-value"
                 type="number"
                 min="0"
-                max={taskMaxGrade ?? 100}
+                max="100"
                 value={value}
                 onChange={(e) => setValue(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -115,8 +99,8 @@ export function AddGradeModal({ isOpen, onClose, student, taskId, taskMinGrade, 
               {/* Quick select buttons */}
               <div className="mt-2 flex flex-wrap gap-2">
                 {quickSelectValues.map((quickValue) => {
-                  const isFail = taskMinGrade != null && quickValue < taskMinGrade;
-                  const isSuccess = taskMinGrade != null && quickValue >= taskMinGrade;
+                  const isFail = quickValue < 50;
+                  const isSuccess = quickValue >= 50;
                   return (
                     <button
                       key={quickValue}

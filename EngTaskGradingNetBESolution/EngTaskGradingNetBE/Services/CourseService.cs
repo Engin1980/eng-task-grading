@@ -127,10 +127,65 @@ namespace EngTaskGradingNetBE.Services
           .ThenInclude(a => a.Days)
             .ThenInclude(a => a.Records)
               .ThenInclude(ar => ar.Value)
+        .Include(q => q.FinalGrades)
+          .ThenInclude(q => q.Student)
         .AsSplitQuery()
         .FirstOrDefaultAsync()
         ?? throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.CourseNotFound, id);
       return ret;
+    }
+
+    internal async Task<FinalGrade> SetFinalGradeAsRecordedAsync(int finalGradeId)
+    {
+      FinalGrade finalGrade = await Db.FinalGrades.FirstOrDefaultAsync(q => q.Id == finalGradeId)
+        ?? throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.FinalGradeNotFound, finalGradeId);
+      finalGrade.RecordedDateTime = DateTime.Now;
+      await Db.SaveChangesAsync();
+      return finalGrade;
+    }
+
+    internal async Task<FinalGrade> SetFinalGradeAsUnrecordedAsync(int finalGradeId)
+    {
+      FinalGrade finalGrade = await Db.FinalGrades.FirstOrDefaultAsync(q => q.Id == finalGradeId)
+        ?? throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.FinalGradeNotFound, finalGradeId);
+      finalGrade.RecordedDateTime = null;
+      await Db.SaveChangesAsync();
+      return finalGrade;
+    }
+
+    internal async Task<FinalGrade> AddFinalGradeAsync(FinalGrade finalGrade)
+    {
+      var course = await Db.Courses
+        .Include(q => q.FinalGrades)
+        .FirstAsync(q => q.Id == finalGrade.CourseId);
+
+      if (course.FinalGrades.Any(q => q.StudentId == finalGrade.StudentId))
+        throw new Exceptions.DuplicateEntityException(Lib.AlreadyExistsErrorKind.FinalGradeAlreadyExists, "");
+
+      await Db.FinalGrades.AddAsync(finalGrade);
+      await Db.SaveChangesAsync();
+
+      return finalGrade;
+    }
+
+    internal async Task<FinalGrade> UpdateFinalGradeAsync(int finalGradeId, int value, string? comment)
+    {
+      FinalGrade finalGrade = await Db.FinalGrades.FirstOrDefaultAsync(q => q.Id == finalGradeId)
+        ?? throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.FinalGradeNotFound, finalGradeId);
+      finalGrade.Value = value;
+      finalGrade.Comment = comment;
+      finalGrade.RecordedDateTime = null;
+      await Db.SaveChangesAsync();
+
+      return finalGrade;
+    }
+
+    internal async System.Threading.Tasks.Task DeleteFinalGradeAsync(int finalGradeId)
+    {
+      FinalGrade finalGrade = await Db.FinalGrades.FirstOrDefaultAsync(q => q.Id == finalGradeId)
+        ?? throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.FinalGradeNotFound, finalGradeId);
+      Db.FinalGrades.Remove(finalGrade);
+      await Db.SaveChangesAsync();
     }
   }
 }

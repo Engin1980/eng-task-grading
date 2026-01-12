@@ -9,6 +9,8 @@ public static class EObjectMapper
 {
   public static TeacherDto To(Teacher teacher) => new(teacher.Id, teacher.Email);
 
+  public static FinalGradeDto To(FinalGrade grade) => new(grade.Id, grade.CourseId, grade.StudentId, grade.Value, grade.Comment, grade.RecordedDateTime);
+
   public static Task From(TaskUpdateDto dto) => new()
   {
     Aggregation = ConverTaskAggregationStringToEnum(dto.Aggregation),

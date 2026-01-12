@@ -1,8 +1,7 @@
 import { apiHttp } from "./api-http";
 import { createLogger } from "./log-service";
-import type { CourseCreateDto, CourseDto, CourseEditDto } from "../model/course-dto";
+import type { FinalGradeDto, CourseCreateDto, CourseDto, CourseEditDto, CourseOverviewDto } from "../model/course-dto";
 import type { StudentCreateDto } from "../model/student-dto";
-import type { GSetCourseDto } from "../model/gset";
 
 const logger = createLogger("CourseService");
 
@@ -43,9 +42,51 @@ export const courseService = {
     return data;
   },
 
-  async getOverview(courseId: string): Promise<GSetCourseDto> {
-    const { data } = await apiHttp.get<GSetCourseDto>(`/v1/course/${courseId}/overview`);
-    logger.info(`Načtena přehledová data pro kurz ${courseId}`);
+  async getOverview(courseId: string): Promise<CourseOverviewDto> {
+    logger.info("Stahuji přehledová data kurzu " + courseId);
+    const { data } = await apiHttp.get<CourseOverviewDto>(`/v1/course/${courseId}/overview`);
+    logger.info("Přehledová data kurzu stažena", { courseId });
     return data;
+  },
+
+  async markFinalGradeAsRecordedAsync(finalGradeId: number): Promise<FinalGradeDto> {
+    logger.info("Označuji závěrečnou známku jako zaznamenanou", { finalGradeId });
+    const res = await apiHttp.put<FinalGradeDto>(`/v1/course/final-grade/${finalGradeId}/recorded`);
+    logger.info("Závěrečná známka byla označena jako zaznamenaná", { finalGradeId });
+    return res.data;
+  },
+
+  async unmarkFinalGradeAsRecordedAsync(finalGradeId: number): Promise<FinalGradeDto> {
+    logger.info("Odznačuji závěrečnou známku jako nezaznamenanou", { finalGradeId });
+    const res = await apiHttp.delete<FinalGradeDto>(`/v1/course/final-grade/${finalGradeId}/recorded`);
+    logger.info("Závěrečná známka byla odznačena jako nezaznamenaná", { finalGradeId });
+    return res.data;
+  },
+
+  async addFinalGrade(courseId: number, studentId: number, value: number, comment: string | null): Promise<FinalGradeDto> {
+    logger.info("Přidávám závěrečnou známku", { courseId, studentId, value });
+    const res = await apiHttp.post<FinalGradeDto>(`/v1/course/${courseId}/final-grade`, {
+      studentId,
+      value,
+      comment
+    });
+    logger.info("Závěrečná známka byla přidána", { courseId, studentId, value });
+    return res.data;
+  },
+
+  async updateFinalGrade(finalGradeId: number, value: number, comment: string | null): Promise<FinalGradeDto> {
+    logger.info("Upravuji závěrečnou známku", { finalGradeId, value });
+    const res = await apiHttp.patch<FinalGradeDto>(`/v1/course/final-grade/${finalGradeId}`, {
+      value,
+      comment
+    });
+    logger.info("Závěrečná známka byla aktualizována", { finalGradeId, value, comment });
+    return res.data;
+  },
+
+  async deleteFinalGradeAsync(finalGradeId: number): Promise<void> {
+    logger.info("Mažu závěrečnou známku", { finalGradeId });
+    await apiHttp.delete<void>(`/v1/course/final-grade/${finalGradeId}`);
+    logger.info("Závěrečná známka byla smazána", { finalGradeId });
   }
 };

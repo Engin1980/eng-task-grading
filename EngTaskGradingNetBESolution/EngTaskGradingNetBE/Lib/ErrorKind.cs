@@ -19,6 +19,7 @@ public sealed class AlreadyExistsErrorKind : IErrorKind
 {
   public static AlreadyExistsErrorKind TeacherEmailAlreadyExists { get; } = new AlreadyExistsErrorKind("TEACHER_EMAIL_ALREADY_EXISTS");
   public static AlreadyExistsErrorKind CourseCodeAlreadyExists { get; } = new AlreadyExistsErrorKind("COURSE_CODE_ALREADY_EXISTS");
+  public static AlreadyExistsErrorKind FinalGradeAlreadyExists { get; } = new AlreadyExistsErrorKind("COURSE_FINAL_GRADE_FOR_STUDENT_ALREADY_EXISTS");
   public string Key { get; private set; }
   private AlreadyExistsErrorKind(string key)
   {
@@ -34,12 +35,13 @@ public sealed class NotFoundErrorKind : IErrorKind
   public static NotFoundErrorKind AttendanceDayNotFound { get; } = new NotFoundErrorKind("ATTENDANCE_DAY_NOT_FOUND");
   public static NotFoundErrorKind AttendanceDaySelfSignNotFound { get; } = new NotFoundErrorKind("ATTENDANCE_DAY_SELF_SIGN_NOT_FOUND");
   public static NotFoundErrorKind AttendanceValueNotFound { get; } = new NotFoundErrorKind("ATTENDANCE_VALUE_NOT_FOUND");
-
-  public string Key { get; private set; }
+  public static NotFoundErrorKind FinalGradeNotFound { get; } = new NotFoundErrorKind("FINAL_GRADE_NOT_FOUND");
   public static NotFoundErrorKind TeacherNotFound { get; } = new NotFoundErrorKind("TEACHER_NOT_FOUND");
   public static NotFoundErrorKind StudentNotFound { get; } = new NotFoundErrorKind("STUDENT_NOT_FOUND");
   public static NotFoundErrorKind GradeNotFound { get; } = new NotFoundErrorKind("GRADE_NOT_FOUND");
   public static NotFoundErrorKind TaskNotFound { get; } = new NotFoundErrorKind("TASK_NOT_FOUND");
+
+  public string Key { get; private set; }
 
   private NotFoundErrorKind(string key)
   {

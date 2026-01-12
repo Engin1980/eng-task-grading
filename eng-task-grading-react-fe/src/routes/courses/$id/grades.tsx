@@ -313,7 +313,7 @@ function GradesPage() {
                     >
                       {attendanceValue !== null ? (
                         <span className={`inline-flex px-4 py-2 text-xs font-semibold rounded-full ${getAttendanceColor(attendanceValue, attendance.minWeight)}`}>
-                          {attendanceValue.toFixed(2)}
+                          {attendanceValue.toFixed(1)}
                         </span>
                       ) : (
                         <span className="text-gray-400 text-xs">—</span>

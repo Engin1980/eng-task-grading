@@ -1,12 +1,14 @@
 import { createFileRoute, Outlet, useNavigate } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import { attendanceService } from '../../services/attendance-service'
-import type { AttendanceDto, AttendanceUpdateDto } from '../../model/attendance-dto'
+import { AttendanceProvider } from '../../contexts/AttendanceContext'
+import type { AttendanceUpdateDto } from '../../model/attendance-dto'
 import { TabLabelBlock } from '../../ui/tabLabelBlock'
 import { TabLabelLink } from '../../ui/tabLabelLink'
 import { AttendanceIcon } from '../../ui/icons/attendanceIcon'
 import { AttendanceOverviewIcon } from '../../ui/icons/attendanceOverviewIcon'
 import { useNavigationContext } from '../../contexts/NavigationContext'
+import { useAttendanceContext } from '../../contexts/AttendanceContext'
 import { useLoadingState } from '../../types/loadingState'
 import { Loading } from '../../ui/loading'
 import { LoadingError } from '../../ui/loadingError'
@@ -17,12 +19,12 @@ import { EditAttendanceModal } from '../../components/attendances/EditAttendance
 import toast from 'react-hot-toast'
 
 export const Route = createFileRoute('/attendances/$id')({
-  component: AttendanceDetailPage,
+  component: AttendanceDetailPageWrapper,
 })
 
 function AttendanceDetailPage() {
   const { id } = Route.useParams() // attendanceId
-  const [attendance, setAttendance] = useState<AttendanceDto>(null!);
+  const { attendance, setAttendance } = useAttendanceContext();
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const ldgState = useLoadingState();
@@ -43,6 +45,7 @@ function AttendanceDetailPage() {
   }
 
   const handleAttendanceDelete = async () => {
+    if (!attendance) return;
     try {
       await attendanceService.delete(attendance.id);
       toast.success("Docházka byla úspěšně smazána.");
@@ -54,6 +57,7 @@ function AttendanceDetailPage() {
   }
 
   const handleAttendanceEdit = async (updatedAttendance: AttendanceUpdateDto) => {
+    if (!attendance) return;
     await attendanceService.update(attendance.id, updatedAttendance);
     //TODO update so let all data are downloaded in request
     // like in Task, via one Set object
@@ -99,7 +103,7 @@ function AttendanceDetailPage() {
           <DeleteModal
             title="Opravdu smazat docházku?"
             question="Bude nevratně smazána docházka i všechna případná související ohodnocení!"
-            verification={attendance.title}
+            verification={attendance?.title ?? "???"}
             onDelete={handleAttendanceDelete}
             isOpen={deleteModalVisible}
             onClose={() => setDeleteModalVisible(false)}
@@ -134,4 +138,12 @@ function AttendanceDetailPage() {
       </div>
     </div>
   )
+}
+
+function AttendanceDetailPageWrapper() {
+  return (
+    <AttendanceProvider>
+      <AttendanceDetailPage />
+    </AttendanceProvider>
+  );
 }

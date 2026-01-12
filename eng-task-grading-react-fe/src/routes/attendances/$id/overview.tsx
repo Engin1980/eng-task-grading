@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import type { AttendanceDaySetDto } from '../../../model/attendance-dto';
+import { type AttendanceDaySetDto } from '../../../model/attendance-dto';
 import { useEffect, useState } from 'react';
+import { useAttendanceContext } from '../../../contexts/AttendanceContext';
 import { attendanceService } from '../../../services/attendance-service';
 import { useLoadingState } from '../../../types/loadingState';
 import { Loading } from '../../../ui/loading';
@@ -12,6 +13,7 @@ export const Route = createFileRoute('/attendances/$id/overview')({
 
 function RouteComponent() {
   const { id: attendanceId } = Route.useParams(); // attendanceId
+  const { attendance } = useAttendanceContext();
   const [data, setData] = useState<AttendanceDaySetDto | null>(null);
   const ldgState = useLoadingState();
   const [studentFilter, setStudentFilter] = useState("");
@@ -44,6 +46,12 @@ function RouteComponent() {
     return record || null;
   };
 
+  const getAttendanceRecordsForStudent = (studentId: number) => {
+    if (!data) return [];
+
+    return data.items.filter(item => item.studentId === studentId);
+  }
+
   // Filtrování studentů podle zadaného filtru
   const filteredStudents = data?.students.filter((student) => {
     if (!studentFilter.trim()) return true;
@@ -56,11 +64,30 @@ function RouteComponent() {
     );
   }) || [];
 
+  const getAttendanceStudentWeight = (studentId: number) => {
+    const studentRecords = getAttendanceRecordsForStudent(studentId);
+    return studentRecords.reduce((sum, record) => sum + record.attendanceValueWeight, 0);
+  }
+
+  // Funkce pro barevné označení attendance podle minWeight
+  const getAttendanceColor = (value: number, minWeight: number | null | undefined) => {
+    if (minWeight === undefined || minWeight === null) {
+      // Pokud není minWeight nastavena, použij neutrální modrou barvu
+      return 'bg-blue-100 text-blue-800';
+    }
+
+    if (value >= minWeight) {
+      return 'bg-green-100 text-green-800 border border-green-200';
+    } else {
+      return 'bg-red-100 text-red-800 border border-red-200';
+    }
+  };
+
   if (ldgState.loading) {
     return <Loading message="Načítám data o docházce..." />;
   }
 
-  if(ldgState.error) {
+  if (ldgState.error) {
     return <LoadingError message={ldgState.error} onRetry={loadData} />;
   }
 
@@ -92,6 +119,9 @@ function RouteComponent() {
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200 sticky left-0 bg-gray-50 z-10">
                 Student
               </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200 sticky left-0 bg-gray-50 z-10">
+                Total
+              </th>
               {data.attendanceDays.map((day) => (
                 <th
                   key={day.id}
@@ -116,6 +146,21 @@ function RouteComponent() {
                     <div className="font-semibold">{student.surname}, {student.name}</div>
                     <div className="text-xs text-gray-500">{student.number}</div>
                   </div>
+                </td>
+                <td
+                  key={`${student.id}-total`}
+                  className="px-2 py-4 text-center text-sm"
+                >
+                  {attendance == null || attendance.minWeight == null ? (
+                    <span className="text-gray-400 text-xs">
+                      {getAttendanceStudentWeight(student.id).toFixed(3)}
+                    </span>
+                  ) : (
+                    <span className={`inline-flex px-4 py-2 text-xs font-semibold rounded-full 
+                      ${getAttendanceColor(getAttendanceStudentWeight(student.id), attendance.minWeight)}`}>
+                      {getAttendanceStudentWeight(student.id).toFixed(1)}
+                    </span>
+                  )}
                 </td>
                 {data.attendanceDays.map((day) => {
                   const attendanceRecord = getAttendanceRecord(student.id, day.id);

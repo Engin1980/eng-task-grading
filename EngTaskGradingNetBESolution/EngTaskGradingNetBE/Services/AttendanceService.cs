@@ -35,6 +35,7 @@ namespace EngTaskGradingNetBE.Services
         .FirstOrDefaultAsync(a => a.Id == id)
         ?? throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.AttendanceNotFound, id);
       existingAttendance.Title = updatedAttendance.Title;
+      existingAttendance.MinWeight = updatedAttendance.MinWeight;
       await this.Db.SaveChangesAsync();
       return existingAttendance;
     }

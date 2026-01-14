@@ -22,6 +22,11 @@ export interface CourseDto {
   attendancesCount: number;
 }
 
+export interface FinalTaskGradeDto {
+  date: Date;
+  value: number;
+}
+
 export interface FinalGradeDto {
   id: number;
   courseId: number;

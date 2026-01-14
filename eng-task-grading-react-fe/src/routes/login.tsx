@@ -144,9 +144,15 @@ function Login() {
           </button>
         </form>
         <p className="text-center text-gray-500 text-sm mt-4">
-          Nemáte účet?{" "}
+          Nemáte účet?&nbsp;
           <a href="/register" className="text-blue-500 hover:underline">
             Zaregistrujte se
+          </a>.
+        </p>
+        <p className="text-center text-gray-500 text-sm mt-1">
+          Zapomněli jste heslo?&nbsp;
+          <a href="/teacherPasswordReset/request" className="text-blue-500 hover:underline">
+            Obnovte si jej
           </a>.
         </p>
         <p className="text-center text-gray-500 text-sm mt-1">

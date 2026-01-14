@@ -181,13 +181,13 @@ namespace EngTaskGradingNetBE.Services
         .FirstOrDefaultAsync(t => t.Email == email)
         ?? throw new EntityNotFoundException(NotFoundErrorKind.TeacherNotFound, "email", email);
 
-      var deprecated = Db.TeacherTokens
-        .Where(q => q.Type == TeacherToken.TokenType.PasswordReset && q.TeacherId == teacher.Id);
-      Db.TeacherTokens.RemoveRange(deprecated);
+      await Db.TeacherTokens
+        .Where(q => q.Type == TeacherToken.TokenType.PasswordReset && q.TeacherId == teacher.Id)
+        .ExecuteDeleteAsync();
 
       TeacherToken resetToken = new()
       {
-        ExpirationDate = DateTime.UtcNow.AddHours(1),
+        ExpirationDate = DateTime.UtcNow.AddHours(1), //TODO to config
         TeacherId = teacher.Id,
         Type = TeacherToken.TokenType.PasswordReset,
         Value = SecurityUtils.GenerateSecureToken(sett.Teacher.PasswordResetTokenLength),
@@ -206,7 +206,7 @@ namespace EngTaskGradingNetBE.Services
         <p>Dobrý den,</p>
         <p>pro váš účet byla přijata žádost o obnovení hesla do systému EngTaskGrading.</p>
         <p>Pokud jste o toto obnovení požádali, klikněte na následující odkaz. Odkaz je platný 1 hodinu od obdržení tohoto e-mailu.</p>
-        <p><a href="{feUrl}/auth/resetPassword/{token}">Obnovit heslo do systému známek EngTaskGrading</a></p>
+        <p><a href="{feUrl}/teacherPasswordReset/set-new-password/{token}">Obnovit heslo do systému známek EngTaskGrading</a></p>
         <p>Pokud jste o toto obnovení nepožádali, tento e-mail ignorujte, vaše heslo zůstane nezměněno.</p>
         <p>V případě dotazů prosím kontaktuje administrátora systému.</p>
         <p>Hezký den přeje tým EngTaskGrading.</p>
@@ -281,6 +281,27 @@ namespace EngTaskGradingNetBE.Services
         DateTime.UtcNow.AddMinutes(sett.Student.AccessTokenExpiryMinutes));
 
       return accessToken;
+    }
+
+    internal async System.Threading.Tasks.Task ResetPasswordAsync(string tokenValue, string email, string password)
+    {
+      Teacher teacher = await Db.Teachers
+          .Include(q => q.Tokens)
+          .FirstOrDefaultAsync(q => q.Email == email.ToLower())
+          ?? throw new EntityNotFoundException(NotFoundErrorKind.TeacherNotFound, nameof(Teacher.Email), email);
+
+      TeacherToken? token = teacher
+        .Tokens
+        .FirstOrDefault(q => q.Value == tokenValue && q.Type == TeacherToken.TokenType.PasswordReset)
+        ?? throw new EntityNotFoundException(NotFoundErrorKind.TeacherTokenNotFound, nameof(TeacherToken.Value), tokenValue);
+
+      Db.TeacherTokens.Remove(token);
+      await Db.SaveChangesAsync();
+
+      if (token.ExpirationDate < DateTime.Now)
+        throw new CommonBadDataException(CommonErrorKind.TokenExpired, "");
+
+      await SetPasswordAsync(teacher.Id, password);
     }
   }
 }

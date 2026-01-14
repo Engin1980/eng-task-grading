@@ -111,7 +111,7 @@ namespace EngTaskGradingNetBE.Controllers
     }
 
     [HttpPost("teacher/request-password-reset")]
-    public async System.Threading.Tasks.Task RequestPasswordResetAsync(string email)
+    public async System.Threading.Tasks.Task RequestPasswordResetAsync([FromBody] string email)
     {
       try
       {
@@ -126,6 +126,21 @@ namespace EngTaskGradingNetBE.Controllers
       {
         logger.LogError(ex, $"Failed to process password reset request for {email}.");
         return; // ignore to prevent user enumeration
+      }
+    }
+
+    public record SetNewTeacherPasswordRequest(string Token, string Email, string Password);
+    [HttpPost("teacher/set-new-teacher-password")]
+    public async System.Threading.Tasks.Task SetNewTeacherPassword([FromBody] SetNewTeacherPasswordRequest data)
+    {
+      try
+      {
+        await authService.ResetPasswordAsync(data.Token, data.Email, data.Password);
+      }
+      catch (Exception ex)
+      {
+        logger.LogError(ex, $"Failed to set new password for ${data.Email}");
+        throw new CommonBadDataException(CommonErrorKind.InvalidPasswordResetData, "");
       }
     }
 

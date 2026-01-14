@@ -40,6 +40,7 @@ public sealed class NotFoundErrorKind : IErrorKind
   public static NotFoundErrorKind StudentNotFound { get; } = new NotFoundErrorKind("STUDENT_NOT_FOUND");
   public static NotFoundErrorKind GradeNotFound { get; } = new NotFoundErrorKind("GRADE_NOT_FOUND");
   public static NotFoundErrorKind TaskNotFound { get; } = new NotFoundErrorKind("TASK_NOT_FOUND");
+  public static NotFoundErrorKind TeacherTokenNotFound { get; } = new NotFoundErrorKind("TEACHER_TOKEN_NOT_FOUND");
 
   public string Key { get; private set; }
 
@@ -53,6 +54,8 @@ public sealed class CommonErrorKind : IErrorKind
 {
   public static CommonErrorKind InvalidSelfSignKey { get; } = new CommonErrorKind("INVALID_SELF_SIGN_KEY");
   public static CommonErrorKind SelfSignAlreadyUsed { get; } = new CommonErrorKind("SELF_SIGN_ALREADY_USED");
+  public static CommonErrorKind InvalidPasswordResetData { get; } = new CommonErrorKind("INVALID_PASSWORD_RESET_DATA");
+  public static CommonErrorKind TokenExpired { get; } = new CommonErrorKind("TOKEN_EXPIRED");
   public string Key { get; private set; }
   private CommonErrorKind(string key)
   {

@@ -14,6 +14,7 @@ import { Route as LogsRouteImport } from './routes/logs'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as HomeRouteImport } from './routes/home'
 import { Route as CoursesIndexRouteImport } from './routes/courses/index'
+import { Route as TeacherPasswordResetRequestRouteImport } from './routes/teacherPasswordReset/request'
 import { Route as TasksIdRouteImport } from './routes/tasks/$id'
 import { Route as StudentViewLoginRouteImport } from './routes/studentView/login'
 import { Route as StudentViewHomeRouteImport } from './routes/studentView/home'
@@ -22,6 +23,7 @@ import { Route as AttendancesIdRouteImport } from './routes/attendances/$id'
 import { Route as AttendanceDaysIdRouteImport } from './routes/attendanceDays/$id'
 import { Route as StudentViewLoginManagementIndexRouteImport } from './routes/studentView/login-management/index'
 import { Route as StudentViewCoursesIndexRouteImport } from './routes/studentView/courses/index'
+import { Route as TeacherPasswordResetSetNewPasswordTokenRouteImport } from './routes/teacherPasswordReset/set-new-password.$token'
 import { Route as StudentViewVerifyTokenRouteImport } from './routes/studentView/verify/$token'
 import { Route as StudentViewCoursesIdRouteImport } from './routes/studentView/courses/$id'
 import { Route as CoursesIdTasksRouteImport } from './routes/courses/$id/tasks'
@@ -60,6 +62,12 @@ const CoursesIndexRoute = CoursesIndexRouteImport.update({
   path: '/courses/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TeacherPasswordResetRequestRoute =
+  TeacherPasswordResetRequestRouteImport.update({
+    id: '/teacherPasswordReset/request',
+    path: '/teacherPasswordReset/request',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const TasksIdRoute = TasksIdRouteImport.update({
   id: '/tasks/$id',
   path: '/tasks/$id',
@@ -101,6 +109,12 @@ const StudentViewCoursesIndexRoute = StudentViewCoursesIndexRouteImport.update({
   path: '/studentView/courses/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TeacherPasswordResetSetNewPasswordTokenRoute =
+  TeacherPasswordResetSetNewPasswordTokenRouteImport.update({
+    id: '/teacherPasswordReset/set-new-password/$token',
+    path: '/teacherPasswordReset/set-new-password/$token',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const StudentViewVerifyTokenRoute = StudentViewVerifyTokenRouteImport.update({
   id: '/studentView/verify/$token',
   path: '/studentView/verify/$token',
@@ -177,6 +191,7 @@ export interface FileRoutesByFullPath {
   '/studentView/home': typeof StudentViewHomeRoute
   '/studentView/login': typeof StudentViewLoginRoute
   '/tasks/$id': typeof TasksIdRoute
+  '/teacherPasswordReset/request': typeof TeacherPasswordResetRequestRoute
   '/courses': typeof CoursesIndexRoute
   '/attendanceSelfSign/self-sign/$id': typeof AttendanceSelfSignSelfSignIdRoute
   '/attendances/$id/days': typeof AttendancesIdDaysRoute
@@ -187,6 +202,7 @@ export interface FileRoutesByFullPath {
   '/courses/$id/tasks': typeof CoursesIdTasksRoute
   '/studentView/courses/$id': typeof StudentViewCoursesIdRouteWithChildren
   '/studentView/verify/$token': typeof StudentViewVerifyTokenRoute
+  '/teacherPasswordReset/set-new-password/$token': typeof TeacherPasswordResetSetNewPasswordTokenRoute
   '/studentView/courses': typeof StudentViewCoursesIndexRoute
   '/studentView/login-management': typeof StudentViewLoginManagementIndexRoute
   '/attendanceSelfSign/view-info/$id/$key': typeof AttendanceSelfSignViewInfoIdKeyRoute
@@ -204,6 +220,7 @@ export interface FileRoutesByTo {
   '/studentView/home': typeof StudentViewHomeRoute
   '/studentView/login': typeof StudentViewLoginRoute
   '/tasks/$id': typeof TasksIdRoute
+  '/teacherPasswordReset/request': typeof TeacherPasswordResetRequestRoute
   '/courses': typeof CoursesIndexRoute
   '/attendanceSelfSign/self-sign/$id': typeof AttendanceSelfSignSelfSignIdRoute
   '/attendances/$id/days': typeof AttendancesIdDaysRoute
@@ -214,6 +231,7 @@ export interface FileRoutesByTo {
   '/courses/$id/tasks': typeof CoursesIdTasksRoute
   '/studentView/courses/$id': typeof StudentViewCoursesIdRouteWithChildren
   '/studentView/verify/$token': typeof StudentViewVerifyTokenRoute
+  '/teacherPasswordReset/set-new-password/$token': typeof TeacherPasswordResetSetNewPasswordTokenRoute
   '/studentView/courses': typeof StudentViewCoursesIndexRoute
   '/studentView/login-management': typeof StudentViewLoginManagementIndexRoute
   '/attendanceSelfSign/view-info/$id/$key': typeof AttendanceSelfSignViewInfoIdKeyRoute
@@ -232,6 +250,7 @@ export interface FileRoutesById {
   '/studentView/home': typeof StudentViewHomeRoute
   '/studentView/login': typeof StudentViewLoginRoute
   '/tasks/$id': typeof TasksIdRoute
+  '/teacherPasswordReset/request': typeof TeacherPasswordResetRequestRoute
   '/courses/': typeof CoursesIndexRoute
   '/attendanceSelfSign/self-sign/$id': typeof AttendanceSelfSignSelfSignIdRoute
   '/attendances/$id/days': typeof AttendancesIdDaysRoute
@@ -242,6 +261,7 @@ export interface FileRoutesById {
   '/courses/$id/tasks': typeof CoursesIdTasksRoute
   '/studentView/courses/$id': typeof StudentViewCoursesIdRouteWithChildren
   '/studentView/verify/$token': typeof StudentViewVerifyTokenRoute
+  '/teacherPasswordReset/set-new-password/$token': typeof TeacherPasswordResetSetNewPasswordTokenRoute
   '/studentView/courses/': typeof StudentViewCoursesIndexRoute
   '/studentView/login-management/': typeof StudentViewLoginManagementIndexRoute
   '/attendanceSelfSign/view-info/$id/$key': typeof AttendanceSelfSignViewInfoIdKeyRoute
@@ -261,6 +281,7 @@ export interface FileRouteTypes {
     | '/studentView/home'
     | '/studentView/login'
     | '/tasks/$id'
+    | '/teacherPasswordReset/request'
     | '/courses'
     | '/attendanceSelfSign/self-sign/$id'
     | '/attendances/$id/days'
@@ -271,6 +292,7 @@ export interface FileRouteTypes {
     | '/courses/$id/tasks'
     | '/studentView/courses/$id'
     | '/studentView/verify/$token'
+    | '/teacherPasswordReset/set-new-password/$token'
     | '/studentView/courses'
     | '/studentView/login-management'
     | '/attendanceSelfSign/view-info/$id/$key'
@@ -288,6 +310,7 @@ export interface FileRouteTypes {
     | '/studentView/home'
     | '/studentView/login'
     | '/tasks/$id'
+    | '/teacherPasswordReset/request'
     | '/courses'
     | '/attendanceSelfSign/self-sign/$id'
     | '/attendances/$id/days'
@@ -298,6 +321,7 @@ export interface FileRouteTypes {
     | '/courses/$id/tasks'
     | '/studentView/courses/$id'
     | '/studentView/verify/$token'
+    | '/teacherPasswordReset/set-new-password/$token'
     | '/studentView/courses'
     | '/studentView/login-management'
     | '/attendanceSelfSign/view-info/$id/$key'
@@ -315,6 +339,7 @@ export interface FileRouteTypes {
     | '/studentView/home'
     | '/studentView/login'
     | '/tasks/$id'
+    | '/teacherPasswordReset/request'
     | '/courses/'
     | '/attendanceSelfSign/self-sign/$id'
     | '/attendances/$id/days'
@@ -325,6 +350,7 @@ export interface FileRouteTypes {
     | '/courses/$id/tasks'
     | '/studentView/courses/$id'
     | '/studentView/verify/$token'
+    | '/teacherPasswordReset/set-new-password/$token'
     | '/studentView/courses/'
     | '/studentView/login-management/'
     | '/attendanceSelfSign/view-info/$id/$key'
@@ -343,10 +369,12 @@ export interface RootRouteChildren {
   StudentViewHomeRoute: typeof StudentViewHomeRoute
   StudentViewLoginRoute: typeof StudentViewLoginRoute
   TasksIdRoute: typeof TasksIdRoute
+  TeacherPasswordResetRequestRoute: typeof TeacherPasswordResetRequestRoute
   CoursesIndexRoute: typeof CoursesIndexRoute
   AttendanceSelfSignSelfSignIdRoute: typeof AttendanceSelfSignSelfSignIdRoute
   StudentViewCoursesIdRoute: typeof StudentViewCoursesIdRouteWithChildren
   StudentViewVerifyTokenRoute: typeof StudentViewVerifyTokenRoute
+  TeacherPasswordResetSetNewPasswordTokenRoute: typeof TeacherPasswordResetSetNewPasswordTokenRoute
   StudentViewCoursesIndexRoute: typeof StudentViewCoursesIndexRoute
   StudentViewLoginManagementIndexRoute: typeof StudentViewLoginManagementIndexRoute
   AttendanceSelfSignViewInfoIdKeyRoute: typeof AttendanceSelfSignViewInfoIdKeyRoute
@@ -387,6 +415,13 @@ declare module '@tanstack/react-router' {
       path: '/courses'
       fullPath: '/courses'
       preLoaderRoute: typeof CoursesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/teacherPasswordReset/request': {
+      id: '/teacherPasswordReset/request'
+      path: '/teacherPasswordReset/request'
+      fullPath: '/teacherPasswordReset/request'
+      preLoaderRoute: typeof TeacherPasswordResetRequestRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/tasks/$id': {
@@ -443,6 +478,13 @@ declare module '@tanstack/react-router' {
       path: '/studentView/courses'
       fullPath: '/studentView/courses'
       preLoaderRoute: typeof StudentViewCoursesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/teacherPasswordReset/set-new-password/$token': {
+      id: '/teacherPasswordReset/set-new-password/$token'
+      path: '/teacherPasswordReset/set-new-password/$token'
+      fullPath: '/teacherPasswordReset/set-new-password/$token'
+      preLoaderRoute: typeof TeacherPasswordResetSetNewPasswordTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/studentView/verify/$token': {
@@ -588,10 +630,13 @@ const rootRouteChildren: RootRouteChildren = {
   StudentViewHomeRoute: StudentViewHomeRoute,
   StudentViewLoginRoute: StudentViewLoginRoute,
   TasksIdRoute: TasksIdRoute,
+  TeacherPasswordResetRequestRoute: TeacherPasswordResetRequestRoute,
   CoursesIndexRoute: CoursesIndexRoute,
   AttendanceSelfSignSelfSignIdRoute: AttendanceSelfSignSelfSignIdRoute,
   StudentViewCoursesIdRoute: StudentViewCoursesIdRouteWithChildren,
   StudentViewVerifyTokenRoute: StudentViewVerifyTokenRoute,
+  TeacherPasswordResetSetNewPasswordTokenRoute:
+    TeacherPasswordResetSetNewPasswordTokenRoute,
   StudentViewCoursesIndexRoute: StudentViewCoursesIndexRoute,
   StudentViewLoginManagementIndexRoute: StudentViewLoginManagementIndexRoute,
   AttendanceSelfSignViewInfoIdKeyRoute: AttendanceSelfSignViewInfoIdKeyRoute,

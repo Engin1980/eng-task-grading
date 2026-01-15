@@ -7,24 +7,19 @@ namespace EngTaskGradingNetBE.Controllers;
 
 public partial class AuthController
 {
-  private class GenericHandler(
-    HttpContext httpContext,
-    AppSettingsService appSettingsService,
-    AuthService authService,
-    ILogger<AuthController> logger
-    )
+  private class GenericHandler(AuthControllerContext ctx)
   {
-    private readonly SecuritySettings securitySettings = appSettingsService.GetSettings().Security;
+    private readonly SecuritySettings securitySettings = ctx.AppSettingsService.GetSettings().Security;
 
     public async Task<string> RefreshAsync()
     {
-      string? teacherRefreshToken = httpContext.Request.Cookies[TEACHER_REFRESH_TOKEN_COOKIE_NAME];
-      string? studentRefreshToken = httpContext.Request.Cookies[STUDENT_REFRESH_TOKEN_COOKIE_NAME];
+      string? teacherRefreshToken = ctx.HttpContext.Request.Cookies[TEACHER_REFRESH_TOKEN_COOKIE_NAME];
+      string? studentRefreshToken = ctx.HttpContext.Request.Cookies[STUDENT_REFRESH_TOKEN_COOKIE_NAME];
 
       if (teacherRefreshToken != null && studentRefreshToken != null)
       {
-        Utils.DeleteRefreshToken(httpContext, TEACHER_REFRESH_TOKEN_COOKIE_NAME, securitySettings.UseHttps);
-        Utils.DeleteRefreshToken(httpContext, STUDENT_REFRESH_TOKEN_COOKIE_NAME, securitySettings.UseHttps);
+        Utils.DeleteRefreshToken(ctx.HttpContext, TEACHER_REFRESH_TOKEN_COOKIE_NAME, securitySettings.UseHttps);
+        Utils.DeleteRefreshToken(ctx.HttpContext, STUDENT_REFRESH_TOKEN_COOKIE_NAME, securitySettings.UseHttps);
         throw new InvalidCredentialsException();
       }
       else if (teacherRefreshToken == null && studentRefreshToken == null)
@@ -41,35 +36,35 @@ public partial class AuthController
 
     internal async Task LogoutAsync()
     {
-      string? refreshToken = httpContext.Request.Cookies[TEACHER_REFRESH_TOKEN_COOKIE_NAME];
+      string? refreshToken = ctx.HttpContext.Request.Cookies[TEACHER_REFRESH_TOKEN_COOKIE_NAME];
       if (refreshToken != null)
       {
         refreshToken = AuthController.Utils.ShrinkRefreshToken(refreshToken, out bool _);
         try
         {
-          await authService.LogoutTeacherAsync(refreshToken);
+          await ctx.AuthService.LogoutTeacherAsync(refreshToken);
         }
         catch (Exception ex)
         {
-          logger.LogError("Failed to logout teacher with refresh-token=" + refreshToken, ex);
+          ctx.Logger.LogError("Failed to logout teacher with refresh-token=" + refreshToken, ex);
           //log error here, but delete refresh token in cookie anyway
         }
-        Utils.DeleteRefreshToken(httpContext, TEACHER_REFRESH_TOKEN_COOKIE_NAME, securitySettings.UseHttps);
+        Utils.DeleteRefreshToken(ctx.HttpContext, TEACHER_REFRESH_TOKEN_COOKIE_NAME, securitySettings.UseHttps);
       }
 
-      refreshToken = httpContext.Request.Cookies[STUDENT_REFRESH_TOKEN_COOKIE_NAME];
+      refreshToken = ctx.HttpContext.Request.Cookies[STUDENT_REFRESH_TOKEN_COOKIE_NAME];
       if (refreshToken != null)
       {
         try
         {
-          await authService.LogoutStudentAsync(refreshToken);
+          await ctx.AuthService.LogoutStudentAsync(refreshToken);
         }
         catch (Exception ex)
         {
-          logger.LogError("Failed to logout student with refresh-token=" + refreshToken, ex);
+          ctx.Logger.LogError("Failed to logout student with refresh-token=" + refreshToken, ex);
           //log error here, but delete refresh token in cookie anyway
         }
-        Utils.DeleteRefreshToken(httpContext, STUDENT_REFRESH_TOKEN_COOKIE_NAME, securitySettings.UseHttps);
+        Utils.DeleteRefreshToken(ctx.HttpContext, STUDENT_REFRESH_TOKEN_COOKIE_NAME, securitySettings.UseHttps);
       }
     }
 
@@ -77,7 +72,7 @@ public partial class AuthController
     {
       refreshToken = Utils.ShrinkRefreshToken(refreshToken, out bool deleteOnSessionEnd);
 
-      AuthService.Tokens tmp = await authService.RefreshTeacherAsync(refreshToken);
+      AuthService.Tokens tmp = await ctx.AuthService.RefreshTeacherAsync(refreshToken);
 
       DateTime? expiration;
       string newRefreshToken;
@@ -86,7 +81,7 @@ public partial class AuthController
       expiration = deleteOnSessionEnd ? null : DateTime.UtcNow.AddMinutes(securitySettings.Teacher.RefreshTokenExpiryInMinutes);
 
       Utils.SetRefreshToken(
-        httpContext,
+        ctx.HttpContext,
         TEACHER_REFRESH_TOKEN_COOKIE_NAME,
         newRefreshToken,
         securitySettings.UseHttps,
@@ -97,7 +92,7 @@ public partial class AuthController
 
     private async Task<string> RefreshStudentTokenAsync(string refreshToken)
     {
-      string accessToken = await authService.RefreshStudentAsync(refreshToken);
+      string accessToken = await ctx.AuthService.RefreshStudentAsync(refreshToken);
       return accessToken;
     }
   }

@@ -33,9 +33,9 @@ function RouteComponent() {
           <h2 className="text-3xl font-bold text-center text-gray-900">
             Reset hesla
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
+          {(reqSubmit.ready || reqSubmit.busy) && (<p className="mt-2 text-center text-sm text-gray-600">
             Zadejte e-mail pro reset hesla
-          </p>
+          </p>)}
         </div>
 
         {(reqSubmit.ready || reqSubmit.busy) && (

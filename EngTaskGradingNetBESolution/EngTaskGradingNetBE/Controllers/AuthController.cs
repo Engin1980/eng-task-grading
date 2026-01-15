@@ -20,6 +20,7 @@ namespace EngTaskGradingNetBE.Controllers
     private const string STUDENT_REFRESH_TOKEN_COOKIE_NAME = "studentRefreshToken";
     private const string DELETE_ON_SESSION_END_PREFIX = "!-!";
 
+    private readonly AuthControllerContext ctx;
     private readonly TeacherHandler teacherHandler;
     private readonly StudentHandler studentHandler;
     private readonly GenericHandler genericHandler;
@@ -31,9 +32,18 @@ namespace EngTaskGradingNetBE.Controllers
       StudentViewService studentViewService,
       ILogger<AuthController> logger)
     {
-      teacherHandler = new(HttpContext, appSettingsService, cloudflareTurnistilleService, authService, logger);
-      studentHandler = new(HttpContext, authService, appSettingsService, cloudflareTurnistilleService, studentViewService, logger);
-      genericHandler = new(HttpContext, appSettingsService, authService, logger);
+      ctx = new(
+        () => this.HttpContext,
+        () => appSettingsService,
+        () => cloudflareTurnistilleService,
+        () => authService,
+        () => logger,
+        () => studentViewService
+        );
+
+      teacherHandler = new(ctx);
+      studentHandler = new(ctx);
+      genericHandler = new(ctx);
     }
 
     public record VerifyRequest(string Token, int DurationSeconds);

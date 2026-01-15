@@ -8,30 +8,23 @@ namespace EngTaskGradingNetBE.Controllers;
 
 public partial class AuthController
 {
-  private class StudentHandler(
-    HttpContext httpContext,
-    AuthService authService,
-    AppSettingsService appSettingsService,
-    CloudflareTurnistilleService cloudflareTurnistilleService,
-    StudentViewService studentViewService,
-    ILogger<AuthController> logger
-    )
+  private class StudentHandler(AuthControllerContext ctx)
   {
-    private readonly SecuritySettings securitySettings = appSettingsService.GetSettings().Security;
+    private readonly SecuritySettings securitySettings = ctx.AppSettingsService.GetSettings().Security;
 
     internal async Task ForgetToken([FromBody] string token)
     {
-      await authService.StudentViewForgetAllRefreshsTokenAsync(token);
-      Utils.DeleteRefreshToken(httpContext, STUDENT_REFRESH_TOKEN_COOKIE_NAME, securitySettings.UseHttps);
+      await ctx.AuthService.StudentViewForgetAllRefreshsTokenAsync(token);
+      Utils.DeleteRefreshToken(ctx.HttpContext, STUDENT_REFRESH_TOKEN_COOKIE_NAME, securitySettings.UseHttps);
     }
 
     internal async Task LoginAsync(StudentViewLoginDto data)
     {
       try
       {
-        if (appSettingsService.GetSettings().CloudFlare.Enabled)
-          await cloudflareTurnistilleService.VerifyAsync(data.CaptchaToken);
-        await studentViewService.SendInvitationAsync(data.StudentNumber);
+        if (ctx.AppSettingsService.GetSettings().CloudFlare.Enabled)
+          await ctx.CloudflareTurnistilleService.VerifyAsync(data.CaptchaToken);
+        await ctx.StudentViewService.SendInvitationAsync(data.StudentNumber);
       }
       catch (Exception ex)
       {
@@ -45,15 +38,15 @@ public partial class AuthController
       AuthService.Tokens res;
       try
       {
-        res = await authService.StudentViewVerifyAsync(request.Token, request.DurationSeconds);
+        res = await ctx.AuthService.StudentViewVerifyAsync(request.Token, request.DurationSeconds);
       }
       catch (Exception ex)
       {
-        logger.LogError(ex, $"Failed to complete verification for {request.Token}.");
+        ctx.Logger.LogError(ex, $"Failed to complete verification for {request.Token}.");
         throw;
       }
 
-      AuthController.Utils.SetRefreshToken(httpContext, STUDENT_REFRESH_TOKEN_COOKIE_NAME, res.RefreshToken, securitySettings.UseHttps, DateTime.UtcNow.AddSeconds(request.DurationSeconds));
+      AuthController.Utils.SetRefreshToken(ctx.HttpContext, STUDENT_REFRESH_TOKEN_COOKIE_NAME, res.RefreshToken, securitySettings.UseHttps, DateTime.UtcNow.AddSeconds(request.DurationSeconds));
       return res.AccessToken;
     }
   }

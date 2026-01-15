@@ -9,22 +9,16 @@ namespace EngTaskGradingNetBE.Controllers;
 
 public partial class AuthController
 {
-  private class TeacherHandler(
-    HttpContext httpContext,
-    AppSettingsService appSettingsService,
-    CloudflareTurnistilleService cloudflareTurnistilleService,
-    AuthService authService,
-    ILogger<AuthController> logger
-    )
+  private class TeacherHandler(AuthControllerContext ctx)
   {
-    private readonly SecuritySettings securitySettings = appSettingsService.GetSettings().Security;
+    private readonly SecuritySettings securitySettings = ctx.AppSettingsService.GetSettings().Security;
 
     internal async Task<string> LoginTeacherAsync(TeacherLoginDto request)
     {
-      if (appSettingsService.GetSettings().CloudFlare.Enabled)
-        await cloudflareTurnistilleService.VerifyAsync(request.CaptchaToken);
+      if (ctx.AppSettingsService.GetSettings().CloudFlare.Enabled)
+        await ctx.CloudflareTurnistilleService.VerifyAsync(request.CaptchaToken);
 
-      var tmp = await authService.LoginTeacherAsync(request.Email, request.Password);
+      var tmp = await ctx.AuthService.LoginTeacherAsync(request.Email, request.Password);
 
       string refreshToken = AuthController.Utils.ExpandRefreshToken(tmp.RefreshToken, request.RememberMe);
       DateTime? expiresAt = request.RememberMe
@@ -32,7 +26,7 @@ public partial class AuthController
         : null;
 
       AuthController.Utils.SetRefreshToken(
-        httpContext,
+        ctx.HttpContext,
         TEACHER_REFRESH_TOKEN_COOKIE_NAME,
         refreshToken,
         securitySettings.UseHttps,
@@ -46,16 +40,16 @@ public partial class AuthController
     {
       try
       {
-        await authService.InvokePasswordResetProcedure(email);
+        await ctx.AuthService.InvokePasswordResetProcedure(email);
       }
       catch (EntityNotFoundException)
       {
-        logger.LogWarning($"Password reset requested for non-existing email {email}.");
+        ctx.Logger.LogWarning($"Password reset requested for non-existing email {email}.");
         return; // ignore to prevent user enumeration
       }
       catch (Exception ex)
       {
-        logger.LogError(ex, $"Failed to process password reset request for {email}.");
+        ctx.Logger.LogError(ex, $"Failed to process password reset request for {email}.");
         return; // ignore to prevent user enumeration
       }
     }
@@ -64,11 +58,11 @@ public partial class AuthController
     {
       try
       {
-        await authService.ResetPasswordAsync(data.Token, data.Email, data.Password);
+        await ctx.AuthService.ResetPasswordAsync(data.Token, data.Email, data.Password);
       }
       catch (Exception ex)
       {
-        logger.LogError(ex, $"Failed to set new password for ${data.Email}");
+        ctx.Logger.LogError(ex, $"Failed to set new password for ${data.Email}");
         throw new CommonBadDataException(CommonErrorKind.InvalidPasswordResetData, "");
       }
     }

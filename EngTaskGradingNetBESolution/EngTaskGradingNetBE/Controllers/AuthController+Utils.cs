@@ -4,6 +4,8 @@ namespace EngTaskGradingNetBE.Controllers
 {
   public partial class AuthController
   {
+    private const string DELETE_ON_SESSION_END_PREFIX = "!-!";
+
     internal static class Utils
     {
       internal static string ExpandRefreshToken(string token, bool isSessionOnly)

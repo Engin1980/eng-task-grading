@@ -18,7 +18,6 @@ namespace EngTaskGradingNetBE.Controllers
   {
     private const string TEACHER_REFRESH_TOKEN_COOKIE_NAME = "refreshToken";
     private const string STUDENT_REFRESH_TOKEN_COOKIE_NAME = "studentRefreshToken";
-    private const string DELETE_ON_SESSION_END_PREFIX = "!-!";
 
     private readonly AuthControllerContext ctx;
     private readonly TeacherHandler teacherHandler;

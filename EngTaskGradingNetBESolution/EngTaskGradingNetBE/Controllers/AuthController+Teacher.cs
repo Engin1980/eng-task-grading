@@ -18,11 +18,11 @@ public partial class AuthController
       if (ctx.AppSettingsService.GetSettings().CloudFlare.Enabled)
         await ctx.CloudflareTurnistilleService.VerifyAsync(request.CaptchaToken);
 
-      var tmp = await ctx.AuthService.LoginTeacherAsync(request.Email, request.Password);
+      var tmp = await ctx.AuthService.LoginTeacherAsync(request.Email, request.Password, request.RememberMe);
 
-      string refreshToken = AuthController.Utils.ExpandRefreshToken(tmp.RefreshToken, request.RememberMe);
+      string refreshToken = tmp.RefreshToken;
       DateTime? expiresAt = request.RememberMe
-        ? DateTime.UtcNow.AddMinutes(securitySettings.Teacher.RefreshTokenExpiryInMinutes)
+        ? DateTime.UtcNow.AddMinutes(securitySettings.Teacher.PersistentRefreshTokenExpiryInMinutes)
         : null;
 
       AuthController.Utils.SetRefreshToken(

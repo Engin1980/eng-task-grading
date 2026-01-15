@@ -6,6 +6,7 @@ using EngTaskGradingNetBE.Models.DbModel;
 using EngTaskGradingNetBE.Models.Dtos;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using System.Diagnostics.Eventing.Reader;
 
 namespace EngTaskGradingNetBE.Services
 {
@@ -15,44 +16,49 @@ namespace EngTaskGradingNetBE.Services
     AppSettingsService appSettingsService) : DbContextBaseService(context)
   {
     private readonly SecuritySettings sett = appSettingsService.GetSettings().Security;
-    public record Tokens(string AccessToken, string RefreshToken);
+    public record Tokens(string AccessToken, string RefreshToken, bool isForSession);
 
-    internal async Task<Tokens> StudentViewVerifyAsync(string loginToken, int durationSeconds)
+    private async Task<Student> GetStudentByLoginTokenOrFailAsync(string loginTokenValue)
     {
-      var refreshTokenEntity = await Db.StudentViewTokens
+      StudentViewToken token = await Db.StudentViewTokens
         .Include(q => q.Student)
-        .FirstOrDefaultAsync(q => q.Token == loginToken && q.Type == StudentViewTokenType.Login);
-      if (refreshTokenEntity == null)
-        throw new Exceptions.StudentTokenInvalidException("Illegal token.");
+        .FirstOrDefaultAsync(q => q.Token == loginTokenValue && q.Type == StudentViewTokenType.Login)
+        ?? throw new StudentTokenInvalidException("Illegal token.");
 
-      Db.StudentViewTokens.Remove(refreshTokenEntity);
+      Db.StudentViewTokens.Remove(token);
       await Db.SaveChangesAsync();
-      if (refreshTokenEntity.ExpiresAt < DateTime.Now)
-      {
-        throw new Exceptions.StudentTokenInvalidException("Expired token.");
-      }
 
-      int studentId = refreshTokenEntity.StudentId;
-      refreshTokenEntity = new StudentViewToken()
+      if (token.ExpiresAt < DateTime.Now)
+        throw new StudentTokenInvalidException("Expired token.");
+
+      return token.Student;
+    }
+
+    internal async Task<Tokens> StudentViewGrantAccessByLoginTokenAsync(string loginTokenValue, int durationSeconds)
+    {
+      Student student = await GetStudentByLoginTokenOrFailAsync(loginTokenValue);
+
+      StudentViewToken refreshToken = new()
       {
         CreatedAt = DateTime.Now,
         ExpiresAt = DateTime.Now.AddSeconds(durationSeconds),
-        StudentId = studentId,
+        StudentId = student.Id,
         Token = SecurityUtils.GenerateSecureToken(sett.RefreshTokenLengthBytes),
         Type = StudentViewTokenType.Access
       };
-      await Db.StudentViewTokens.AddAsync(refreshTokenEntity);
+      await Db.StudentViewTokens.AddAsync(refreshToken);
       await Db.SaveChangesAsync();
 
       string accessToken = GenerateJwtToken(
-        refreshTokenEntity.Student.Email,
+        student.Email,
         Roles.STUDENT_ROLE,
-        DateTime.Now.AddMinutes(sett.Student.AccessTokenExpiryMinutes));
+        sett.Student.AccessTokenExpiryMinutes);
 
-      return new(accessToken, refreshTokenEntity.Token);
+      return new(accessToken, refreshToken.Token, true);
     }
 
-    internal async Task<Tokens> LoginTeacherAsync(string email, string password)
+    internal async Task<Tokens> LoginTeacherAsync(
+      string email, string password, bool rememberTeacherOverSessions)
     {
       EAssert.Arg.IsNotEmpty(email, nameof(email));
       EAssert.Arg.IsNotEmpty(password, nameof(password));
@@ -76,20 +82,23 @@ namespace EngTaskGradingNetBE.Services
         refreshToken = new TeacherToken
         {
           TeacherId = teacher.Id,
-          Type = TeacherToken.TokenType.Refresh,
+          Type = rememberTeacherOverSessions ? TeacherToken.TokenType.RefreshPersistent : TeacherToken.TokenType.Refresh,
         };
         Db.TeacherTokens.Add(refreshToken);
       }
+
       refreshToken.Value = SecurityUtils.GenerateSecureToken(sett.RefreshTokenLengthBytes);
-      refreshToken.ExpirationDate = DateTime.UtcNow.AddMinutes(sett.Teacher.RefreshTokenExpiryInMinutes);
+      refreshToken.ExpirationDate = refreshToken.Type == TeacherToken.TokenType.Refresh
+        ? DateTime.Now.AddMinutes(sett.Teacher.SessionRefreshTokenExpiryInMinutes)
+        : DateTime.Now.AddMinutes(sett.Teacher.PersistentRefreshTokenExpiryInMinutes);
       await Db.SaveChangesAsync();
 
       string accessToken = GenerateJwtToken(
         teacher.Email,
         Roles.TEACHER_ROLE,
-        DateTime.UtcNow.AddMinutes(sett.Teacher.AccessTokenExpiryMinutes));
+        sett.Teacher.AccessTokenExpiryMinutes);
 
-      return new(accessToken, refreshToken.Value);
+      return new(accessToken, refreshToken.Value, refreshToken.Type == TeacherToken.TokenType.Refresh);
     }
 
     internal async System.Threading.Tasks.Task LogoutTeacherAsync(string refreshToken)
@@ -144,7 +153,7 @@ namespace EngTaskGradingNetBE.Services
       await Db.SaveChangesAsync();
     }
 
-    private string GenerateJwtToken(string email, string roleName, DateTime dateTime)
+    private string GenerateJwtToken(string email, string roleName, int expiratonInMinutes)
     {
       var jwtKey = appSettingsService.GetSettings().Security.AccessTokenJwtSecretKey;
       if (string.IsNullOrEmpty(jwtKey))
@@ -162,7 +171,7 @@ namespace EngTaskGradingNetBE.Services
       var tokenDescriptor = new Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor
       {
         Subject = new System.Security.Claims.ClaimsIdentity(claims),
-        Expires = dateTime,
+        Expires = DateTime.UtcNow.AddMinutes(expiratonInMinutes),
         NotBefore = DateTime.UtcNow,
         IssuedAt = DateTime.UtcNow,
         SigningCredentials = new Microsoft.IdentityModel.Tokens.SigningCredentials(
@@ -234,11 +243,15 @@ namespace EngTaskGradingNetBE.Services
       await Db.SaveChangesAsync();
     }
 
-    internal async System.Threading.Tasks.Task<Tokens> RefreshTeacherAsync(string refreshToken)
+    internal async Task<Tokens> RefreshTeacherAsync(string refreshToken)
     {
+      if (refreshToken.Length == 0)
+        throw new InvalidCredentialsException();
+
       TeacherToken? token = await Db.TeacherTokens
           .Include(t => t.Teacher)
-          .FirstOrDefaultAsync(t => t.Value == refreshToken || t.Type == TeacherToken.TokenType.Refresh)
+          .FirstOrDefaultAsync(t => t.Value == refreshToken ||
+            (t.Type == TeacherToken.TokenType.Refresh && t.Type == TeacherToken.TokenType.RefreshPersistent))
           ?? throw new InvalidCredentialsException();
 
       if (token.ExpirationDate < DateTime.UtcNow)
@@ -247,22 +260,25 @@ namespace EngTaskGradingNetBE.Services
         throw new InvalidCredentialsException();
       }
 
-      // update the current refresh token with new values
-      refreshToken = SecurityUtils.GenerateSecureToken(sett.RefreshTokenLengthBytes);
-      token.Value = refreshToken;
-      token.ExpirationDate = DateTime.Now.AddMinutes(sett.Teacher.RefreshTokenExpiryInMinutes);
+      token.Value = SecurityUtils.GenerateSecureToken(sett.RefreshTokenLengthBytes);
+      token.ExpirationDate = token.Type == TeacherToken.TokenType.Refresh
+        ? DateTime.Now.AddMinutes(sett.Teacher.SessionRefreshTokenExpiryInMinutes)
+        : DateTime.Now.AddMinutes(sett.Teacher.PersistentRefreshTokenExpiryInMinutes);
       await Db.SaveChangesAsync();
 
       string accessToken = GenerateJwtToken(
         token.Teacher.Email,
         Roles.TEACHER_ROLE,
-        DateTime.UtcNow.AddMinutes(sett.Teacher.AccessTokenExpiryMinutes));
+        sett.Teacher.AccessTokenExpiryMinutes);
 
-      Tokens ret = new(accessToken, refreshToken);
+      Tokens ret = new(
+        accessToken,
+        refreshToken,
+        token.Type == TeacherToken.TokenType.Refresh);
       return ret;
     }
 
-    internal async Task<string> RefreshStudentAsync(string refreshToken)
+    internal async Task<string> GenerateStudentAccessTokenAsync(string refreshToken)
     {
       var tokenEntity = await Db.StudentViewTokens
         .Include(q => q.Student)
@@ -278,7 +294,7 @@ namespace EngTaskGradingNetBE.Services
       string accessToken = GenerateJwtToken(
         tokenEntity.Student.Number,
         Roles.STUDENT_ROLE,
-        DateTime.UtcNow.AddMinutes(sett.Student.AccessTokenExpiryMinutes));
+        sett.Student.AccessTokenExpiryMinutes);
 
       return accessToken;
     }

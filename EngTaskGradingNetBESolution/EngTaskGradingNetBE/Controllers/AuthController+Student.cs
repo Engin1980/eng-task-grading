@@ -38,7 +38,7 @@ public partial class AuthController
       AuthService.Tokens res;
       try
       {
-        res = await ctx.AuthService.StudentViewVerifyAsync(request.Token, request.DurationSeconds);
+        res = await ctx.AuthService.StudentViewGrantAccessByLoginTokenAsync(request.Token, request.DurationSeconds);
       }
       catch (Exception ex)
       {
@@ -46,7 +46,9 @@ public partial class AuthController
         throw;
       }
 
-      AuthController.Utils.SetRefreshToken(ctx.HttpContext, STUDENT_REFRESH_TOKEN_COOKIE_NAME, res.RefreshToken, securitySettings.UseHttps, DateTime.UtcNow.AddSeconds(request.DurationSeconds));
+      DateTime? duration = request.DurationSeconds == 0 ? null : DateTime.UtcNow.AddSeconds(request.DurationSeconds);
+      AuthController.Utils.SetRefreshToken(
+        ctx.HttpContext, STUDENT_REFRESH_TOKEN_COOKIE_NAME, res.RefreshToken, securitySettings.UseHttps, duration);
       return res.AccessToken;
     }
   }

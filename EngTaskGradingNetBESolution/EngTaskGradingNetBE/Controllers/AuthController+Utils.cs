@@ -4,21 +4,8 @@ namespace EngTaskGradingNetBE.Controllers
 {
   public partial class AuthController
   {
-    private const string DELETE_ON_SESSION_END_PREFIX = "!-!";
-
     internal static class Utils
     {
-      internal static string ExpandRefreshToken(string token, bool isSessionOnly)
-      {
-        return isSessionOnly ? DELETE_ON_SESSION_END_PREFIX + token : token;
-      }
-
-      internal static string ShrinkRefreshToken(string token, out bool isSesionOnly)
-      {
-        isSesionOnly = token.StartsWith(DELETE_ON_SESSION_END_PREFIX);
-        return isSesionOnly ? token[DELETE_ON_SESSION_END_PREFIX.Length..] : token;
-      }
-
       private static CookieOptions BuildTokenCookieOptions(bool useHttps, DateTime? expirationUtcDateTime) => new()
       {
         HttpOnly = true,

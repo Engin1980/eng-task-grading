@@ -9,7 +9,8 @@ public class TeacherToken
   {
     Unset = 0,
     PasswordReset = 1,
-    Refresh = 2
+    Refresh = 2,
+    RefreshPersistent = 3
   }
 
   [Key]

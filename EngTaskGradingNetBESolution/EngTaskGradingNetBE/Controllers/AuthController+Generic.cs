@@ -39,7 +39,6 @@ public partial class AuthController
       string? refreshToken = ctx.HttpContext.Request.Cookies[TEACHER_REFRESH_TOKEN_COOKIE_NAME];
       if (refreshToken != null)
       {
-        refreshToken = AuthController.Utils.ShrinkRefreshToken(refreshToken, out bool _);
         try
         {
           await ctx.AuthService.LogoutTeacherAsync(refreshToken);
@@ -70,15 +69,11 @@ public partial class AuthController
 
     private async Task<string> RefreshTeacherTokenAsync(string refreshToken)
     {
-      refreshToken = Utils.ShrinkRefreshToken(refreshToken, out bool deleteOnSessionEnd);
-
       AuthService.Tokens tmp = await ctx.AuthService.RefreshTeacherAsync(refreshToken);
 
-      DateTime? expiration;
-      string newRefreshToken;
-
-      newRefreshToken = Utils.ExpandRefreshToken(tmp.RefreshToken, deleteOnSessionEnd);
-      expiration = deleteOnSessionEnd ? null : DateTime.UtcNow.AddMinutes(securitySettings.Teacher.RefreshTokenExpiryInMinutes);
+      DateTime? expiration = tmp.isForSession ? null :
+        DateTime.UtcNow.AddMinutes(securitySettings.Teacher.PersistentRefreshTokenExpiryInMinutes);
+      string newRefreshToken = tmp.RefreshToken;
 
       Utils.SetRefreshToken(
         ctx.HttpContext,
@@ -92,7 +87,7 @@ public partial class AuthController
 
     private async Task<string> RefreshStudentTokenAsync(string refreshToken)
     {
-      string accessToken = await ctx.AuthService.RefreshStudentAsync(refreshToken);
+      string accessToken = await ctx.AuthService.GenerateStudentAccessTokenAsync(refreshToken);
       return accessToken;
     }
   }

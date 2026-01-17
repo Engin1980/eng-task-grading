@@ -10,7 +10,6 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as RegisterRouteImport } from './routes/register'
-import { Route as LogsRouteImport } from './routes/logs'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as HomeRouteImport } from './routes/home'
 import { Route as CoursesIndexRouteImport } from './routes/courses/index'
@@ -21,6 +20,8 @@ import { Route as StudentViewHomeRouteImport } from './routes/studentView/home'
 import { Route as CoursesIdRouteImport } from './routes/courses/$id'
 import { Route as AttendancesIdRouteImport } from './routes/attendances/$id'
 import { Route as AttendanceDaysIdRouteImport } from './routes/attendanceDays/$id'
+import { Route as AdminLogsRouteImport } from './routes/admin/logs'
+import { Route as AdminClientLogsRouteImport } from './routes/admin/client-logs'
 import { Route as StudentViewLoginManagementIndexRouteImport } from './routes/studentView/login-management/index'
 import { Route as StudentViewCoursesIndexRouteImport } from './routes/studentView/courses/index'
 import { Route as TeacherPasswordResetSetNewPasswordTokenRouteImport } from './routes/teacherPasswordReset/set-new-password.$token'
@@ -40,11 +41,6 @@ import { Route as AttendanceSelfSignViewInfoIdKeyRouteImport } from './routes/at
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LogsRoute = LogsRouteImport.update({
-  id: '/logs',
-  path: '/logs',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -96,6 +92,16 @@ const AttendancesIdRoute = AttendancesIdRouteImport.update({
 const AttendanceDaysIdRoute = AttendanceDaysIdRouteImport.update({
   id: '/attendanceDays/$id',
   path: '/attendanceDays/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminLogsRoute = AdminLogsRouteImport.update({
+  id: '/admin/logs',
+  path: '/admin/logs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminClientLogsRoute = AdminClientLogsRouteImport.update({
+  id: '/admin/client-logs',
+  path: '/admin/client-logs',
   getParentRoute: () => rootRouteImport,
 } as any)
 const StudentViewLoginManagementIndexRoute =
@@ -183,8 +189,9 @@ const AttendanceSelfSignViewInfoIdKeyRoute =
 export interface FileRoutesByFullPath {
   '/home': typeof HomeRoute
   '/login': typeof LoginRoute
-  '/logs': typeof LogsRoute
   '/register': typeof RegisterRoute
+  '/admin/client-logs': typeof AdminClientLogsRoute
+  '/admin/logs': typeof AdminLogsRoute
   '/attendanceDays/$id': typeof AttendanceDaysIdRoute
   '/attendances/$id': typeof AttendancesIdRouteWithChildren
   '/courses/$id': typeof CoursesIdRouteWithChildren
@@ -212,8 +219,9 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/home': typeof HomeRoute
   '/login': typeof LoginRoute
-  '/logs': typeof LogsRoute
   '/register': typeof RegisterRoute
+  '/admin/client-logs': typeof AdminClientLogsRoute
+  '/admin/logs': typeof AdminLogsRoute
   '/attendanceDays/$id': typeof AttendanceDaysIdRoute
   '/attendances/$id': typeof AttendancesIdRouteWithChildren
   '/courses/$id': typeof CoursesIdRouteWithChildren
@@ -242,8 +250,9 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/home': typeof HomeRoute
   '/login': typeof LoginRoute
-  '/logs': typeof LogsRoute
   '/register': typeof RegisterRoute
+  '/admin/client-logs': typeof AdminClientLogsRoute
+  '/admin/logs': typeof AdminLogsRoute
   '/attendanceDays/$id': typeof AttendanceDaysIdRoute
   '/attendances/$id': typeof AttendancesIdRouteWithChildren
   '/courses/$id': typeof CoursesIdRouteWithChildren
@@ -273,8 +282,9 @@ export interface FileRouteTypes {
   fullPaths:
     | '/home'
     | '/login'
-    | '/logs'
     | '/register'
+    | '/admin/client-logs'
+    | '/admin/logs'
     | '/attendanceDays/$id'
     | '/attendances/$id'
     | '/courses/$id'
@@ -302,8 +312,9 @@ export interface FileRouteTypes {
   to:
     | '/home'
     | '/login'
-    | '/logs'
     | '/register'
+    | '/admin/client-logs'
+    | '/admin/logs'
     | '/attendanceDays/$id'
     | '/attendances/$id'
     | '/courses/$id'
@@ -331,8 +342,9 @@ export interface FileRouteTypes {
     | '__root__'
     | '/home'
     | '/login'
-    | '/logs'
     | '/register'
+    | '/admin/client-logs'
+    | '/admin/logs'
     | '/attendanceDays/$id'
     | '/attendances/$id'
     | '/courses/$id'
@@ -361,8 +373,9 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   HomeRoute: typeof HomeRoute
   LoginRoute: typeof LoginRoute
-  LogsRoute: typeof LogsRoute
   RegisterRoute: typeof RegisterRoute
+  AdminClientLogsRoute: typeof AdminClientLogsRoute
+  AdminLogsRoute: typeof AdminLogsRoute
   AttendanceDaysIdRoute: typeof AttendanceDaysIdRoute
   AttendancesIdRoute: typeof AttendancesIdRouteWithChildren
   CoursesIdRoute: typeof CoursesIdRouteWithChildren
@@ -387,13 +400,6 @@ declare module '@tanstack/react-router' {
       path: '/register'
       fullPath: '/register'
       preLoaderRoute: typeof RegisterRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/logs': {
-      id: '/logs'
-      path: '/logs'
-      fullPath: '/logs'
-      preLoaderRoute: typeof LogsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -464,6 +470,20 @@ declare module '@tanstack/react-router' {
       path: '/attendanceDays/$id'
       fullPath: '/attendanceDays/$id'
       preLoaderRoute: typeof AttendanceDaysIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/logs': {
+      id: '/admin/logs'
+      path: '/admin/logs'
+      fullPath: '/admin/logs'
+      preLoaderRoute: typeof AdminLogsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/client-logs': {
+      id: '/admin/client-logs'
+      path: '/admin/client-logs'
+      fullPath: '/admin/client-logs'
+      preLoaderRoute: typeof AdminClientLogsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/studentView/login-management/': {
@@ -622,8 +642,9 @@ const StudentViewCoursesIdRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   HomeRoute: HomeRoute,
   LoginRoute: LoginRoute,
-  LogsRoute: LogsRoute,
   RegisterRoute: RegisterRoute,
+  AdminClientLogsRoute: AdminClientLogsRoute,
+  AdminLogsRoute: AdminLogsRoute,
   AttendanceDaysIdRoute: AttendanceDaysIdRoute,
   AttendancesIdRoute: AttendancesIdRouteWithChildren,
   CoursesIdRoute: CoursesIdRouteWithChildren,

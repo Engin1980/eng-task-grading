@@ -13,14 +13,17 @@ type SenderRule = {
   level: LogLevel;
 };
 
-class SenderRulesHandler {
+export class SenderRulesHandler {
   private rules: SenderRule[] = [];
+
+  constructor() {
+    this.loadFromStorage();
+  }
 
   insertRule(pattern: string, level: LogLevel | string, index: number) {
     const logLevelLevel = parseLogLevel(level);
     this.rules.splice(index, 0, { pattern: new RegExp(pattern), level: logLevelLevel });
   }
-
   addRule(pattern: string, level: LogLevel | string) {
     const logLevelLevel = parseLogLevel(level);
     this.rules.push({ pattern: new RegExp(pattern), level: logLevelLevel });
@@ -44,6 +47,34 @@ class SenderRulesHandler {
   getRules(): SenderRule[] {
     return this.rules;
   }
+  saveToStorage() {
+    // save to local storage
+    const serializedRules = this.rules.map(rule => ({
+      pattern: rule.pattern.source,
+      level: rule.level
+    }));
+    localStorage.setItem("logSenderRules", JSON.stringify(serializedRules));
+  }
+  loadFromStorage() {
+    const data = localStorage.getItem("logSenderRules");
+    if (data) {
+      try {
+        const parsedRules = JSON.parse(data);
+        this.rules = parsedRules.map((rule: { pattern: string; level: string }) => ({
+          pattern: new RegExp(rule.pattern),
+          level: parseLogLevel(rule.level),
+        }));
+      } catch (error) {
+        console.error("Failed to load log sender rules:", error);
+      }
+    }
+  }
+  deleteFromStorage() {
+    localStorage.removeItem("logSenderRules");
+  }
+  clear() {
+    this.rules = [];
+  }
 }
 
 export function parseLogLevel(value: string, defaultLevel: LogLevel = LogLevels.info): LogLevel {
@@ -58,7 +89,7 @@ export function parseLogLevel(value: string, defaultLevel: LogLevel = LogLevels.
 
 const orderedLogLevels: LogLevel[] = [LogLevels.debug, LogLevels.info, LogLevels.warn, LogLevels.error];
 const minimalLogLevel: LogLevel = (AppSettings.logLevel || "info") as LogLevel;
-const senderRulesHandler = new SenderRulesHandler();
+export const senderRulesHandler = new SenderRulesHandler();
 
 interface Logger {
   debug: (message: string, meta?: any) => void;

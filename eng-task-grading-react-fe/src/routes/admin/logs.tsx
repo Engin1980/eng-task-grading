@@ -1,14 +1,14 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
-import type { AppLogDto } from '../model/applog-dto'
-import { appLogService } from '../services/applog-service'
-import { Loading } from '../ui/loading'
-import { LoadingError } from '../ui/loadingError'
-import { useLoadingState } from '../types/loadingState'
-import { AppLogDetailModal } from '../components/appLog/AppLogDetailModal'
-import { useLogger } from '../hooks/use-logger'
+import type { AppLogDto } from '../../model/applog-dto'
+import { appLogService } from '../../services/applog-service'
+import { Loading } from '../../ui/loading'
+import { LoadingError } from '../../ui/loadingError'
+import { useLoadingState } from '../../types/loadingState'
+import { AppLogDetailModal } from '../../components/appLog/AppLogDetailModal'
+import { useLogger } from '../../hooks/use-logger'
 
-export const Route = createFileRoute('/logs')({
+export const Route = createFileRoute('/admin/logs')({
   component: RouteComponent,
 })
 

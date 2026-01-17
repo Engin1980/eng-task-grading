@@ -3,11 +3,10 @@ import { useEffect, useState } from 'react'
 import { courseService } from '../../services/course-service'
 import { useLogger } from '../../hooks/use-logger'
 import { CreateCourseModal } from '../../components/courses'
-import type { CourseCreateDto, CourseDto } from '../../model/course-dto'
+import type { CourseDto } from '../../model/course-dto'
 import { Loading } from '../../ui/loading'
 import { LoadingError } from '../../ui/loadingError'
 import { useLoadingState } from '../../types/loadingState'
-import { useToast } from '../../hooks/use-toast'
 
 export const Route = createFileRoute('/courses/')({
   component: CoursesPage,
@@ -18,7 +17,6 @@ function CoursesPage() {
   const ldgState = useLoadingState();
   const [isModalOpen, setIsModalOpen] = useState(false)
   const logger = useLogger("CoursesPage")
-  const tst = useToast();
 
   const _loadCourses = async () => {
     try {
@@ -38,7 +36,7 @@ function CoursesPage() {
     _loadCourses()
   }, [])
 
-  const handleCourseCreated = async (courseData: CourseCreateDto) => {
+  const handleCourseCreated = async () => {
     setIsModalOpen(false);
     await _loadCourses();
   }

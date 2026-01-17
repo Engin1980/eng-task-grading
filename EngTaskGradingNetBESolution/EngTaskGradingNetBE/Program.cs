@@ -1,49 +1,32 @@
 ﻿using EngTaskGradingNetBE.Middleware;
 using EngTaskGradingNetBE.Models.DbModel;
-using EngTaskGradingNetBE.Models.Config;
 using EngTaskGradingNetBE.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using System.Text;
-using System.Diagnostics;
-using Microsoft.AspNetCore.Authorization.Infrastructure;
-using EngTaskGradingNetBE.Exceptions;
-
-
 
 var builder = WebApplication.CreateBuilder(args);
 BuildLogging(builder);
 BuildServices(builder);
 BuildSecurity(builder);
 BuildCors(builder);
-
-void BuildCors(WebApplicationBuilder builder)
-{
-  builder.Services.AddCors(options =>
-  {
-    string feUrl = builder.Configuration["AppSettings:FrontEndUrl"] ?? throw new ApplicationException("Front-end URL not set.");
-    options.AddPolicy("AllowFrontend", policy =>
-    {
-      policy.WithOrigins(feUrl)
-            .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials();
-    });
-  });
-}
-
 BuildDb(builder);
 
-Log.Information("Building main app");
+Log.Information("Building main app at " + DateTime.Now);
 var app = builder.Build();
 
+Log.Information("Initializing database");
 InitDb(app);
+UpdateLogging(builder);
+Log.Debug("Database initialized");
 
+Log.Information("Configuring request pipeline.");
 app.UseMiddleware<GlobalExceptionHandler>(); // must be the first one
 app.UseHttpsRedirection();
-app.UseCors("AllowFrontend"); // must be before authen-to
+app.UseCors("AllowFrontend"); // must be before authen-autho
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
@@ -57,6 +40,22 @@ app.MapGet("/", context =>
 Log.Information("Starting main app");
 
 app.Run();
+
+void BuildCors(WebApplicationBuilder builder)
+{
+  builder.Services.AddCors(options =>
+  {
+    string feUrl = builder.Configuration["AppSettings:FrontEndUrl"] ?? throw new ApplicationException("Front-end URL not set.");
+    Log.Information("Front-end URL for CORS: {feUrl}", feUrl);
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+      policy.WithOrigins(feUrl)
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    });
+  });
+}
 
 static void BuildServices(WebApplicationBuilder builder)
 {
@@ -87,26 +86,51 @@ static string GetConnectionString(WebApplicationBuilder builder)
   string cs = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new ApplicationException("Default connection not found in app properties.");
   string pass = Environment.GetEnvironmentVariable(DB_ENV_KEY) ?? throw new ApplicationException("DB_PASSWORD not found in environmental variables.");
   string ret = cs.Replace(DB_ENV_KEY_REF, pass);
+
+  // log CS securely
+  var csBuilder = new SqlConnectionStringBuilder(cs)
+  {
+    Password = "*****"
+  };
+  Log.Information("Connection string obtained as " + csBuilder.ConnectionString);
   return ret;
 }
 
-static void BuildLogging(WebApplicationBuilder builder)
+
+static LoggerConfiguration CreateLoggerConfiguration(WebApplicationBuilder builder, bool addDb)
 {
-  Log.Logger = new LoggerConfiguration()
+  var ret = new LoggerConfiguration()
       .WriteTo.Console()
-      .WriteTo.File("Logs/app.log", rollingInterval: RollingInterval.Day)
-      //TODO remove following when DB is working
-      .WriteTo.MSSqlServer(
+      .WriteTo.File("logs/app.log", rollingInterval: RollingInterval.Day);
+  if (addDb)
+    ret = ret.WriteTo.MSSqlServer(
           connectionString: GetConnectionString(builder),
           sinkOptions: new Serilog.Sinks.MSSqlServer.MSSqlServerSinkOptions
           {
             TableName = "AppLog",
             AutoCreateSqlTable = false
           }
-      )
+      );
+
+  return ret;
+}
+
+static void BuildLogging(WebApplicationBuilder builder)
+{
+  Log.Logger = CreateLoggerConfiguration(builder, addDb: false)
       .CreateLogger();
 
   builder.Host.UseSerilog();
+
+  Log.Information("Logging initialized.");
+}
+
+static void UpdateLogging(WebApplicationBuilder builder)
+{
+  Log.CloseAndFlush();
+  Log.Logger = CreateLoggerConfiguration(builder, addDb: true)
+      .CreateLogger();
+  Log.Information("Logging updated to use database sink.");
 }
 
 static void BuildDb(WebApplicationBuilder builder)
@@ -118,16 +142,27 @@ static void BuildDb(WebApplicationBuilder builder)
     Log.Fatal("No connection string found");
     throw new InvalidOperationException("No connection string found");
   }
+  Log.Debug("Using connection string: {connectionString}", connectionString);
   builder.Services.AddDbContext<AppDbContext>(options =>
       options.UseSqlServer(connectionString));
 }
 
 static void InitDb(WebApplication app)
 {
-  using var scope = app.Services.CreateScope();
-  using var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-  db.Database.Migrate();
-  Log.Information("Database migrated.");
+  try
+  {
+    Log.Debug("Creating service scope...");
+    using var scope = app.Services.CreateScope();
+    Log.Debug("Obtaining AppDbContext...");
+    using var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+    Log.Information("Database migrated.");
+  }
+  catch (Exception ex)
+  {
+    Log.Fatal(ex, "Database initialization failed.");
+    throw;
+  }
 }
 
 static void BuildSecurity(WebApplicationBuilder builder)
@@ -142,12 +177,12 @@ static void BuildSecurity(WebApplicationBuilder builder)
   })
     .AddJwtBearer(options =>
   {
-    options.RequireHttpsMetadata = false; // v produkci = true
+    options.RequireHttpsMetadata = true;
     options.SaveToken = true;
     options.TokenValidationParameters = new TokenValidationParameters
     {
-      ValidateIssuer = false, // v produkci nastavit na true a dodat issuer
-      ValidateAudience = false, // v produkci nastavit na true a dodat audience
+      ValidateIssuer = false,
+      ValidateAudience = false,
       ValidateIssuerSigningKey = true,
       IssuerSigningKey = new SymmetricSecurityKey(key),
       ClockSkew = TimeSpan.Zero
@@ -160,31 +195,7 @@ static void BuildSecurity(WebApplicationBuilder builder)
         return System.Threading.Tasks.Task.CompletedTask;
       }
     };
-    //options.Events = new JwtBearerEvents
-    //{
-    //  OnAuthenticationFailed = context =>
-    //  {
-    //    if (context.Exception is SecurityTokenExpiredException)
-    //    {
-    //      context.NoResult();
-    //      context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-    //      context.Response.ContentType = "application/json";
-    //      return context.Response.WriteAsync("{\"error\":\"Token expired\"}");
-    //    }
-
-    //    return System.Threading.Tasks.Task.CompletedTask;
-    //  }
-    //};
   });
-
-  // demo pro Keycloak, ale tady v projektu se nepoužívá:
-  //builder.Services.AddAuthentication("Bearer")
-  //  .AddJwtBearer("Bearer", options =>
-  //  {
-  //    options.Authority = "http://localhost:8080/realms/TaskGradingRealm";
-  //    options.RequireHttpsMetadata = false; //TODO jen pro vývoj!
-  //    options.Audience = "TaskGradingNetBE";
-  //  });
 
   builder.Services.AddAuthorization();
 }

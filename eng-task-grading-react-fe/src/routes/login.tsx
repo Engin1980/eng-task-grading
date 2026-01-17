@@ -30,8 +30,11 @@ function Login() {
   const TURNSTILE_SITE_KEY = AppSettings.cloudflare.siteKey
 
   useEffect(() => {
-    setEmail("marek.vajgl@osu.cz");
-    setPassword("Bublinka#1");
+    if (import.meta.env.DEV) {
+      logger.debug("Vývojové prostředí: Předvyplňuji přihlašovací údaje");
+      setEmail("marek.vajgl@osu.cz");
+      setPassword("Bublinka#1");
+    }
     if (isCloudflareEnabled && !TURNSTILE_SITE_KEY) {
       toast.error('Chyba: VITE_CLOUDFLARE_SITE_KEY není nastaven v .env.local');
     }

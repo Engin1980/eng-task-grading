@@ -17,13 +17,31 @@ export class SenderRulesHandler {
   private rules: SenderRule[] = [];
 
   constructor() {
+    this.setDefaults();
     this.loadFromStorage();
+  }
+
+  setDefaults() {
+    this.rules = [
+      { pattern: /\.tsx/, level: LogLevels.warn },
+      { pattern: /Service/, level: LogLevels.warn },
+      { pattern: /.*/, level: parseLogLevel(AppSettings.logLevel || "info") },
+    ];
   }
 
   insertRule(pattern: string, level: LogLevel | string, index: number) {
     const logLevelLevel = parseLogLevel(level);
     this.rules.splice(index, 0, { pattern: new RegExp(pattern), level: logLevelLevel });
   }
+
+  moveRuleToIndex(fromIndex: number, toIndex: number) {
+    if (fromIndex < 0 || fromIndex >= this.rules.length || toIndex < 0 || toIndex >= this.rules.length) {
+      return;
+    }
+    const [movedRule] = this.rules.splice(fromIndex, 1);
+    this.rules.splice(toIndex, 0, movedRule);
+  }
+
   addRule(pattern: string, level: LogLevel | string) {
     const logLevelLevel = parseLogLevel(level);
     this.rules.push({ pattern: new RegExp(pattern), level: logLevelLevel });
@@ -60,10 +78,11 @@ export class SenderRulesHandler {
     if (data) {
       try {
         const parsedRules = JSON.parse(data);
-        this.rules = parsedRules.map((rule: { pattern: string; level: string }) => ({
+        const tmpRules = parsedRules.map((rule: { pattern: string; level: string }) => ({
           pattern: new RegExp(rule.pattern),
           level: parseLogLevel(rule.level),
         }));
+        this.rules = tmpRules;
       } catch (error) {
         console.error("Failed to load log sender rules:", error);
       }

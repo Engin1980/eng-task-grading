@@ -1,12 +1,216 @@
 import { createFileRoute } from '@tanstack/react-router'
-import type { SenderRulesHandler } from '../../services/log-service';
-import { senderRulesHandler } from '../../services/log-service';
-import { useState } from 'react';
+import { senderRulesHandler, LogLevels } from '../../services/log-service';
+import type { LogLevel } from '../../services/log-service';
+import { useEffect, useState } from 'react';
 
 export const Route = createFileRoute('/admin/client-logs')({
   component: RouteComponent,
 })
 
 function RouteComponent() {
-  return <div>Hello "/admin/client-logs"!</div>
+  const [rules, setRules] = useState(senderRulesHandler.getRules());
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [editPattern, setEditPattern] = useState('');
+  const [editLevel, setEditLevel] = useState<LogLevel>(LogLevels.info);
+  const [newPattern, setNewPattern] = useState('');
+  const [newLevel, setNewLevel] = useState<LogLevel>(LogLevels.info);
+
+  useEffect(() => {
+    senderRulesHandler.loadFromStorage();
+    setRules(senderRulesHandler.getRules());
+  }, []);
+
+  const handleLoad = () => {
+    senderRulesHandler.loadFromStorage();
+    setRules(senderRulesHandler.getRules());
+  };
+
+  const handleSave = () => {
+    senderRulesHandler.saveToStorage();
+    alert('Uloženo');
+  };
+
+  const handleDelete = () => {
+    if (confirm('Opravdu smazat všechna pravidla?')) {
+      senderRulesHandler.deleteFromStorage();
+      senderRulesHandler.setDefaults();
+      setRules(senderRulesHandler.getRules());
+    }
+  };
+
+  const handleEdit = (index: number, pattern: string, level: LogLevel) => {
+    setEditingIndex(index);
+    setEditPattern(pattern);
+    setEditLevel(level);
+  };
+
+  const handleSaveEdit = (index: number) => {
+    senderRulesHandler.deleteRuleAt(index);
+    senderRulesHandler.insertRule(editPattern, editLevel, index);
+    setRules(senderRulesHandler.getRules());
+    setEditingIndex(null);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingIndex(null);
+    setEditPattern('');
+    setEditLevel(LogLevels.info);
+  };
+
+  const handleAddRule = () => {
+    if (!newPattern.trim()) {
+      alert('Pattern cannot be empty');
+      return;
+    }
+    senderRulesHandler.addRule(newPattern, newLevel);
+    setRules(senderRulesHandler.getRules());
+    setNewPattern('');
+    setNewLevel(LogLevels.info);
+  };
+
+  const handleDeleteRule = (index: number) => {
+    if (confirm('Delete this rule?')) {
+      senderRulesHandler.deleteRuleAt(index);
+      setRules(senderRulesHandler.getRules());
+    }
+  };
+
+  return (
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-4">Client Log Rules</h1>
+      
+      <div className="mb-4 flex gap-2">
+        <button onClick={handleLoad} className="px-4 py-2 bg-blue-500 text-white rounded">
+          Load
+        </button>
+        <button onClick={handleSave} className="px-4 py-2 bg-green-500 text-white rounded">
+          Save
+        </button>
+        <button onClick={handleDelete} className="px-4 py-2 bg-red-500 text-white rounded">
+          Delete
+        </button>
+      </div>
+
+      <div className="mb-4 p-4 border rounded bg-gray-50">
+        <h2 className="text-lg font-semibold mb-2">Add New Rule</h2>
+        <div className="flex gap-2 items-end">
+          <div className="flex-1">
+            <label className="block text-sm mb-1">Pattern (RegExp)</label>
+            <input
+              type="text"
+              value={newPattern}
+              onChange={(e) => setNewPattern(e.target.value)}
+              className="border p-2 rounded w-full"
+              placeholder="e.g., \.tsx or Service or .*"
+            />
+          </div>
+          <div>
+            <label className="block text-sm mb-1">Log Level</label>
+            <select
+              value={newLevel}
+              onChange={(e) => setNewLevel(e.target.value as LogLevel)}
+              className="border p-2 rounded"
+            >
+              <option value={LogLevels.debug}>debug</option>
+              <option value={LogLevels.info}>info</option>
+              <option value={LogLevels.warn}>warn</option>
+              <option value={LogLevels.error}>error</option>
+            </select>
+          </div>
+          <button
+            onClick={handleAddRule}
+            className="px-4 py-2 bg-blue-500 text-white rounded"
+          >
+            Add
+          </button>
+        </div>
+      </div>
+
+      <table className="w-full border-collapse border">
+        <thead>
+          <tr className="bg-gray-100">
+            <th className="border p-2 text-left">#</th>
+            <th className="border p-2 text-left">Pattern</th>
+            <th className="border p-2 text-left">Level</th>
+            <th className="border p-2 text-left">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rules.map((rule, index) => (
+            <tr key={index}>
+              <td className="border p-2 text-gray-500">{index}</td>
+              <td className="border p-2 font-mono">
+                {editingIndex === index ? (
+                  <input
+                    type="text"
+                    value={editPattern}
+                    onChange={(e) => setEditPattern(e.target.value)}
+                    className="border p-1 w-full"
+                  />
+                ) : (
+                  rule.pattern.source
+                )}
+              </td>
+              <td className="border p-2">
+                {editingIndex === index ? (
+                  <select
+                    value={editLevel}
+                    onChange={(e) => setEditLevel(e.target.value as LogLevel)}
+                    className="border p-1"
+                  >
+                    <option value={LogLevels.debug}>debug</option>
+                    <option value={LogLevels.info}>info</option>
+                    <option value={LogLevels.warn}>warn</option>
+                    <option value={LogLevels.error}>error</option>
+                  </select>
+                ) : (
+                  <span className={`font-semibold ${
+                    rule.level === LogLevels.error ? 'text-red-600' :
+                    rule.level === LogLevels.warn ? 'text-yellow-600' :
+                    rule.level === LogLevels.info ? 'text-blue-600' :
+                    'text-gray-600'
+                  }`}>
+                    {rule.level}
+                  </span>
+                )}
+              </td>
+              <td className="border p-2">
+                {editingIndex === index ? (
+                  <>
+                    <button
+                      onClick={() => handleSaveEdit(index)}
+                      className="px-2 py-1 bg-green-500 text-white rounded mr-2"
+                    >
+                      Save
+                    </button>
+                    <button
+                      onClick={handleCancelEdit}
+                      className="px-2 py-1 bg-gray-500 text-white rounded"
+                    >
+                      Cancel
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => handleEdit(index, rule.pattern.source, rule.level)}
+                      className="px-2 py-1 bg-blue-500 text-white rounded mr-2"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDeleteRule(index)}
+                      className="px-2 py-1 bg-red-500 text-white rounded"
+                    >
+                      Delete
+                    </button>
+                  </>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
 }

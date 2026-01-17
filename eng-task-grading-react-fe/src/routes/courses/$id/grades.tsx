@@ -280,7 +280,6 @@ function GradesPage() {
       }
       const row: CourseStudentRow = {
         student: data.students.find(s => s.id == studentDto.id)!,
-        finalGrade: data.finalGrades.find(fg => fg.studentId === studentDto.id) || null,
         attendanceSuccessCount: attendanceCells.filter(a => a.isSuccessful).length,
         taskSuccessCount: taskCells.filter(t => t.isSuccessful).length
       };

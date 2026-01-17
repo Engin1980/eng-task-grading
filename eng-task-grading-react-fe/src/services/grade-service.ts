@@ -1,5 +1,5 @@
+import type { FinalTaskGradeDto } from "../model/course-dto";
 import type { GradeCreateDto, GradeDto, GradeUpdateDto, NewGradeSetTaskDto } from "../model/grade-dto";
-import type { FinalGradeDto } from "../model/gset";
 import { apiHttp } from "./api-http"
 import { createLogger } from "./log-service";
 
@@ -65,7 +65,7 @@ export const gradeService = {
     return Math.ceil(percentage);
   },
 
-  evaluateFinalGrade(type: "min" | "max" | "avg" | "last", grades: GradeDto[]): FinalGradeDto | null {
+  evaluateFinalGrade(type: "min" | "max" | "avg" | "last", grades: GradeDto[]): FinalTaskGradeDto | null {
     if (grades.length === 0) return null;
 
     // order grades by date descending
@@ -73,7 +73,7 @@ export const gradeService = {
 
     let value: number;
     let date: Date;
-    let ret: FinalGradeDto;
+    let ret: FinalTaskGradeDto;
     switch (type.toLowerCase()) {
       case "min":
         value = reducerMin(grades);

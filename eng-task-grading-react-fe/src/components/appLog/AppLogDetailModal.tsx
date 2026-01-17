@@ -12,7 +12,6 @@ interface AppLogDetailModalProps {
 
 export function AppLogDetailModal(props: AppLogDetailModalProps) {
   const [currentIndex, setCurrentIndex] = useState(props.index);
-  const [currentItem, setCurrentItem] = useState<AppLogDto>(props.logs[props.index]);
 
   const currentLog = props.logs[currentIndex];
   const isFirst = currentIndex === 0;
@@ -21,14 +20,12 @@ export function AppLogDetailModal(props: AppLogDetailModalProps) {
   const handlePrevious = () => {
     if (!isFirst) {
       setCurrentIndex(currentIndex - 1);
-      setCurrentItem(props.logs[currentIndex - 1]);
     }
   };
 
   const handleNext = () => {
     if (!isLast) {
       setCurrentIndex(currentIndex + 1);
-      setCurrentItem(props.logs[currentIndex + 1]);
     };
   };
 

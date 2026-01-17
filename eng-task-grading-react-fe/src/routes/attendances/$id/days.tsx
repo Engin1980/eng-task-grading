@@ -6,6 +6,7 @@ import { attendanceService } from '../../../services/attendance-service';
 import { useLoadingState } from '../../../types/loadingState';
 import { Loading } from '../../../ui/loading';
 import { LoadingError } from '../../../ui/loadingError';
+import { useLogger } from '../../../hooks/use-logger';
 
 export const Route = createFileRoute('/attendances/$id/days')({
   component: RouteComponent,
@@ -17,6 +18,7 @@ function RouteComponent() {
   const [attendance, setAttendance] = useState<AttendanceDto | null>(null);
   const ldgState = useLoadingState();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const logger = useLogger("attendanceDays/$id/days.tsx");
 
   const loadAttendance = async () => {
     try {
@@ -25,7 +27,7 @@ function RouteComponent() {
       setAttendance(data);
       ldgState.setDone();
     } catch (err) {
-      console.error('Error loading attendance:', err);
+      logger.error('Error loading attendance:', err);
       ldgState.setError('Chyba při načítání docházky');
     }
   };
@@ -43,7 +45,7 @@ function RouteComponent() {
       await attendanceService.createDay(attendanceDayWithId);
       await loadAttendance(); // Refresh the data
     } catch (err) {
-      console.error('Error creating attendance day:', err);
+      logger.error('Error creating attendance day:', err);
       throw err; // Re-throw to let modal handle the error
     }
   };

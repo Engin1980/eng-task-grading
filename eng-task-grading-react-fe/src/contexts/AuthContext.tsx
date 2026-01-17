@@ -13,6 +13,8 @@ interface AuthContextType {
   loginStudent: (token: string, duration: number) => Promise<void>;
   loginTeacher: (data: TeacherLoginDto) => Promise<void>;
   logout: () => Promise<void>;
+  requestTeacherPasswordReset: (email: string) => Promise<void>;
+  setNewTeacherPassword: (token: string, email: string, newPassword: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -25,6 +27,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setTokenProvider(() => accessToken);
     setRefreshHandler(refresh);
   }, []);
+
+  const setNewTeacherPassword = async (token: string, email: string, newPassword: string): Promise<void> => {
+    logger.info("Pokus o nastavení nového hesla učitele", { email });
+    await apiHttp.post("/v1/auth/teacher/set-new-teacher-password", { token, email, password: newPassword });
+    logger.info("Nové heslo učitele úspěšně nastaveno", { email });
+  };
+
+  const requestTeacherPasswordReset = async (email: string): Promise<void> => {
+    logger.info("Pokus o odeslání požadavku na reset hesla učitele", { email });
+    await apiHttp.post("/v1/auth/teacher/request-password-reset", email);
+    logger.info("Požadavek na reset hesla učitele úspěšně odeslán", { email });
+  };
 
   const setLoggedUserByToken = (token: string | null) => {
     if (token) {
@@ -88,7 +102,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ loggedUser, loginTeacher, loginStudent, logout }}>
+    <AuthContext.Provider value={{ loggedUser, loginTeacher, loginStudent, logout, requestTeacherPasswordReset, setNewTeacherPassword }}>
       {children}
     </AuthContext.Provider>
   );

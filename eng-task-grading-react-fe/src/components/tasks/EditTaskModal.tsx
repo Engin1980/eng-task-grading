@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import type { TaskDto, TaskUpdateDto } from '../../model/task-dto';
 import { taskService } from '../../services/task-service';
-import toast from 'react-hot-toast';
 import { TaskEditor, type TaskEditorData } from '../../ui/editors/TaskEditor';
 import { AppDialog } from '../../ui/AppDialog';
+import { useToast } from '../../hooks/use-toast';
+import { useLogger } from '../../hooks/use-logger';
 
 export interface EditTaskModalProps {
   isOpen: boolean;
@@ -21,11 +22,13 @@ export function EditTaskModal({ isOpen, task, onClose }: EditTaskModalProps) {
     maxGrade: task?.maxGrade ?? null,
     aggregation: task?.aggregation ?? 'last'
   });
+  const tst = useToast();
+  const logger = useLogger("EditTaskModal");
 
   const handleSubmit = async () => {
 
     if (!task || !taskEditorData.title.trim()) {
-      toast.error('Název úkolu je povinný.');
+      tst.warning(tst.WRN.TASK_TITLE_REQUIRED);
       return;
     }
 
@@ -40,13 +43,13 @@ export function EditTaskModal({ isOpen, task, onClose }: EditTaskModalProps) {
       };
 
       await taskService.update(task.id.toString(), updateData);
-      toast.success('Úkol byl úspěšně aktualizován.');
+      tst.success(tst.SUC.ITEM_UPDATED);
       clearData();
       onClose(true);
 
     } catch (error) {
-      console.error('Error updating task:', error);
-      toast.error('Chyba při aktualizaci úkolu.');
+      logger.error('Error updating task:', error);
+      tst.error(error);
     }
   };
 

@@ -30,11 +30,11 @@ namespace EngTaskGradingNetBE.Services
       return await GetAllByCourseAsync(course.Id);
     }
 
-    public async Task<Student> GetByIdAsync(int id)
+    public async Task<Student> GetByIdAsync(int studentId)
     {
       Student ret = await Db.Students
-        .FirstOrDefaultAsync(q => q.Id == id)
-        ?? throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.StudentNotFound, id);
+        .FirstOrDefaultAsync(q => q.Id == studentId)
+        ?? throw new Exceptions.BadData.NotFound.EntityNotFoundException<Student>(studentId);
       return ret;
     }
 
@@ -146,10 +146,10 @@ namespace EngTaskGradingNetBE.Services
       return existing;
     }
 
-    public async Task<Student> UpdateAsync(int id, Student updatedStudent)
+    public async Task<Student> UpdateAsync(int studentId, Student updatedStudent)
     {
-      var existingStudent = await Db.Students.FirstOrDefaultAsync(q => q.Id == id)
-        ?? throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.StudentNotFound, id);
+      var existingStudent = await Db.Students.FirstOrDefaultAsync(q => q.Id == studentId)
+        ?? throw new Exceptions.BadData.NotFound.EntityNotFoundException<Student>(studentId);
 
       existingStudent.Number = updatedStudent.Number;
       existingStudent.Name = updatedStudent.Name;
@@ -163,12 +163,14 @@ namespace EngTaskGradingNetBE.Services
       return existingStudent;
     }
 
-    public async System.Threading.Tasks.Task DeleteAsync(int id, bool mustExist = false)
+    public async System.Threading.Tasks.Task DeleteAsync(int studentId, bool mustExist = false)
     {
-      var student = await Db.Students.FirstOrDefaultAsync(q => q.Id == id);
+      var student = await Db.Students.FirstOrDefaultAsync(q => q.Id == studentId);
       if (student == null)
-        if (mustExist) throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.StudentNotFound, id);
-        else return;
+        if (mustExist)
+          throw new Exceptions.BadData.NotFound.EntityNotFoundException<Student>(studentId);
+        else 
+          return;
       Db.Students.Remove(student);
       await Db.SaveChangesAsync();
       return;
@@ -178,7 +180,7 @@ namespace EngTaskGradingNetBE.Services
     {
       Student ret = await Db.Students
         .FirstOrDefaultAsync(q => q.Number == studyNumber.ToUpper())
-        ?? throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.StudentNotFound, "StudyNumber ==" + studyNumber);
+        ?? throw new Exceptions.BadData.NotFound.EntityNotFoundException<Student>(studyNumber);
       return ret;
     }
   }

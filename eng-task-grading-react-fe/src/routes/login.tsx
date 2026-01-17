@@ -1,5 +1,4 @@
 import { createFileRoute } from '@tanstack/react-router'
-import toast from 'react-hot-toast';
 import { useLogger } from "../hooks/use-logger";
 import { useNavigate } from '@tanstack/react-router';
 import { Turnstile } from '../components/turnstille'
@@ -7,6 +6,7 @@ import AppSettings from '../config/app-settings'
 import { useCallback, useEffect, useState } from 'react';
 import { useAuthContext } from '../contexts/AuthContext';
 import type { TeacherLoginDto } from '../model/teacher-dto';
+import { useToast } from '../hooks/use-toast';
 
 export const Route = createFileRoute('/login')({
   component: Login,
@@ -17,13 +17,14 @@ function Login() {
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null)
-  const logger = useLogger("LoginPage");
+  const logger = useLogger("Login");
   const navigate = useNavigate();
   const { loginTeacher } = useAuthContext();
   // Optional next page from query string (?nextPage=/some/path)
   const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams();
   const rawNextPage = searchParams.get('nextPage') || undefined;
   const nextPage = rawNextPage ? decodeURIComponent(rawNextPage) : undefined;
+  const tst = useToast();
 
   // Cloudflare konfigurace z AppSettings
   const isCloudflareEnabled = AppSettings.cloudflare.enabled
@@ -36,7 +37,7 @@ function Login() {
       setPassword("Bublinka#1");
     }
     if (isCloudflareEnabled && !TURNSTILE_SITE_KEY) {
-      toast.error('Chyba: VITE_CLOUDFLARE_SITE_KEY není nastaven v .env.local');
+      logger.error('Chyba: VITE_CLOUDFLARE_SITE_KEY není nastaven v .env.local');
     }
   }, [isCloudflareEnabled, TURNSTILE_SITE_KEY]);
 
@@ -51,8 +52,8 @@ function Login() {
 
     // Kontrola captcha pouze pokud je Cloudflare enabled
     if (isCloudflareEnabled && !captchaToken) {
-      toast.error('Prosím dokončete ověření captcha')
-      return
+      tst.warning(tst.WRN.CAPTCHA_COMPLETION_NEEDED);
+      return;
     }
 
     const data: TeacherLoginDto = {
@@ -64,7 +65,7 @@ function Login() {
 
     try {
       await loginTeacher(data);
-      toast.success("Učitel úspěšně přihlášen.");
+      tst.success(tst.SUC.LOGIN_SUCCESSFUL);
       // If nextPage provided and appears to be a safe internal path, redirect there.
       if (nextPage && nextPage.startsWith('/')) {
         navigate({ to: nextPage });
@@ -73,7 +74,7 @@ function Login() {
       }
     } catch (ex) {
       logger.error("Přihlášení selhalo", { email, error: ex });
-      toast.error("Přihlášení selhalo: " + ex);
+      tst.error(ex);
     }
   };
 
@@ -147,9 +148,15 @@ function Login() {
           </button>
         </form>
         <p className="text-center text-gray-500 text-sm mt-4">
-          Nemáte účet?{" "}
+          Nemáte účet?&nbsp;
           <a href="/register" className="text-blue-500 hover:underline">
             Zaregistrujte se
+          </a>.
+        </p>
+        <p className="text-center text-gray-500 text-sm mt-1">
+          Zapomněli jste heslo?&nbsp;
+          <a href="/teacherPasswordReset/request" className="text-blue-500 hover:underline">
+            Obnovte si jej
           </a>.
         </p>
         <p className="text-center text-gray-500 text-sm mt-1">

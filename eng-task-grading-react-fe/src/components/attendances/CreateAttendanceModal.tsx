@@ -2,7 +2,8 @@ import { useState } from 'react';
 import type { AttendanceCreateDto } from '../../model/attendance-dto';
 import { AppDialog } from '../../ui/AppDialog';
 import { AttendanceEditor, type AttendanceEditorData } from '../../ui/editors/AttendanceEditor';
-import toast from 'react-hot-toast';
+import { useToast } from '../../hooks/use-toast';
+import { useLogger } from '../../hooks/use-logger';
 
 interface CreateAttendanceModalProps {
   isOpen: boolean;
@@ -15,6 +16,8 @@ export function CreateAttendanceModal(props: CreateAttendanceModalProps) {
   const cleanData: AttendanceEditorData = { title: '', minWeight: null };
   const [attendanceEditorData, setAttendanceEditorData] = useState<AttendanceEditorData>(cleanData);
   const [submitting, setSubmitting] = useState(false);
+  const tst = useToast();
+  const logger = useLogger("CreateAttendanceModal");
 
   const handleSubmit = async () => {
     if (!attendanceEditorData.title.trim()) return;
@@ -27,12 +30,12 @@ export function CreateAttendanceModal(props: CreateAttendanceModalProps) {
       };
 
       props.onSubmit(attendanceData);
-      toast.success("Docházka byla úspěšně vytvořena.");
+      tst.success(tst.SUC.ITEM_CREATED);
       setAttendanceEditorData(cleanData);
       props.onClose();
     } catch (error) {
-      console.error('Error creating attendance:', error);
-      toast.error("Chyba při vytváření docházky.");
+      logger.error('Error creating attendance:', error);
+      tst.error(error);
     } finally {
       setSubmitting(false);
     }

@@ -10,7 +10,7 @@
   ],
   "compilerOptions": {
     "strict": true,
-    "noEmitOnError": true, // DEV server typicky ignoruje, ale hodí se
+    "noEmitOnError": true,
     "forceConsistentCasingInFileNames": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true

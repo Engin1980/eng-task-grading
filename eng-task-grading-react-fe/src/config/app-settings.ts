@@ -29,6 +29,7 @@ const AppSettings = {
     siteKey: String(getRaw('VITE_CLOUDFLARE_SITE_KEY') ?? ''),
   },
   logLevel: String(getRaw('VITE_LOG_LEVEL') ?? 'debug'),
+  presetLoginForm: coerceBool(getRaw('VITE_PRESET_LOGIN_FORM')),
 }
 
 export default AppSettings

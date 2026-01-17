@@ -28,6 +28,7 @@ namespace EngTaskGradingNetBE.Models.Config
     public int LoginTokenLengthBytes { get; set; } = 32;
     public int LoginTokenExpiryMinutes { get; set; } = 15;
     public int AccessTokenExpiryMinutes { get; set; } = 5;
+    public int SessionRefreshTokenExpiryInMinutes { get; set; } = 15;
   }
 
   public class TeacherSecuritySettings
@@ -37,7 +38,10 @@ namespace EngTaskGradingNetBE.Models.Config
     public int PasswordResetTokenExpiryMinutes { get; set; } = 60;
     public int PasswordResetTokenLength { get; set; } = 128;
     public int AccessTokenExpiryMinutes { get; set; } = 5;
-    public int RefreshTokenExpiryInMinutes { get; set; } = 60 * 8;
+    public int SessionRefreshTokenExpiryInMinutes { get; set; } = 15;
+    public int PersistentRefreshTokenExpiryInMinutes { get; set; } = 60 * 8;
+
+    public string PasswordRegex { get; set; } = @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,}$";
   }
 
   public class CloudFlareSettings

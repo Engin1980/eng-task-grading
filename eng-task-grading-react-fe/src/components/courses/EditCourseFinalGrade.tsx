@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import type { StudentDto } from '../../model/student-dto';
 import type { FinalGradeDto } from '../../model/course-dto';
 import { courseService } from '../../services/course-service';
+import { useToast } from '../../hooks/use-toast';
+import { useLogger } from '../../hooks/use-logger';
 
 interface EditCourseFinalGradeModalProps {
   isOpen: boolean;
@@ -15,6 +17,8 @@ export function EditCourseFinalGradeModal({ isOpen, onClose, student, grade, onG
   const [value, setValue] = useState<string>('');
   const [comment, setComment] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const tst = useToast();
+  const logger = useLogger("EditCourseFinalGradeModal");
 
   // Aktualizovat hodnoty když se změní grade
   useEffect(() => {
@@ -34,7 +38,7 @@ export function EditCourseFinalGradeModal({ isOpen, onClose, student, grade, onG
 
     const gradeValue = parseInt(value);
     if (isNaN(gradeValue) || gradeValue < 0 || gradeValue > 100) {
-      alert('Známka musí být číslo mezi 0 a 100');
+      tst.warning(tst.WRN.COURSE_FINAL_GRADE_VALUE_INVALID);
       return;
     }
 
@@ -42,11 +46,12 @@ export function EditCourseFinalGradeModal({ isOpen, onClose, student, grade, onG
 
     try {
       const updatedGrade = await courseService.updateFinalGrade(grade.id, gradeValue, comment.trim() || null);
+      tst.success(tst.SUC.ITEM_UPDATED);
       onGradeUpdated(updatedGrade);
       handleClose();
     } catch (error) {
-      console.error('Error updating grade:', error);
-      alert('Chyba při aktualizaci známky');
+      logger.error('Error updating grade:', error);
+      tst.error(error);
     } finally {
       setIsSubmitting(false);
     }

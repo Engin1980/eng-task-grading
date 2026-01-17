@@ -2,7 +2,7 @@ import * as Dialog from '@radix-ui/react-dialog';
 import { useLogger } from '../../hooks/use-logger';
 import type { StudentCreateDto, StudentImportAnalysisResultDto } from '../../model/student-dto';
 import { courseService } from '../../services/course-service';
-import toast from 'react-hot-toast';
+import { useToast } from '../../hooks/use-toast';
 
 interface ImportStudentsWizardSecondModalProps {
   isOpen: boolean;
@@ -20,6 +20,7 @@ export function ImportStudentsWizardSecondModal({
   courseId
 }: ImportStudentsWizardSecondModalProps) {
   const logger = useLogger("ImportStudentsWizardSecondModal");
+  const tst = useToast();
 
   const handleDoImport = async () => {
     logger.info("Zahajuji import do kurzu");
@@ -27,10 +28,11 @@ export function ImportStudentsWizardSecondModal({
       await courseService.importStudentsToCourse(courseId, analysisResult!.students);
       logger.info("Import do kurzu dokončen");
       onImported(analysisResult!.students);
+      tst.success(tst.SUC.STUDENTS_IMPORTED);
       onClose();
     }
     catch {
-      toast.error('Chyba při importu studentů do kurzu.');
+      tst.error(tst.ERR.STUDENTS_IMPORT_FAILED);
     }
   };
 

@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import type { TaskCreateDto } from '../../model/task-dto';
 import { TaskEditor, type TaskEditorData } from '../../ui/editors/TaskEditor';
-import toast from 'react-hot-toast';
 import { AppDialog } from '../../ui/AppDialog';
+import { useToast } from '../../hooks/use-toast';
 
 interface CreateTaskModalProps {
   isOpen: boolean;
@@ -21,10 +21,11 @@ export function CreateTaskModal(props: CreateTaskModalProps) {
     maxGrade: null,
     aggregation: 'avg'
   });
+const tst = useToast();
 
   const validateTask = () => {
     if (!taskEditorData.title.trim()) {
-      toast.error("Název úkolu je povinný.");
+      tst.warning(tst.WRN.TASK_TITLE_REQUIRED);
       return false;
     } else return true;
   }

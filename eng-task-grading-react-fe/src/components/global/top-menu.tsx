@@ -1,13 +1,24 @@
-import { Link } from '@tanstack/react-router';
+import { Link, useNavigate } from '@tanstack/react-router';
 import { useAuthContext } from '../../contexts/AuthContext';
 import { TopMenuNavigation } from './top-menu-navigation';
+import { useToast } from '../../hooks/use-toast';
+import { useLogger } from '../../hooks/use-logger';
 
 const TopMenu: React.FC = () => {
+  const tst = useToast();
   const { loggedUser, logout } = useAuthContext();
+  const navigate = useNavigate();
+  const logger = useLogger("TopMenu");
 
   const handleLogout = async () => {
-    await logout();
-    window.location.href = '/login'; // Redirect to login page after logout
+    try {
+      await logout();
+      tst.success(tst.SUC.LOGOUT_SUCCESSFUL);
+    } catch (err) {
+      logger.error("Logout error:", err);
+      tst.error(err);
+    }
+    navigate({ to: '/login' });
   }
 
   return (
@@ -24,7 +35,7 @@ const TopMenu: React.FC = () => {
                     <Link to="/studentView/login" className="mr-4 text-blue-600">Přihlášení studenta</Link>
                   </>
                 )}
-                {loggedUser && loggedUser.role == "ROLE_TEACHER" && (<>                  
+                {loggedUser && loggedUser.role == "ROLE_TEACHER" && (<>
                   <TopMenuNavigation />
                   <Link to="/logs" className="ml-8 text-blue-600">📝 App-Log</Link>
                 </>)}

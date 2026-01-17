@@ -1,4 +1,5 @@
 ﻿using EngTaskGradingNetBE.Exceptions;
+using EngTaskGradingNetBE.Exceptions.BadData.Common;
 using EngTaskGradingNetBE.Lib;
 using EngTaskGradingNetBE.Models.DbModel;
 using EngTaskGradingNetBE.Models.Dtos;
@@ -232,7 +233,7 @@ namespace EngTaskGradingNetBE.Controllers
       AttendanceDay atd = await attendanceService.GetDayByIdAsync(dayId, false);
       if (atd.SelfAssignKey == null || atd.SelfAssignKey.Length == 0 || atd.SelfAssignKey != data.Key)
       {
-        throw new CommonBadDataException(CommonErrorKind.InvalidSelfSignKey, data.Key);
+        throw new InvalidStudentSelfSignKeyException(data.Key);
       }
       Student student = await studentService.GetByStudyNumberAsync(data.StudyNumber);
 

@@ -22,17 +22,17 @@ namespace EngTaskGradingNetBE.Services
       if (settings.CloudFlare.Enabled == false)
         throw new ApplicationException(typeof(CloudflareTurnistilleService).Name + " is disabled in config.");
       if (string.IsNullOrWhiteSpace(token))
-        throw new Exceptions.CloudflareTurnistilleException($"Cloudflare Token is null or empty");
+        throw new Exceptions.Server.CloudflareTurnistille.CloudflareTurnistilleTokenEmptyException();
 
       string secret = appSettingsService.GetKey("CloudFlare:Turnstille:SecretKey")
-        ?? throw new ApplicationException("CloudFlare SecretKey not found in config.");
+        ?? throw new Exceptions.Server.CloudflareTurnistille.CloudflareTurnistilleKeyEmptyException();
       var client = httpClientFactory.CreateClient();
 
       var values = new Dictionary<string, string>
-            {
-                { "secret", secret },
-                { "response", token }
-            };
+        {
+          { "secret", secret },
+          { "response", token }
+        };
 
       var response = await client.PostAsync(
           "https://challenges.cloudflare.com/turnstile/v0/siteverify",
@@ -42,7 +42,7 @@ namespace EngTaskGradingNetBE.Services
       var data = await response.Content.ReadFromJsonAsync<TurnstileResponse>();
 
       if (!(data != null && data.Success))
-        throw new Exceptions.CloudflareTurnistilleException(string.Join(",", data?.ErrorCodes ?? []));
+        throw new Exceptions.Server.CloudflareTurnistille.CloudflareTurnistilleVerifyException(data?.ErrorCodes ?? []);
     }
   }
 }

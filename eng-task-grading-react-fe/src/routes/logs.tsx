@@ -5,6 +5,8 @@ import { appLogService } from '../services/applog-service'
 import { Loading } from '../ui/loading'
 import { LoadingError } from '../ui/loadingError'
 import { useLoadingState } from '../types/loadingState'
+import { AppLogDetailModal } from '../components/appLog/AppLogDetailModal'
+import { useLogger } from '../hooks/use-logger'
 
 export const Route = createFileRoute('/logs')({
   component: RouteComponent,
@@ -15,6 +17,8 @@ function RouteComponent() {
   const ldgState = useLoadingState();
   const [filter, setFilter] = useState('')
   const [levelFilter, setLevelFilter] = useState('')
+  const [selectedLogIndex, setSelectedLogIndex] = useState<number | null>(null)
+  const logger = useLogger("/logs.tsx");
 
   const loadLogs = async () => {
     try {
@@ -24,7 +28,7 @@ function RouteComponent() {
       ldgState.setDone();
     } catch (err) {
       ldgState.setError('Chyba při načítání logů')
-      console.error('Error loading logs:', err)
+      logger.error('Error loading logs:', err)
     }
   }
 
@@ -62,11 +66,21 @@ function RouteComponent() {
 
   const uniqueLevels = [...new Set(logs.map(log => log.level).filter(level => level !== null))]
 
+  const handleRowClick = (log: AppLogDto) => {
+    const index = filteredLogs.indexOf(log)
+    setSelectedLogIndex(index)
+  }
+
+  const handleCloseModal = () => {
+    setSelectedLogIndex(null)
+  }
+
   if (ldgState.loading) return (<Loading message="Načítám logy, to může chvilku trvat..." />)
   if (ldgState.error) { return (<LoadingError message={ldgState.error} onRetry={loadLogs} />) }
 
   return (
     <div className="container mx-auto p-4">
+      {/* ...existing code... */}
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900 mb-4">Aplikační logy</h1>
 
@@ -169,26 +183,27 @@ function RouteComponent() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {/* První sloupec: stáhneme na minimum, zakážeme zalomení */}
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-px whitespace-nowrap">
                     Čas
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {/* Druhý sloupec: stejně jako první */}
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-px whitespace-nowrap">
                     Úroveň
                   </th>
+                  {/* Třetí sloupec: sebere zbytek místa */}
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Zpráva
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Šablona
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Vlastnosti
                   </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredLogs.map((log) => (
-                  <tr key={log.id} className="hover:bg-gray-50">
+                  <tr
+                    key={log.id}
+                    onClick={() => handleRowClick(log)}
+                    className="hover:bg-gray-50 cursor-pointer"
+                  >
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {log.timeStamp ? new Date(log.timeStamp).toLocaleString('cs-CZ') : '-'}
                     </td>
@@ -197,25 +212,15 @@ function RouteComponent() {
                         {log.level || 'N/A'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-900">
-                      <div className="max-w-xs truncate" title={log.message || ''}>
+                    <td className="px-6 py-4 text-sm text-gray-900 max-w-md">
+                      <div className="break-words overflow-wrap-anywhere" title={log.message || ''}>
                         {log.message || '-'}
                       </div>
                       {log.exception && (
-                        <div className="text-xs text-red-600 mt-1 truncate" title={log.exception}>
-                          Exception: {log.exception}
+                        <div className="font-mono text-xs text-red-600 mt-1" title={log.exception}>
+                          ... exception details
                         </div>
                       )}
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-500">
-                      <div className="max-w-xs truncate" title={log.messageTemplate || ''}>
-                        {log.messageTemplate || '-'}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-500">
-                      <div className="max-w-xs truncate" title={log.properties || ''}>
-                        {log.properties || '-'}
-                      </div>
                     </td>
                   </tr>
                 ))}
@@ -223,6 +228,15 @@ function RouteComponent() {
             </table>
           </div>
         </div>
+      )}
+
+      {selectedLogIndex !== null && (
+        <AppLogDetailModal
+          isOpen={selectedLogIndex !== null}
+          logs={filteredLogs}
+          index={selectedLogIndex}
+          onClose={handleCloseModal}
+        />
       )}
     </div>)
 }

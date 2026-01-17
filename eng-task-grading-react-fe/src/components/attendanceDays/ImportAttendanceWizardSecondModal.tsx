@@ -1,9 +1,9 @@
 import * as Dialog from '@radix-ui/react-dialog';
 import { useLogger } from '../../hooks/use-logger';
-import toast from 'react-hot-toast';
 import { attendanceService } from '../../services/attendance-service';
 import { AttendanceValueLabel } from '../../ui/attendanceValueLabel';
 import type { AttendanceImportAnalysisResultWithAttendanceValueDto } from '../../model/attendance-dto';
+import { useToast } from '../../hooks/use-toast';
 
 interface ImportAttendanceWizardSecondModalProps {
   isOpen: boolean;
@@ -21,6 +21,7 @@ export function ImportAttendanceWizardSecondModal({
   attendanceDayId
 }: ImportAttendanceWizardSecondModalProps) {
   const logger = useLogger("ImportAttendanceWizardSecondModal");
+  const tst = useToast();
 
   const handleDoImport = async () => {
     logger.info("Zahajuji import do docházky");
@@ -30,11 +31,12 @@ export function ImportAttendanceWizardSecondModal({
         analysisResult!.attendanceValue.id,
         analysisResult!.result.students);
       logger.info("Import do docházky dokončen");
+      tst.success(tst.SUC.STUDENTS_IMPORTED);
       onImported();
       onClose();
     }
     catch {
-      toast.error('Chyba při importu studentů do kurzu.');
+      tst.error(tst.ERR.STUDENTS_IMPORT_FAILED);
     }
   };
 

@@ -16,8 +16,8 @@ import { useLoadingState } from '../../types/loadingState'
 import { EditIcon } from '../../ui/icons/editIcon'
 import { DeleteIcon } from '../../ui/icons/deleteIcon'
 import { DeleteModal } from '../../components/global/DeleteModal'
-import toast from 'react-hot-toast'
 import { EditCourseModal } from '../../components/courses/EditCourseModal'
+import { useToast } from '../../hooks/use-toast'
 
 export const Route = createFileRoute('/courses/$id')({
   component: CourseDetailPage,
@@ -32,6 +32,7 @@ function CourseDetailPage() {
   const ldgState = useLoadingState();
   const navigate = useNavigate();
   const navCtx = useNavigationContext();
+  const tst = useToast();
 
   const loadCourse = async () => {
     try {
@@ -49,7 +50,7 @@ function CourseDetailPage() {
   }
 
   const handleCourseDelete = async () => {
-    toast.error("Funkce mazání kurzů ještě není implementována");
+    tst.error("Funkce mazání kurzů ještě není implementována");
   }
 
   const handleCourseEdit = async (courseData: CourseEditDto) => {

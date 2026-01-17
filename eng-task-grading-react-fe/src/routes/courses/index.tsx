@@ -7,6 +7,7 @@ import type { CourseCreateDto, CourseDto } from '../../model/course-dto'
 import { Loading } from '../../ui/loading'
 import { LoadingError } from '../../ui/loadingError'
 import { useLoadingState } from '../../types/loadingState'
+import { useToast } from '../../hooks/use-toast'
 
 export const Route = createFileRoute('/courses/')({
   component: CoursesPage,
@@ -17,9 +18,9 @@ function CoursesPage() {
   const ldgState = useLoadingState();
   const [isModalOpen, setIsModalOpen] = useState(false)
   const logger = useLogger("CoursesPage")
+  const tst = useToast();
 
   const _loadCourses = async () => {
-    logger.info("Načítám kurzíky");
     try {
       logger.info('Načítám kurzy')
       ldgState.setLoading();
@@ -34,12 +35,12 @@ function CoursesPage() {
   };
 
   useEffect(() => {
-    logger.info("useEffect volán, načítám kurzy");
     _loadCourses()
   }, [])
 
   const handleCourseCreated = async (courseData: CourseCreateDto) => {
-    await courseService.createCourse(courseData);
+    setIsModalOpen(false);
+    await _loadCourses();
   }
 
   return (
@@ -58,7 +59,7 @@ function CoursesPage() {
       <CreateCourseModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onSubmit={handleCourseCreated}
+        onCourseCreated={handleCourseCreated}
       />
 
       {ldgState.loading && (<Loading message="Načítám kurzy..." />)}

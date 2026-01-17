@@ -16,7 +16,7 @@ import { EditIcon } from '../../ui/icons/editIcon'
 import { DeleteIcon } from '../../ui/icons/deleteIcon'
 import { DeleteModal } from '../../components/global/DeleteModal'
 import { EditAttendanceModal } from '../../components/attendances/EditAttendanceModal'
-import toast from 'react-hot-toast'
+import { useToast } from '../../hooks/use-toast'
 
 export const Route = createFileRoute('/attendances/$id')({
   component: AttendanceDetailPageWrapper,
@@ -30,6 +30,7 @@ function AttendanceDetailPage() {
   const ldgState = useLoadingState();
   const navCtx = useNavigationContext();
   const navigate = useNavigate();
+const tst = useToast();
 
   const loadAttendance = async () => {
     try {
@@ -48,10 +49,10 @@ function AttendanceDetailPage() {
     if (!attendance) return;
     try {
       await attendanceService.delete(attendance.id);
-      toast.success("Docházka byla úspěšně smazána.");
+      tst.success(tst.SUC.ITEM_DELETED);
       navigate({ to: `/courses/${attendance.courseId}/attendances` });
     } catch (err) {
-      toast.error("Chyba při mazání docházky.");
+      tst.error(err);
       throw err;
     }
   }

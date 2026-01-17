@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { teacherService } from '../services/teacher-service';
 import type { TeacherRegisterDto } from '../model/teacher-dto';
 import { useNavigate } from '@tanstack/react-router';
-import toast from 'react-hot-toast';
+import { useToast } from '../hooks/use-toast';
 
 export const Route = createFileRoute('/register')({
   component: RouteComponent,
@@ -14,6 +14,7 @@ function RouteComponent() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const tst = useToast();
 
   const validateEmail = (value: string) => {
     return value.endsWith('@osu.cz');
@@ -22,11 +23,11 @@ function RouteComponent() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateEmail(email)) {
-      toast.error('Email musí končit na @osu.cz');
+      tst.error(tst.ERR.EMAIL_MUST_END_WITH_OSU_CZ);
       return;
     }
     if (!password || password.length < 8) {
-      toast.error('Heslo musí mít alespoň 8 znaků.');
+      tst.error(tst.ERR.PASSWORD_MIN_LENGTH);
       return;
     }
     setLoading(true);
@@ -36,12 +37,12 @@ function RouteComponent() {
         password
       };
       await teacherService.register(data);
-      toast.success('Registrace byla úspěšná. Nyní se můžete přihlásit.');
+      tst.success(tst.SUC.REGISTRATION_SUCCESS);
       setEmail('');
       setPassword('');
       navigate({ to: '/login' });
     } catch (err) {
-      toast.error('Chyba při registraci.');
+      tst.error(err);
     } finally {
       setLoading(false);
     }

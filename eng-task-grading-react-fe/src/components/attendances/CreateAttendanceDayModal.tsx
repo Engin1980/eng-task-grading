@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { AttendanceDayCreateDto } from '../../model/attendance-dto';
 import { AppDialog } from '../../ui/AppDialog';
-import toast from 'react-hot-toast';
+import { useToast } from '../../hooks/use-toast';
 
 interface CreateAttendanceDayModalProps {
   isOpen: boolean;
@@ -13,6 +13,7 @@ interface CreateAttendanceDayModalProps {
 export function CreateAttendanceDayModal(props: CreateAttendanceDayModalProps) {
   const [title, setTitle] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const tst = useToast();
 
   const handleSubmit = async () => {
     if (!title.trim()) return;
@@ -25,11 +26,11 @@ export function CreateAttendanceDayModal(props: CreateAttendanceDayModalProps) {
 
       props.onSubmit(data);
 
-      toast.success("Den docházky byl úspěšně vytvořen.");
+      tst.success(tst.SUC.ITEM_CREATED );
       setTitle('');
       props.onClose();
     } catch (error) {
-      toast.error("Chyba při vytváření dne docházky.");
+      tst.error(error);
     } finally {
       setSubmitting(false);
     }

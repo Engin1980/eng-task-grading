@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { courseService } from '../../services/course-service';
 import type { FinalGradeDto } from '../../model/course-dto';
 import type { StudentDto } from '../../model/student-dto';
+import { useToast } from '../../hooks/use-toast';
+import { useLogger } from '../../hooks/use-logger';
 
 interface AddCourseFinalGradeModalProps {
   isOpen: boolean;
@@ -16,6 +18,8 @@ export function AddCourseFinalGradeModal({ isOpen, onClose, student, courseId, o
   const [comment, setComment] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const quickSelectValues: number[] = [0, 5, 25, 35, 45, 55, 60, 65, 70, 75, 80, 85, 90, 95, 98, 100];
+  const tst = useToast();
+const logger = useLogger("AddCourseFinalGradeModal");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,11 +36,12 @@ export function AddCourseFinalGradeModal({ isOpen, onClose, student, courseId, o
 
     try {
       const grade = await courseService.addFinalGrade(+courseId, student.id, gradeValue, comment.trim() || null);
+      tst.success(tst.SUC.ITEM_CREATED);
       onGradeAdded(grade);
       handleClose();
     } catch (error) {
-      console.error('Error adding grade:', error);
-      alert('Chyba při přidávání známky');
+      logger.error('Error adding grade:', error);
+      tst.error(error);
     } finally {
       setIsSubmitting(false);
     }

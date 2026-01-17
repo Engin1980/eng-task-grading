@@ -1,5 +1,6 @@
 import { useEffect, useRef, useCallback } from "react";
 import { useTurnstile } from "../hooks/use-turnstile";
+import { useLogger } from "../hooks/use-logger";
 
 interface TurnstileProps {
   siteKey: string;
@@ -9,6 +10,7 @@ interface TurnstileProps {
 export function Turnstile({ siteKey, onVerify }: TurnstileProps) {
   const ref = useRef<HTMLDivElement>(null);
   const isRenderedRef = useRef<boolean>(false);
+  const logger = useLogger('TurnstileComponent');
 
   useTurnstile();
 
@@ -22,15 +24,15 @@ export function Turnstile({ siteKey, onVerify }: TurnstileProps) {
         if (ref.current) {
           ref.current.innerHTML = '';
         }
-        
+
         window.turnstile.render(ref.current, {
           sitekey: siteKey,
           callback: stableOnVerify, //TODO vyřešit tady onVerify vs stableOnVerify
         });
-        
+
         isRenderedRef.current = true;
       } catch (error) {
-        console.error('Turnstile render error:', error);
+        logger.error('Turnstile render error:', error);
       }
     }
 

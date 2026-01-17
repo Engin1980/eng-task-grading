@@ -68,9 +68,44 @@ function RouteComponent() {
     setNewLevel(LogLevels.info);
   };
 
+  const handleAddRuleFirst = () => {
+    if (!newPattern.trim()) {
+      alert('Pattern cannot be empty');
+      return;
+    }
+    senderRulesHandler.insertRule(newPattern, newLevel, 0);
+    setRules(senderRulesHandler.getRules());
+    setNewPattern('');
+    setNewLevel(LogLevels.info);
+  };
+
   const handleDeleteRule = (index: number) => {
     if (confirm('Delete this rule?')) {
       senderRulesHandler.deleteRuleAt(index);
+      setRules(senderRulesHandler.getRules());
+    }
+  };
+
+  const handleMoveFirst = (index: number) => {
+    senderRulesHandler.moveRuleToIndex(index, 0);
+    setRules(senderRulesHandler.getRules());
+  };
+
+  const handleMoveLast = (index: number) => {
+    senderRulesHandler.moveRuleToIndex(index, rules.length - 1);
+    setRules(senderRulesHandler.getRules());
+  };
+
+  const handleMoveUp = (index: number) => {
+    if (index > 0) {
+      senderRulesHandler.moveRuleToIndex(index, index - 1);
+      setRules(senderRulesHandler.getRules());
+    }
+  };
+
+  const handleMoveDown = (index: number) => {
+    if (index < rules.length - 1) {
+      senderRulesHandler.moveRuleToIndex(index, index + 1);
       setRules(senderRulesHandler.getRules());
     }
   };
@@ -122,6 +157,12 @@ function RouteComponent() {
             className="px-4 py-2 bg-blue-500 text-white rounded"
           >
             Add
+          </button>
+          <button
+            onClick={handleAddRuleFirst}
+            className="px-4 py-2 bg-purple-500 text-white rounded"
+          >
+            Add First
           </button>
         </div>
       </div>
@@ -191,20 +232,52 @@ function RouteComponent() {
                     </button>
                   </>
                 ) : (
-                  <>
+                  <div className="flex flex-wrap gap-1">
                     <button
                       onClick={() => handleEdit(index, rule.pattern.source, rule.level)}
-                      className="px-2 py-1 bg-blue-500 text-white rounded mr-2"
+                      className="px-2 py-1 bg-blue-500 text-white rounded text-xs"
                     >
                       Edit
                     </button>
                     <button
                       onClick={() => handleDeleteRule(index)}
-                      className="px-2 py-1 bg-red-500 text-white rounded"
+                      className="px-2 py-1 bg-red-500 text-white rounded text-xs"
                     >
-                      Delete
+                      Del
                     </button>
-                  </>
+                    <button
+                      onClick={() => handleMoveFirst(index)}
+                      disabled={index === 0}
+                      className="px-2 py-1 bg-purple-500 text-white rounded text-xs disabled:bg-gray-300"
+                      title="Move to first"
+                    >
+                      ⇈
+                    </button>
+                    <button
+                      onClick={() => handleMoveUp(index)}
+                      disabled={index === 0}
+                      className="px-2 py-1 bg-purple-500 text-white rounded text-xs disabled:bg-gray-300"
+                      title="Move up"
+                    >
+                      ↑
+                    </button>
+                    <button
+                      onClick={() => handleMoveDown(index)}
+                      disabled={index === rules.length - 1}
+                      className="px-2 py-1 bg-purple-500 text-white rounded text-xs disabled:bg-gray-300"
+                      title="Move down"
+                    >
+                      ↓
+                    </button>
+                    <button
+                      onClick={() => handleMoveLast(index)}
+                      disabled={index === rules.length - 1}
+                      className="px-2 py-1 bg-purple-500 text-white rounded text-xs disabled:bg-gray-300"
+                      title="Move to last"
+                    >
+                      ⇊
+                    </button>
+                  </div>
                 )}
               </td>
             </tr>

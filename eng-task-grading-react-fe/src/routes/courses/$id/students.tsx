@@ -187,7 +187,7 @@ function StudentsPage() {
                       className="text-blue-600 hover:text-blue-800 font-medium"
                       onClick={() => {
                         // TODO: Implementovat detail známek studenta
-                        console.log('Detail studenta:', student.number);
+                        alert("Not implemented yet");
                       }}
                     >
                       {student.number}

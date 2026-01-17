@@ -6,6 +6,7 @@ import type { StudentTokenInfoDto } from '../../../model/student-view-dto';
 import { useLoadingState } from '../../../types/loadingState';
 import { useAuthContext } from '../../../contexts/AuthContext';
 import { useToast } from '../../../hooks/use-toast';
+import { useLogger } from '../../../hooks/use-logger';
 
 export const Route = createFileRoute('/studentView/login-management/')({
   component: RouteComponent,
@@ -15,7 +16,6 @@ export const Route = createFileRoute('/studentView/login-management/')({
 function getStudentNumberFromJWT(): string | null {
   try {
     const token = localStorage.getItem('studentViewAccessJWT');
-    console.log('JWT Student Token:', token);
     if (!token) return null;
 
     // Decode JWT payload (base64url decode)
@@ -25,7 +25,7 @@ function getStudentNumberFromJWT(): string | null {
     const decodedPayload = JSON.parse(atob(payload));
     return decodedPayload.sub || null;
   } catch (error) {
-    console.error('Error decoding JWT:', error);
+    //TODO silent error, is it ok?
     return null;
   }
 }
@@ -37,6 +37,7 @@ function RouteComponent() {
   const navigate = useNavigate();
   const authContext = useAuthContext();
   const tst = useToast();
+  const logger = useLogger("/studentView/login-management/index.tsx");
 
   useEffect(() => {
     const tmp = async () => {
@@ -45,8 +46,9 @@ function RouteComponent() {
         setTokens(fetchedTokens);
         lds.setDone();
       } catch (error) {
-        console.error('Error fetching tokens:', error);
+        logger.error('Error fetching tokens:', error);
         lds.setError('Chyba při načítání tokenů.');
+        tst.error(error);
       }
     };
     tmp();
@@ -62,7 +64,7 @@ function RouteComponent() {
       tst.success(tst.SUC.ALL_LOGINS_REVOKED);
       navigate({ to: '/studentView/login' });
     } catch (error) {
-      console.error('Error deleting tokens:', error);
+      logger.error('Error deleting tokens:', error);
       lds.setError('Chyba při zneplatňování tokenů.');
       tst.error(error);
     }

@@ -6,6 +6,7 @@ import { attendanceService } from '../../../services/attendance-service';
 import { useLoadingState } from '../../../types/loadingState';
 import { Loading } from '../../../ui/loading';
 import { LoadingError } from '../../../ui/loadingError';
+import { useLogger } from '../../../hooks/use-logger';
 
 export const Route = createFileRoute('/attendances/$id/overview')({
   component: RouteComponent,
@@ -18,6 +19,7 @@ function RouteComponent() {
   const ldgState = useLoadingState();
   const [studentFilter, setStudentFilter] = useState("");
   const navigate = useNavigate();
+  const logger = useLogger("attendances/$id/overview.tsx");
 
   const loadData = async () => {
     try {
@@ -26,7 +28,7 @@ function RouteComponent() {
       setData(result);
       ldgState.setDone();
     } catch (error) {
-      console.error('Error loading attendance data:', error);
+      logger.error('Error loading attendance data:', error);
       ldgState.setError(error);
     }
   };

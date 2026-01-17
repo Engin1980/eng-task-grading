@@ -3,6 +3,7 @@ import type { AttendanceDto, AttendanceUpdateDto } from '../../model/attendance-
 import { AppDialog } from '../../ui/AppDialog';
 import { AttendanceEditor, type AttendanceEditorData } from '../../ui/editors/AttendanceEditor';
 import { useToast } from '../../hooks/use-toast';
+import { useLogger } from '../../hooks/use-logger';
 
 interface EditAttendanceModalProps {
   isOpen: boolean;
@@ -16,6 +17,7 @@ export function EditAttendanceModal(props: EditAttendanceModalProps) {
   const [attendanceEditorData, setAttendanceEditorData] = useState<AttendanceEditorData>(cleanData);
   const [submitting, setSubmitting] = useState(false);
   const tst = useToast();
+  const logger = useLogger("EditAttendanceModal");
 
   const handleSubmit = async () => {
     if (!attendanceEditorData.title.trim()) return;
@@ -33,7 +35,7 @@ export function EditAttendanceModal(props: EditAttendanceModalProps) {
       setAttendanceEditorData(cleanData);
       props.onClose();
     } catch (error) {
-      console.error('Error creating attendance:', error);
+      logger.error('Error creating attendance:', error);
       tst.error(error);
     } finally {
       setSubmitting(false);

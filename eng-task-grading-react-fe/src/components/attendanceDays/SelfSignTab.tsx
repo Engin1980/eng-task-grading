@@ -54,15 +54,13 @@ export function SelfSignTab({ attendanceDayId }: SelfSignTabProps) {
       setCurrentKey(dataSet.key);
       ldgState.setDone();
     } catch (error) {
-      console.error('Error loading data:', error);
+      logger.error('Error loading data:', error);
       ldgState.setError(error);
     }
   }
 
   useEffect(() => {
-    console.log("### useeffect invoked");
     loadDataAsync();
-    console.log("### useeffect completed");
   }, [attendanceDayId]);
 
   const handleSetKey = async () => {
@@ -79,7 +77,7 @@ export function SelfSignTab({ attendanceDayId }: SelfSignTabProps) {
       tst.success(tst.SUC.SELFSIGN_KEY_SET);
       await loadDataAsync();
     } catch (error) {
-      console.error('Error setting key:', error);
+      logger.error('Error setting key:', error);
       tst.error(error);
     }
     setLoadingKey(false);
@@ -94,7 +92,7 @@ export function SelfSignTab({ attendanceDayId }: SelfSignTabProps) {
       // Znovu načti data po změně
       await loadDataAsync();
     } catch (error) {
-      console.error('Error deleting key:', error);
+      logger.error('Error deleting key:', error);
       tst.error(error);
     }
     setLoadingKey(false);
@@ -127,7 +125,7 @@ export function SelfSignTab({ attendanceDayId }: SelfSignTabProps) {
         };
       });
     } catch (error) {
-      console.error('Error resolving self-sign:', error);
+      logger.error('Error resolving self-sign:', error);
       tst.error(error);
     }
   }

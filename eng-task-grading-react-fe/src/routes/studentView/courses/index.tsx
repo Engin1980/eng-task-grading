@@ -7,6 +7,7 @@ import { Loading } from '../../../ui/loading';
 import { LoadingError } from '../../../ui/loadingError';
 import { useLoadingState } from '../../../types/loadingState';
 import { useToast } from '../../../hooks/use-toast';
+import { useLogger } from '../../../hooks/use-logger';
 
 export const Route = createFileRoute('/studentView/courses/')({
   component: RouteComponent,
@@ -16,7 +17,6 @@ export const Route = createFileRoute('/studentView/courses/')({
 function getStudentNumberFromJWT(): string | null {
   try {
     const token = localStorage.getItem('studentViewAccessJWT');
-    console.log('JWT Student Token:', token);
     if (!token) return null;
 
     // Decode JWT payload (base64url decode)
@@ -26,7 +26,7 @@ function getStudentNumberFromJWT(): string | null {
     const decodedPayload = JSON.parse(atob(payload));
     return decodedPayload.sub || null;
   } catch (error) {
-    console.error('Error decoding JWT:', error);
+    //TODO silent error, is it ok?
     return null;
   }
 }
@@ -37,6 +37,7 @@ function RouteComponent() {
   const ldgState = useLoadingState();
   const studentNumber = getStudentNumberFromJWT();
   const tst = useToast();
+  const logger = useLogger("/studentView/courses/index.tsx");
 
   const loadCourses = async () => {
     try {
@@ -45,7 +46,7 @@ function RouteComponent() {
       setCourses(courses);
       ldgState.setDone();
     } catch (error) {
-      console.error('Error loading courses:', error);
+      logger.error('Error loading courses:', error);
       tst.error(error);
       ldgState.setError(error);
     }

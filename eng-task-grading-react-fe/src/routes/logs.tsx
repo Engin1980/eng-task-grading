@@ -6,6 +6,7 @@ import { Loading } from '../ui/loading'
 import { LoadingError } from '../ui/loadingError'
 import { useLoadingState } from '../types/loadingState'
 import { AppLogDetailModal } from '../components/appLog/AppLogDetailModal'
+import { useLogger } from '../hooks/use-logger'
 
 export const Route = createFileRoute('/logs')({
   component: RouteComponent,
@@ -17,6 +18,7 @@ function RouteComponent() {
   const [filter, setFilter] = useState('')
   const [levelFilter, setLevelFilter] = useState('')
   const [selectedLogIndex, setSelectedLogIndex] = useState<number | null>(null)
+  const logger = useLogger("/logs.tsx");
 
   const loadLogs = async () => {
     try {
@@ -26,7 +28,7 @@ function RouteComponent() {
       ldgState.setDone();
     } catch (err) {
       ldgState.setError('Chyba při načítání logů')
-      console.error('Error loading logs:', err)
+      logger.error('Error loading logs:', err)
     }
   }
 
@@ -66,7 +68,6 @@ function RouteComponent() {
 
   const handleRowClick = (log: AppLogDto) => {
     const index = filteredLogs.indexOf(log)
-    console.log("Row clicked at " + index);
     setSelectedLogIndex(index)
   }
 

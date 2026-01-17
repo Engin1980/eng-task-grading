@@ -15,6 +15,7 @@ import { DeleteIcon } from '../../ui/icons/deleteIcon';
 import { DeleteModal } from '../../components/global/DeleteModal';
 import { taskService } from '../../services/task-service';
 import { useToast } from '../../hooks/use-toast';
+import { useLogger } from '../../hooks/use-logger';
 
 export const Route = createFileRoute('/tasks/$id')({
   component: RouteComponent,
@@ -35,6 +36,7 @@ function RouteComponent() {
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const navigate = useNavigate();
   const tst = useToast();
+  const logger = useLogger("/routes/tasks/$id.tsx");
 
   // Funkce pro filtrování studentů
   const filteredStudentData = set?.students.filter(studentData => {
@@ -147,6 +149,7 @@ function RouteComponent() {
     if (window.confirm('Opravdu chcete smazat tuto známku? Tato akce je nevratná.')) {
       try {
         await gradeService.deleteGrade(gradeId.toString());
+        tst.success(tst.SUC.ITEM_DELETED);
 
         // TODO tohle je tu 3x podobné, refactorovat a když už, tak využít FinalGradeDto
         if (set) {
@@ -163,8 +166,8 @@ function RouteComponent() {
           setSet({ ...set, students: updatedStudentDatas });
         }
       } catch (error) {
-        console.error('Error deleting grade:', error);
-        alert('Chyba při mazání známky');
+        logger.error('Error deleting grade:', error);
+        tst.error(error);
       }
     }
   };

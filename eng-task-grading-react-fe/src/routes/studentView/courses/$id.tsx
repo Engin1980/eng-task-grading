@@ -12,6 +12,7 @@ import { Loading } from '../../../ui/loading'
 import { LoadingError } from '../../../ui/loadingError'
 import { useLoadingState } from '../../../types/loadingState'
 import { useToast } from '../../../hooks/use-toast'
+import { useLogger } from '../../../hooks/use-logger'
 
 export const Route = createFileRoute('/studentView/courses/$id')({
   component: RouteComponent,
@@ -30,7 +31,7 @@ function getStudentNumberFromJWT(): string | null {
     const decodedPayload = JSON.parse(atob(payload));
     return decodedPayload.sub || null;
   } catch (error) {
-    console.error('Error decoding JWT:', error);
+    //TODO silent error, is it ok?
     return null;
   }
 }
@@ -41,6 +42,7 @@ function RouteComponent() {
   const ldgState = useLoadingState();
   const studentNumber = getStudentNumberFromJWT()
   const tst = useToast();
+  const logger = useLogger("/studentView/courses/$id.tsx");
 
   const loadCourse = async () => {
     try {
@@ -49,7 +51,7 @@ function RouteComponent() {
       setCourseData(courseData)
       ldgState.setDone();
     } catch (error) {
-      console.error('Error loading course:', error)
+      logger.error('Error loading course:', error)
       tst.error(error);
       ldgState.setError(error);
     }

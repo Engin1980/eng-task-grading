@@ -7,6 +7,7 @@ import AppSettings from '../../config/app-settings'
 import type { StudentViewLoginDto } from '../../model/student-view-dto'
 import { studentViewService } from '../../services/student-view-service'
 import { useToast } from '../../hooks/use-toast'
+import { useLogger } from '../../hooks/use-logger'
 
 export const Route = createFileRoute('/studentView/login')({
   component: RouteComponent,
@@ -17,6 +18,7 @@ function RouteComponent() {
   const [captchaToken, setCaptchaToken] = useState<string | null>(null)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const tst = useToast();
+  const logger = useLogger("/studentView/login.tsx");
 
   // Cloudflare konfigurace z AppSettings
   const isCloudflareEnabled = AppSettings.cloudflare.enabled
@@ -58,7 +60,7 @@ function RouteComponent() {
         setCaptchaToken(null) // Reset captcha token po úspěšném odeslání
 
       } catch (error) {
-        console.error('Login error:', error)
+        logger.error('Login error:', error)
         tst.error(error);
       } finally {
         setIsSubmitting(false)

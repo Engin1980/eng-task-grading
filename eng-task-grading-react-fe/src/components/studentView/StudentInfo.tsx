@@ -1,6 +1,7 @@
 import { useNavigate } from '@tanstack/react-router';
 import { studentViewService } from '../../services/student-view-service';
 import { useToast } from '../../hooks/use-toast';
+import { useLogger } from '../../hooks/use-logger';
 
 interface StudentInfoProps {
   studentNumber: string | null;
@@ -9,6 +10,7 @@ interface StudentInfoProps {
 export function StudentInfo({ studentNumber }: StudentInfoProps) {
   const navigate = useNavigate();
   const tst = useToast();
+const logger = useLogger("StudentInfo");
 
   const handleLogout = async () => {
     try {
@@ -29,7 +31,7 @@ export function StudentInfo({ studentNumber }: StudentInfoProps) {
       // Redirect to login page
       navigate({ to: '/studentView/login' });
     } catch (error) {
-      console.error('Error during logout:', error);
+      logger.error('Error during logout:', error);
       // Even if API call fails, clear localStorage and redirect
       localStorage.removeItem('studentViewAccessJWT');
       localStorage.removeItem('studentViewRefreshJWT');

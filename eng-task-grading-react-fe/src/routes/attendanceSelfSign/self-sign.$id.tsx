@@ -4,6 +4,7 @@ import type { AttendanceDaySelfSignCreateDto } from '../../model/attendance-dto'
 import { attendanceService } from '../../services/attendance-service'
 import Cookies from "js-cookie";
 import { useToast } from '../../hooks/use-toast';
+import { useLogger } from '../../hooks/use-logger';
 
 const SELF_SIGN_USED_COOKIE_NAME = "self-sign-used";
 
@@ -27,6 +28,7 @@ function SelfSignComponent() {
   const [isSubmitted, setIsSubmitted] = useState(false)
   const selfSignCookieValue: string | undefined = Cookies.get(SELF_SIGN_USED_COOKIE_NAME);
   const tst = useToast();
+  const logger = useLogger("/attendanceSelfSign/self-sign/$id.tsx");
 
   const validateStudyNumber = (value: string): boolean => {
     const pattern = /^[A-Za-z]\d{5}$/
@@ -60,7 +62,7 @@ function SelfSignComponent() {
         tst.success(tst.SUC.ITEM_CREATED);
         setIsSubmitted(true);
       } catch (error) {
-        console.error('Chyba při odesílání žádosti o zápis:', error);
+        logger.error('Chyba při odesílání žádosti o zápis:', error);
         tst.error(error);
       }
     }

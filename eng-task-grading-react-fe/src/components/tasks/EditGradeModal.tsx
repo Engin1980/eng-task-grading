@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import type { StudentDto } from '../../model/student-dto';
 import type { GradeDto, GradeUpdateDto } from '../../model/grade-dto';
 import { gradeService } from '../../services/grade-service';
+import { useLogger } from '../../hooks/use-logger';
 
 interface EditGradeModalProps {
   isOpen: boolean;
@@ -17,6 +18,7 @@ export function EditGradeModal({ isOpen, onClose, student, grade, taskMinGrade, 
   const [value, setValue] = useState<string>('');
   const [comment, setComment] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const logger = useLogger("EditGradeModal");
 
   // Aktualizovat hodnoty když se změní grade
   useEffect(() => {
@@ -35,7 +37,7 @@ export function EditGradeModal({ isOpen, onClose, student, grade, taskMinGrade, 
     if (!grade || !student || !value.trim()) return;
 
     const gradeValue = parseInt(value);
-    if (isNaN(gradeValue) ) {
+    if (isNaN(gradeValue)) {
       alert('Známka musí být validní celé číslo.');
       return;
     }
@@ -52,7 +54,7 @@ export function EditGradeModal({ isOpen, onClose, student, grade, taskMinGrade, 
       onGradeUpdated(updatedGrade);
       handleClose();
     } catch (error) {
-      console.error('Error updating grade:', error);
+      logger.error('Error updating grade:', error);
       alert('Chyba při aktualizaci známky');
     } finally {
       setIsSubmitting(false);

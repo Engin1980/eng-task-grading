@@ -235,8 +235,6 @@ export function useToast() {
     else {
       const key = (error as any)?.errorKey;
       const errorParam = (error as any)?.param;
-      console.log("Err je " + key + " a param " + errorParam);
-      console.log(JSON.stringify(error));
       const msg = convertErrorMessageToMessage(key, errorParam);
       toast.error(msg);
     }

@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useAuthContext } from '../../../contexts/AuthContext'
 import { useToast } from '../../../hooks/use-toast'
+import { useLogger } from '../../../hooks/use-logger'
 
 export const Route = createFileRoute('/studentView/verify/$token')({
   component: RouteComponent,
@@ -43,6 +44,7 @@ function RouteComponent() {
   const [isLoading, setIsLoading] = useState(false)
   const { loginStudent } = useAuthContext();
   const tst = useToast();
+  const logger = useLogger("/studentView/verify/$token.tsx");
 
   const confirmTokenAndDuration = async (token: string, duration: string) => {
     const durationSeconds = convertDurationToSeconds(duration);
@@ -52,6 +54,7 @@ function RouteComponent() {
       // Navigate to courses page after successful verification
       navigate({ to: '/studentView/courses' })
     } catch (error) {
+      logger.error('Error confirming token:', error);
       tst.error(token);
     }
   }
@@ -63,9 +66,9 @@ function RouteComponent() {
     try {
       await confirmTokenAndDuration(token, selectedDuration)
     } catch (error) {
-      console.error('Error confirming token:', error)
+      logger.error('Error confirming token:', error)
 
-//TODO resolve and unify error handling w.r.t. tst/toast usage
+      //TODO resolve and unify error handling w.r.t. tst/toast usage
       // Check if it's a 401 Unauthorized error
       if (error instanceof Error && error.message.includes('401')) {
         tst.error('Token je neplatný nebo vypršel. Požádejte o nový odkaz pro ověření.')

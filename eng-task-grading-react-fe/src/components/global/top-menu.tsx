@@ -2,18 +2,20 @@ import { Link, useNavigate } from '@tanstack/react-router';
 import { useAuthContext } from '../../contexts/AuthContext';
 import { TopMenuNavigation } from './top-menu-navigation';
 import { useToast } from '../../hooks/use-toast';
+import { useLogger } from '../../hooks/use-logger';
 
 const TopMenu: React.FC = () => {
   const tst = useToast();
   const { loggedUser, logout } = useAuthContext();
   const navigate = useNavigate();
+  const logger = useLogger("TopMenu");
 
   const handleLogout = async () => {
     try {
       await logout();
       tst.success(tst.SUC.LOGOUT_SUCCESSFUL);
     } catch (err) {
-      console.error("Logout error:", err);
+      logger.error("Logout error:", err);
       tst.error(err);
     }
     navigate({ to: '/login' });

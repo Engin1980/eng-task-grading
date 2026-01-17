@@ -17,7 +17,7 @@ function Login() {
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null)
-  const logger = useLogger("LoginPage");
+  const logger = useLogger("Login");
   const navigate = useNavigate();
   const { loginTeacher } = useAuthContext();
   // Optional next page from query string (?nextPage=/some/path)
@@ -36,7 +36,7 @@ function Login() {
       setPassword("Bublinka#1");
     }
     if (isCloudflareEnabled && !TURNSTILE_SITE_KEY) {
-      console.error('Chyba: VITE_CLOUDFLARE_SITE_KEY není nastaven v .env.local');
+      logger.error('Chyba: VITE_CLOUDFLARE_SITE_KEY není nastaven v .env.local');
     }
   }, [isCloudflareEnabled, TURNSTILE_SITE_KEY]);
 

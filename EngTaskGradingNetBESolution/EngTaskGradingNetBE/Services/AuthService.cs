@@ -1,5 +1,7 @@
 ﻿using Azure.Core;
 using EngTaskGradingNetBE.Exceptions;
+using EngTaskGradingNetBE.Exceptions.BadData.Common;
+using EngTaskGradingNetBE.Exceptions.BadData.NotFound;
 using EngTaskGradingNetBE.Lib;
 using EngTaskGradingNetBE.Models.Config;
 using EngTaskGradingNetBE.Models.DbModel;
@@ -7,6 +9,7 @@ using EngTaskGradingNetBE.Models.Dtos;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using System.Diagnostics.Eventing.Reader;
+using System.Text.RegularExpressions;
 
 namespace EngTaskGradingNetBE.Services
 {
@@ -23,13 +26,13 @@ namespace EngTaskGradingNetBE.Services
       StudentViewToken token = await Db.StudentViewTokens
         .Include(q => q.Student)
         .FirstOrDefaultAsync(q => q.Token == loginTokenValue && q.Type == StudentViewTokenType.Login)
-        ?? throw new StudentTokenInvalidException("Illegal token.");
+        ?? throw new InvalidTokenException(InvalidTokenException.InvalidationType.NotFound);
 
       Db.StudentViewTokens.Remove(token);
       await Db.SaveChangesAsync();
 
       if (token.ExpiresAt < DateTime.Now)
-        throw new StudentTokenInvalidException("Expired token.");
+        throw new InvalidTokenException(InvalidTokenException.InvalidationType.Expired);
 
       return token.Student;
     }
@@ -145,12 +148,22 @@ namespace EngTaskGradingNetBE.Services
 
     internal async System.Threading.Tasks.Task SetPasswordAsync(int teacherId, string password)
     {
+      if (!IsPasswordRequirementFulfilled(password))
+        throw new PasswordsRequirementsNotFulfilledException();
+
       string passwordHash = BCrypt.Net.BCrypt.HashPassword(password);
       Teacher teacher = await Db.Teachers.FirstOrDefaultAsync(t => t.Id == teacherId)
-        ?? throw new EntityNotFoundException(NotFoundErrorKind.TeacherNotFound, teacherId);
+        ?? throw new Exceptions.BadData.NotFound.EntityNotFoundException<Teacher>(teacherId);
 
       teacher.PasswordHash = passwordHash;
       await Db.SaveChangesAsync();
+    }
+
+    private bool IsPasswordRequirementFulfilled(string password)
+    {
+      var passwordRegex = new Regex(sett.Teacher.PasswordRegex, RegexOptions.Compiled);
+      if (string.IsNullOrWhiteSpace(password)) return false;
+      return passwordRegex.IsMatch(password);
     }
 
     private string GenerateJwtToken(string email, string roleName, int expiratonInMinutes)
@@ -184,11 +197,11 @@ namespace EngTaskGradingNetBE.Services
       return jwt;
     }
 
-    internal async System.Threading.Tasks.Task InvokePasswordResetProcedure(string email)
+    internal async System.Threading.Tasks.Task InvokeTeacherPasswordResetProcedure(string email)
     {
       Teacher teacher = await Db.Teachers
         .FirstOrDefaultAsync(t => t.Email == email)
-        ?? throw new EntityNotFoundException(NotFoundErrorKind.TeacherNotFound, "email", email);
+        ?? throw new Exceptions.BadData.NotFound.EntityNotFoundException<Teacher>(email);
 
       await Db.TeacherTokens
         .Where(q => q.Type == TeacherToken.TokenType.PasswordReset && q.TeacherId == teacher.Id)
@@ -301,21 +314,20 @@ namespace EngTaskGradingNetBE.Services
 
     internal async System.Threading.Tasks.Task ResetPasswordAsync(string tokenValue, string email, string password)
     {
-      Teacher teacher = await Db.Teachers
-          .Include(q => q.Tokens)
-          .FirstOrDefaultAsync(q => q.Email == email.ToLower())
-          ?? throw new EntityNotFoundException(NotFoundErrorKind.TeacherNotFound, nameof(Teacher.Email), email);
+      TeacherToken token = await Db.TeacherTokens
+        .Include(q => q.Teacher)
+        .FirstOrDefaultAsync(q => q.Value == tokenValue && q.Type == TeacherToken.TokenType.PasswordReset)
+        ?? throw new InvalidTokenException(InvalidTokenException.InvalidationType.NotFound);
 
-      TeacherToken? token = teacher
-        .Tokens
-        .FirstOrDefault(q => q.Value == tokenValue && q.Type == TeacherToken.TokenType.PasswordReset)
-        ?? throw new EntityNotFoundException(NotFoundErrorKind.TeacherTokenNotFound, nameof(TeacherToken.Value), tokenValue);
+      Teacher teacher = token.Teacher;
+      if (teacher.Email != email)
+        throw new InvalidTokenException(InvalidTokenException.InvalidationType.InvalidOwner);
 
       Db.TeacherTokens.Remove(token);
       await Db.SaveChangesAsync();
 
       if (token.ExpirationDate < DateTime.Now)
-        throw new CommonBadDataException(CommonErrorKind.TokenExpired, "");
+        throw new InvalidTokenException(InvalidTokenException.InvalidationType.Expired);
 
       await SetPasswordAsync(teacher.Id, password);
     }

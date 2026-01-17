@@ -5,6 +5,7 @@ import type { AttendanceValueDto, AttendanceRecordDto } from '../../model/attend
 import { AttendanceValueLabelBlock } from '../../ui/attendanceValueLabelBlock';
 import { AttendanceValueLabel } from '../../ui/attendanceValueLabel';
 import { AttendanceValueUnsetLabel } from '../../ui/attendanceValueUnsetLabel';
+import { useToast } from '../../hooks/use-toast';
 
 interface AttendanceRecordsTabProps {
   attendanceDayId: number;
@@ -15,6 +16,7 @@ export function AttendanceRecordsTab({ attendanceDayId }: AttendanceRecordsTabPr
   const [values, setValues] = useState<AttendanceValueDto[]>([]);
   const [records, setRecords] = useState<AttendanceRecordDto[]>([]);
   const [loading, setLoading] = useState(true);
+  const tst = useToast();
 
   const loadDataAsync = async () => {
     try {
@@ -29,6 +31,7 @@ export function AttendanceRecordsTab({ attendanceDayId }: AttendanceRecordsTabPr
       setRecords(tmpB);
     } catch (error) {
       console.error('Error loading data:', error);
+      tst.error(error);
     } finally {
       setLoading(false);
     }
@@ -47,6 +50,7 @@ export function AttendanceRecordsTab({ attendanceDayId }: AttendanceRecordsTabPr
       };
 
       const savedRecord = await attendanceService.setRecord(newRecord);
+      tst.success(tst.SUC.ITEM_CREATED);
 
       // Aktualizuj records v state
       setRecords(prevRecords => {
@@ -63,6 +67,7 @@ export function AttendanceRecordsTab({ attendanceDayId }: AttendanceRecordsTabPr
       });
     } catch (error) {
       console.error('Error setting record:', error);
+      tst.error(error);
     }
   };
 
@@ -74,9 +79,11 @@ export function AttendanceRecordsTab({ attendanceDayId }: AttendanceRecordsTabPr
 
         // Odstraň záznam z state
         setRecords(prevRecords => prevRecords.filter(r => r.studentId !== studentId));
+        tst.success(tst.SUC.ITEM_DELETED);
       }
     } catch (error) {
       console.error('Error deleting record:', error);
+      tst.error(error);
     }
   };
 

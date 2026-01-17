@@ -2,18 +2,20 @@ import { useState } from 'react'
 import type { CourseCreateDto } from '../../model/course-dto'
 import { AppDialog } from '../../ui/AppDialog'
 import { CourseEditor, type CourseEditorData } from '../../ui/editors/CourseEditor'
-import { toast } from 'react-hot-toast'
 import { isCourseCodeValid } from '../../types/validations'
+import { courseService } from '../../services/course-service'
+import { useToast } from '../../hooks/use-toast'
 
 interface CreateCourseModalProps {
   isOpen: boolean
   onClose: () => void
-  onSubmit: (course: CourseCreateDto) => void
+  onCourseCreated: (courseData: CourseCreateDto) => void
 }
 
 
 export function CreateCourseModal(props: CreateCourseModalProps) {
   const [courseEditorData, setCourseEditorData] = useState<CourseEditorData>({ code: '', name: '' })
+  const tst = useToast();
 
   const handleCreateCourse = async () => {
     const courseData: CourseCreateDto = {
@@ -22,12 +24,13 @@ export function CreateCourseModal(props: CreateCourseModalProps) {
     }
 
     try {
-      props.onSubmit(courseData);
-      toast.success(`Kurz ${courseData.code} byl úspěšně vytvořen.`);
+      await courseService.createCourse(courseData);
+      tst.success(tst.SUC.ITEM_CREATED);
       setCourseEditorData({ code: '', name: '' });
+      props.onCourseCreated(courseData);
       props.onClose();
     } catch (err) {
-      toast.error(`Chyba při vytváření kurzu.`);
+      tst.error(err);
     }
   }
 

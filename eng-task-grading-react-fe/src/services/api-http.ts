@@ -2,10 +2,12 @@ import axios from "axios";
 import type { AxiosInstance, AxiosResponse } from "axios";
 import { createLogger } from "./log-service";
 import AppSettings from "../config/app-settings";
-import toast from "react-hot-toast";
+import { useToast } from "../hooks/use-toast";
 
 const logger = createLogger("ApiHttp");
 const BASE_URL = AppSettings.backendUrl; //backendUrl; "https://localhost:55556/api";
+
+const tst = useToast();
 
 let getAccessToken: (() => string | null) = () => null;
 let refreshHandler: (() => Promise<string | undefined>) = () => Promise.resolve(undefined);
@@ -16,6 +18,13 @@ export function setTokenProvider(provider: () => string | null) {
 
 export function setRefreshHandler(handler: () => Promise<string | undefined>) {
   refreshHandler = handler;
+}
+
+function tryUnwrapAxiosError(error: any): any {
+  if (axios.isAxiosError(error))
+    return error.response?.data || error.message;
+  else
+    return error;
 }
 
 // Vytvoříme axios instanci
@@ -69,7 +78,7 @@ axiosInstance.interceptors.response.use(
         }
         else {
           // refresh did not return a token -> redirect to login with nextPage
-          toast.error("Přihlášení vypršelo. Prosím přihlaste se znovu.");
+          tst.error(tst.ERR.LOGIN_EXPIRED);
           if (typeof window !== 'undefined') {
             const next = encodeURIComponent(window.location.pathname + window.location.search);
             window.location.href = `/login?nextPage=${next}`;
@@ -78,7 +87,7 @@ axiosInstance.interceptors.response.use(
         }
       } catch (refreshError) {
         // refresh attempt threw -> redirect to login with nextPage
-        toast.error("Neznámá interní chyba při zpracování požadavku.");
+        tst.error(refreshError);
         if (typeof window !== 'undefined') {
           const next = encodeURIComponent(window.location.pathname + window.location.search);
           window.location.href = `/login?nextPage=${next}`;
@@ -124,6 +133,7 @@ export const apiHttp = {
       return response;
     } catch (error) {
       logger.error(`GET ${url} - ERROR`, { error, config });
+      error = tryUnwrapAxiosError(error);
       throw error;
     }
   },
@@ -141,6 +151,7 @@ export const apiHttp = {
       return response;
     } catch (error) {
       logger.error(`POST ${url} - ERROR`, { error, data, config });
+      error = tryUnwrapAxiosError(error);
       throw error;
     }
   },
@@ -158,6 +169,7 @@ export const apiHttp = {
       return response;
     } catch (error) {
       logger.error(`PUT ${url} - ERROR`, { error, data, config });
+      error = tryUnwrapAxiosError(error);
       throw error;
     }
   },
@@ -175,6 +187,7 @@ export const apiHttp = {
       return response;
     } catch (error) {
       logger.error(`DELETE ${url} - ERROR`, { error, config });
+      error = tryUnwrapAxiosError(error);
       throw error;
     }
   },
@@ -192,6 +205,7 @@ export const apiHttp = {
       return response;
     } catch (error) {
       logger.error(`PATCH ${url} - ERROR`, { error, data, config });
+      error = tryUnwrapAxiosError(error);
       throw error;
     }
   },

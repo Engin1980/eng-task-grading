@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
-import toast from 'react-hot-toast'
 import { useAuthContext } from '../../../contexts/AuthContext'
+import { useToast } from '../../../hooks/use-toast'
 
 export const Route = createFileRoute('/studentView/verify/$token')({
   component: RouteComponent,
@@ -42,6 +42,7 @@ function RouteComponent() {
   const [selectedDuration, setSelectedDuration] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const { loginStudent } = useAuthContext();
+  const tst = useToast();
 
   const confirmTokenAndDuration = async (token: string, duration: string) => {
     const durationSeconds = convertDurationToSeconds(duration);
@@ -50,8 +51,8 @@ function RouteComponent() {
       await loginStudent(token, durationSeconds);
       // Navigate to courses page after successful verification
       navigate({ to: '/studentView/courses' })
-    } catch {
-      toast.error('Token je neplatný nebo vypršel. Požádejte o nový odkaz pro ověření.')
+    } catch (error) {
+      tst.error(token);
     }
   }
 
@@ -64,13 +65,14 @@ function RouteComponent() {
     } catch (error) {
       console.error('Error confirming token:', error)
 
+//TODO resolve and unify error handling w.r.t. tst/toast usage
       // Check if it's a 401 Unauthorized error
       if (error instanceof Error && error.message.includes('401')) {
-        toast.error('Token je neplatný nebo vypršel. Požádejte o nový odkaz pro ověření.')
+        tst.error('Token je neplatný nebo vypršel. Požádejte o nový odkaz pro ověření.')
       } else if (error instanceof Response && error.status === 401) {
-        toast.error('Token je neplatný nebo vypršel. Požádejte o nový odkaz pro ověření.')
+        tst.error('Token je neplatný nebo vypršel. Požádejte o nový odkaz pro ověření.')
       } else {
-        toast.error('Došlo k chybě při ověřování. Zkuste to prosím znovu.')
+        tst.error('Došlo k chybě při ověřování. Zkuste to prosím znovu.')
       }
     } finally {
       setIsLoading(false)

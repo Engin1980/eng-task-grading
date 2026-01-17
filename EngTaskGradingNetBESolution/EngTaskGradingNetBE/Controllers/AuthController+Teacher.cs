@@ -1,4 +1,5 @@
 ﻿using EngTaskGradingNetBE.Exceptions;
+using EngTaskGradingNetBE.Exceptions.BadData;
 using EngTaskGradingNetBE.Lib;
 using EngTaskGradingNetBE.Models.Config;
 using EngTaskGradingNetBE.Models.Dtos;
@@ -40,9 +41,9 @@ public partial class AuthController
     {
       try
       {
-        await ctx.AuthService.InvokePasswordResetProcedure(email);
+        await ctx.AuthService.InvokeTeacherPasswordResetProcedure(email);
       }
-      catch (EntityNotFoundException)
+      catch (BadDataException)
       {
         ctx.Logger.LogWarning($"Password reset requested for non-existing email {email}.");
         return; // ignore to prevent user enumeration
@@ -50,7 +51,7 @@ public partial class AuthController
       catch (Exception ex)
       {
         ctx.Logger.LogError(ex, $"Failed to process password reset request for {email}.");
-        return; // ignore to prevent user enumeration
+        throw;
       }
     }
 
@@ -63,7 +64,7 @@ public partial class AuthController
       catch (Exception ex)
       {
         ctx.Logger.LogError(ex, $"Failed to set new password for ${data.Email}");
-        throw new CommonBadDataException(CommonErrorKind.InvalidPasswordResetData, "");
+        throw;
       }
     }
   }

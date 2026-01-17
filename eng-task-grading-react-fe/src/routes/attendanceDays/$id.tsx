@@ -4,7 +4,6 @@ import { AttendanceRecordsTab, SelfSignTab } from '../../components/attendanceDa
 import { EditIcon } from '../../ui/icons/editIcon';
 import { DeleteIcon } from '../../ui/icons/deleteIcon';
 import { DeleteModal } from '../../components/global/DeleteModal';
-import toast from 'react-hot-toast';
 import type { AttendanceDayDto, AttendanceDayUpdateDto } from '../../model/attendance-dto';
 import { attendanceService } from '../../services/attendance-service';
 import { useNavigate } from '@tanstack/react-router';
@@ -12,6 +11,7 @@ import { useLoadingState } from '../../types/loadingState';
 import { Loading } from '../../ui/loading';
 import { LoadingError } from '../../ui/loadingError';
 import { EditAttendanceDayModal } from '../../components/attendanceDays/EditAttendanceDayModal';
+import { useToast } from '../../hooks/use-toast';
 
 export const Route = createFileRoute('/attendanceDays/$id')({
   component: AttendanceDayDetailPage,
@@ -26,6 +26,7 @@ function AttendanceDayDetailPage() {
   const [attendanceDay, setAttendanceDay] = useState<AttendanceDayDto>(null!);
   const navigate = useNavigate();
   const ldgState = useLoadingState();
+  const tst = useToast();
 
   const loadData = async () => {
     try {
@@ -45,10 +46,10 @@ function AttendanceDayDetailPage() {
   const handleAttendanceDelete = () => {
     try {
       attendanceService.deleteDay(id);
-      toast.success("Den docházky byl úspěšně smazán.");
+      tst.success(tst.SUC.ITEM_DELETED)
       navigate({ to: `/attendances/${attendanceDay.attendanceId}/days` });
     } catch (err) {
-      toast.error("Chyba při mazání dne docházky.");
+      tst.error(err);
       throw err;
     }
   }

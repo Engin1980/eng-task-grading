@@ -109,13 +109,13 @@ namespace EngTaskGradingNetBE.Services
     {
       var student = await Db.Students
         .FirstOrDefaultAsync(q => q.Number == studyNumber)
-        ?? throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.StudentNotFound, $"StudyNumber == {studyNumber}");
+        ?? throw new Exceptions.BadData.NotFound.EntityNotFoundException<Student>(studyNumber);
 
       var courseWithTasks = await Db.Courses
         .Include(q => q.Tasks)
         .Include(q => q.Attendances).ThenInclude(q => q.Days)
         .FirstOrDefaultAsync(q => q.Id == courseId)
-        ?? throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.CourseNotFound, courseId);
+        ?? throw new Exceptions.BadData.NotFound.EntityNotFoundException<Course>(courseId);
       var grades = await Db.Grades
         .Where(q => q.StudentId == student.Id)
         .ToListAsync();

@@ -1,5 +1,6 @@
 ﻿using EngTaskGradingNetBE.Models.DbModel;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace EngTaskGradingNetBE.Services
 {
@@ -19,15 +20,16 @@ namespace EngTaskGradingNetBE.Services
       await Db.SaveChangesAsync();
     }
 
-    public async Task<Models.DbModel.Task> GetByIdAsync(int id)
+    public async Task<Models.DbModel.Task> GetByIdAsync(int taskId)
     {
-      return await Db.Tasks.FindAsync(id) ?? throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.TaskNotFound, id);
+      return await Db.Tasks.FindAsync(taskId)
+        ?? throw new Exceptions.BadData.NotFound.EntityNotFoundException<Models.DbModel.Task>(taskId);
     }
 
     public async Task<Models.DbModel.Task> UpdateAsync(int taskId, Models.DbModel.Task updatedTask)
     {
       var existingTask = await Db.Tasks.FirstOrDefaultAsync(q => q.Id == taskId)
-        ?? throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.TaskNotFound, taskId);
+        ?? throw new Exceptions.BadData.NotFound.EntityNotFoundException<Models.DbModel.Task>(taskId);
 
       existingTask.Title = updatedTask.Title;
       existingTask.Description = updatedTask.Description;
@@ -40,11 +42,11 @@ namespace EngTaskGradingNetBE.Services
       return existingTask;
     }
 
-    public async System.Threading.Tasks.Task DeleteAsync(int id, bool mustExist = false)
+    public async System.Threading.Tasks.Task DeleteAsync(int taskId, bool mustExist = false)
     {
-      var task = await Db.Tasks.FirstOrDefaultAsync(q => q.Id == id);
+      var task = await Db.Tasks.FirstOrDefaultAsync(q => q.Id == taskId);
       if (task == null)
-        if (mustExist) throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.TaskNotFound, id);
+        if (mustExist) throw new Exceptions.BadData.NotFound.EntityNotFoundException<Models.DbModel.Task>(taskId);
         else return;
       Db.Tasks.Remove(task);
       await Db.SaveChangesAsync();

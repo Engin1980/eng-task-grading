@@ -1,6 +1,6 @@
 import { useNavigate } from '@tanstack/react-router';
 import { studentViewService } from '../../services/student-view-service';
-import toast from 'react-hot-toast';
+import { useToast } from '../../hooks/use-toast';
 
 interface StudentInfoProps {
   studentNumber: string | null;
@@ -8,23 +8,24 @@ interface StudentInfoProps {
 
 export function StudentInfo({ studentNumber }: StudentInfoProps) {
   const navigate = useNavigate();
+  const tst = useToast();
 
   const handleLogout = async () => {
     try {
       const refreshToken = localStorage.getItem('studentViewRefreshJWT');
-      
+
       // Call forget API if we have a refresh token
       if (refreshToken) {
         await studentViewService.forget(refreshToken);
       }
-      
+
       // Clear localStorage
       localStorage.removeItem('studentViewAccessJWT');
       localStorage.removeItem('studentViewRefreshJWT');
-      
+
       // Show success message
-      toast.success('Úspěšně odhlášeno');
-      
+      tst.success(tst.SUC.LOGOUT_SUCCESSFUL);
+
       // Redirect to login page
       navigate({ to: '/studentView/login' });
     } catch (error) {
@@ -32,7 +33,7 @@ export function StudentInfo({ studentNumber }: StudentInfoProps) {
       // Even if API call fails, clear localStorage and redirect
       localStorage.removeItem('studentViewAccessJWT');
       localStorage.removeItem('studentViewRefreshJWT');
-      toast.success('Úspěšně odhlášeno');
+      tst.success(tst.SUC.LOGOUT_SUCCESSFUL);
       navigate({ to: '/studentView/login' });
     }
   };

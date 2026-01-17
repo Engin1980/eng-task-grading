@@ -40,6 +40,8 @@ namespace EngTaskGradingNetBE.Models.Config
     public int AccessTokenExpiryMinutes { get; set; } = 5;
     public int SessionRefreshTokenExpiryInMinutes { get; set; } = 15;
     public int PersistentRefreshTokenExpiryInMinutes { get; set; } = 60 * 8;
+
+    public string PasswordRegex { get; set; } = @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,}$";
   }
 
   public class CloudFlareSettings

@@ -14,7 +14,7 @@ import { EditTaskModal } from '../../components/tasks/EditTaskModal';
 import { DeleteIcon } from '../../ui/icons/deleteIcon';
 import { DeleteModal } from '../../components/global/DeleteModal';
 import { taskService } from '../../services/task-service';
-import toast from 'react-hot-toast';
+import { useToast } from '../../hooks/use-toast';
 
 export const Route = createFileRoute('/tasks/$id')({
   component: RouteComponent,
@@ -34,6 +34,7 @@ function RouteComponent() {
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const navigate = useNavigate();
+  const tst = useToast();
 
   // Funkce pro filtrování studentů
   const filteredStudentData = set?.students.filter(studentData => {
@@ -176,10 +177,10 @@ function RouteComponent() {
   const handleTaskDelete = async () => {
     try {
       await taskService.delete(task.id);
-      toast.success('Úkol byl úspěšně smazán.');
+      tst.success(tst.SUC.ITEM_DELETED);
       navigate({ to: `/courses/${task.courseId}/tasks` });
     } catch (err) {
-      toast.error('Úkol se nepodařilo smazat.');
+      tst.error(err);
     }
   }
 

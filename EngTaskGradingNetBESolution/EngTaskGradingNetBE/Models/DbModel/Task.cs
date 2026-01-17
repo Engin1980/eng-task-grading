@@ -32,5 +32,5 @@ public class Task
 
   public AggregationType Aggregation { get; set; } = AggregationType.Last;
 
-  public List<Grade> Grades { get; set; } = null!;
+  public List<Grade> Grades { get; set; } = [];
 }

@@ -6,7 +6,7 @@ import { taskService } from '../../../services/task-service';
 import { CreateTaskModal } from '../../../components/tasks';
 import { LoadingError } from '../../../ui/loadingError';
 import { useLoadingState } from '../../../types/loadingState';
-import toast from 'react-hot-toast';
+import { useToast } from '../../../hooks/use-toast';
 
 export const Route = createFileRoute('/courses/$id/tasks')({
   component: TasksPage,
@@ -20,6 +20,7 @@ function TasksPage() {
   const [tasks, setTasks] = useState<TaskDto[]>();
   const ldgState = useLoadingState();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const tst = useToast();
 
   const loadTasks = async () => {
     logger.info("Loading tasks for course", { courseId });
@@ -46,10 +47,9 @@ function TasksPage() {
     try {
       await taskService.create(data);
       await loadTasks();
-      toast.success("Úkol byl úspěšně vytvořen.");
+      tst.success(tst.SUC.ITEM_CREATED);
     } catch (err) {
-      toast.error("Chyba při vytváření úkolu.");
-      throw err;
+      tst.error(err);
     }
   }
 

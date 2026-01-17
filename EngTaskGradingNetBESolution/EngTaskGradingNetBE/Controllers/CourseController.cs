@@ -14,12 +14,12 @@ namespace EngTaskGradingNetBE.Controllers
   public class CourseController(CourseService courseService, StudentService studentService) : ControllerBase
   {
     [HttpPost]
-    public async Task<ActionResult<Course>> CreateCourseAsync([FromBody] CourseCreateDto courseCreateDto)
+    public async Task<CourseDto> CreateCourseAsync([FromBody] CourseCreateDto courseCreateDto)
     {
       Course course = EObjectMapper.From(courseCreateDto);
       var createdCourse = await courseService.CreateAsync(course);
       var courseDto = EObjectMapper.To(createdCourse);
-      return CreatedAtAction(nameof(CreateCourseAsync), courseDto.Id, courseDto);
+      return courseDto;
     }
 
     [HttpPatch("{courseId}")]

@@ -3,7 +3,7 @@ import type { AttendanceDayDto, AttendanceDayUpdateDto } from "../../model/atten
 import type { AttendanceDayEditorData } from "../../ui/editors/AttendanceDayEditor";
 import { AppDialog } from "../../ui/AppDialog";
 import { EditAttendanceDayEditor } from "./EditAttendanceDayEditor";
-import toast from "react-hot-toast";
+import { useToast } from "../../hooks/use-toast";
 
 interface EditAttendanceDayModalProps {
   isOpen: boolean;
@@ -17,6 +17,7 @@ export function EditAttendanceDayModal(props: EditAttendanceDayModalProps) {
   const [attendanceDayEditorData, setAttendanceDayEditorData] = useState<AttendanceDayEditorData>({
     title: ""
   });
+  const tst = useToast();
 
   const handleSubmit = async () => {
 
@@ -28,11 +29,11 @@ export function EditAttendanceDayModal(props: EditAttendanceDayModalProps) {
 
     try {
       props.onSubmit(data);
-      toast.success("Den docházky byl úspěšně upraven.");
+      tst.success(tst.SUC.ITEM_UPDATED);
       setAttendanceDayEditorData({ title: "" });
       props.onClose(true);
     } catch (err) {
-      toast.error("Chyba při úpravě dne docházky.");
+      tst.error(err);
     }
   }
 

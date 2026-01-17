@@ -22,14 +22,14 @@ namespace EngTaskGradingNetBE.Services
         .Include(q => q.Students)
         .Include(q => q.Attendances)
         .FirstOrDefaultAsync()
-        ?? throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.CourseNotFound, courseId);
+        ?? throw new Exceptions.BadData.NotFound.EntityNotFoundException<Course>(courseId);
     }
 
     public async Task<Course> CreateAsync(Course course)
     {
       if (Db.Courses.Any(c => c.Code == course.Code))
       {
-        throw new Exceptions.DuplicateEntityException(Lib.AlreadyExistsErrorKind.CourseCodeAlreadyExists, course.Code);
+        throw new Exceptions.BadData.Duplicate.DuplicateCourseCodeException(course.Code);
       }
 
       Db.Courses.Add(course);
@@ -49,10 +49,8 @@ namespace EngTaskGradingNetBE.Services
     {
       var course = await Db.Courses
           .Include(c => c.Students)
-          .FirstOrDefaultAsync(c => c.Id == courseId);
-
-      if (course == null)
-        throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.CourseNotFound, courseId);
+          .FirstOrDefaultAsync(c => c.Id == courseId)
+          ?? throw new Exceptions.BadData.NotFound.EntityNotFoundException<Course>(courseId);
 
       var studentsToAssign = await Db.Students
           .Where(s => studentIds.Contains(s.Id))
@@ -73,9 +71,9 @@ namespace EngTaskGradingNetBE.Services
       var course = await Db.Courses
           .Include(c => c.Students)
           .FirstOrDefaultAsync(c => c.Id == courseId)
-          ?? throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.CourseNotFound, courseId);
+          ?? throw new Exceptions.BadData.NotFound.EntityNotFoundException<Course>(courseId);
       var student = await Db.Students.FindAsync(studentId)
-        ?? throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.StudentNotFound, studentId);
+        ?? throw new Exceptions.BadData.NotFound.EntityNotFoundException<Student>(studentId);
 
       if (course.Students.Any(s => s.Id == student.Id) == false)
       {
@@ -89,9 +87,9 @@ namespace EngTaskGradingNetBE.Services
       var course = await Db.Courses
           .Include(c => c.Students)
           .FirstOrDefaultAsync(c => c.Id == courseId)
-          ?? throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.CourseNotFound, courseId);
+          ?? throw new Exceptions.BadData.NotFound.EntityNotFoundException<Course>(courseId);
       var student = await Db.Students.FindAsync(studentId)
-        ?? throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.StudentNotFound, studentId);
+        ?? throw new Exceptions.BadData.NotFound.EntityNotFoundException<Student>(studentId);
       if (course.Students.Any(s => s.Id == student.Id))
       {
         course.Students.Remove(student);
@@ -102,7 +100,7 @@ namespace EngTaskGradingNetBE.Services
     public async Task<Course> UpdateAsync(int courseId, Course updatedCourse)
     {
       var existingCourse = await Db.Courses.FirstOrDefaultAsync(q => q.Id == courseId)
-        ?? throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.CourseNotFound, courseId);
+        ?? throw new Exceptions.BadData.NotFound.EntityNotFoundException<Course>(courseId);
 
       existingCourse.Name = updatedCourse.Name;
       existingCourse.Code = updatedCourse.Code;
@@ -111,10 +109,10 @@ namespace EngTaskGradingNetBE.Services
       return existingCourse;
     }
 
-    internal async Task<Course> GetForOverview(int id)
+    internal async Task<Course> GetForOverview(int courseId)
     {
       Course ret = await Db.Courses
-        .Where(q => q.Id == id)
+        .Where(q => q.Id == courseId)
         .Include(q => q.Tasks)
         .Include(q => q.Students)
           .ThenInclude(s => s.Grades)
@@ -131,14 +129,14 @@ namespace EngTaskGradingNetBE.Services
           .ThenInclude(q => q.Student)
         .AsSplitQuery()
         .FirstOrDefaultAsync()
-        ?? throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.CourseNotFound, id);
+        ?? throw new Exceptions.BadData.NotFound.EntityNotFoundException<Course>(courseId);
       return ret;
     }
 
     internal async Task<FinalGrade> SetFinalGradeAsRecordedAsync(int finalGradeId)
     {
       FinalGrade finalGrade = await Db.FinalGrades.FirstOrDefaultAsync(q => q.Id == finalGradeId)
-        ?? throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.FinalGradeNotFound, finalGradeId);
+        ?? throw new Exceptions.BadData.NotFound.EntityNotFoundException<FinalGrade>(finalGradeId);
       finalGrade.RecordedDateTime = DateTime.Now;
       await Db.SaveChangesAsync();
       return finalGrade;
@@ -147,7 +145,7 @@ namespace EngTaskGradingNetBE.Services
     internal async Task<FinalGrade> SetFinalGradeAsUnrecordedAsync(int finalGradeId)
     {
       FinalGrade finalGrade = await Db.FinalGrades.FirstOrDefaultAsync(q => q.Id == finalGradeId)
-        ?? throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.FinalGradeNotFound, finalGradeId);
+        ?? throw new Exceptions.BadData.NotFound.EntityNotFoundException<FinalGrade>(finalGradeId);
       finalGrade.RecordedDateTime = null;
       await Db.SaveChangesAsync();
       return finalGrade;
@@ -160,7 +158,7 @@ namespace EngTaskGradingNetBE.Services
         .FirstAsync(q => q.Id == finalGrade.CourseId);
 
       if (course.FinalGrades.Any(q => q.StudentId == finalGrade.StudentId))
-        throw new Exceptions.DuplicateEntityException(Lib.AlreadyExistsErrorKind.FinalGradeAlreadyExists, "");
+        throw new Exceptions.BadData.Duplicate.DuplicateFinalGradeForCourseAndStudent(finalGrade.CourseId, finalGrade.StudentId);
 
       await Db.FinalGrades.AddAsync(finalGrade);
       await Db.SaveChangesAsync();
@@ -171,7 +169,7 @@ namespace EngTaskGradingNetBE.Services
     internal async Task<FinalGrade> UpdateFinalGradeAsync(int finalGradeId, int value, string? comment)
     {
       FinalGrade finalGrade = await Db.FinalGrades.FirstOrDefaultAsync(q => q.Id == finalGradeId)
-        ?? throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.FinalGradeNotFound, finalGradeId);
+        ?? throw new Exceptions.BadData.NotFound.EntityNotFoundException<FinalGrade>(finalGradeId);
       finalGrade.Value = value;
       finalGrade.Comment = comment;
       finalGrade.RecordedDateTime = null;
@@ -183,7 +181,7 @@ namespace EngTaskGradingNetBE.Services
     internal async System.Threading.Tasks.Task DeleteFinalGradeAsync(int finalGradeId)
     {
       FinalGrade finalGrade = await Db.FinalGrades.FirstOrDefaultAsync(q => q.Id == finalGradeId)
-        ?? throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.FinalGradeNotFound, finalGradeId);
+        ?? throw new Exceptions.BadData.NotFound.EntityNotFoundException<FinalGrade>(finalGradeId);
       Db.FinalGrades.Remove(finalGrade);
       await Db.SaveChangesAsync();
     }

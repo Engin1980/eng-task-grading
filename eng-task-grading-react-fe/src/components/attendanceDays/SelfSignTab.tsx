@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { attendanceService } from '../../services/attendance-service';
-import toast from 'react-hot-toast';
 import type { AttendanceDaySelfSignSetDto, AttendanceImportAnalysisResultWithAttendanceValueDto, AttendanceValueDto } from '../../model/attendance-dto';
 import { useLogger } from '../../hooks/use-logger';
 import { ImportAttendanceWizardFirstModal } from './ImportAttendanceWizardFirstModal';
@@ -11,6 +10,7 @@ import { AttendanceValueLabel } from '../../ui/attendanceValueLabel';
 import { useLoadingState } from '../../types/loadingState';
 import { Loading } from '../../ui/loading';
 import { LoadingError } from '../../ui/loadingError';
+import { useToast } from '../../hooks/use-toast';
 
 interface SelfSignTabProps {
   attendanceDayId: number;
@@ -28,6 +28,7 @@ export function SelfSignTab({ attendanceDayId }: SelfSignTabProps) {
   const [isImportFirstModalOpen, setIsImportFirstModalOpen] = useState(false);
   const [isImportSecondModalOpen, setIsImportSecondModalOpen] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<AttendanceImportAnalysisResultWithAttendanceValueDto>();
+  const tst = useToast();
 
   const loadDataAsync = async () => {
     try {
@@ -66,7 +67,7 @@ export function SelfSignTab({ attendanceDayId }: SelfSignTabProps) {
 
   const handleSetKey = async () => {
     if (!key.trim()) {
-      toast.error('Klíč nesmí být prázdný');
+      tst.error(tst.ERR.SELFSIGN_KEY_EMPTY);
       return;
     }
 
@@ -75,12 +76,11 @@ export function SelfSignTab({ attendanceDayId }: SelfSignTabProps) {
       await attendanceService.setDaySelfSignKey(attendanceDayId, key.trim());
       setCurrentKey(key.trim());
       setKey('');
-      toast.success('Klíč pro samo-zápis byl nastaven.');
-      // Znovu načti data po změně
+      tst.success(tst.SUC.SELFSIGN_KEY_SET);
       await loadDataAsync();
     } catch (error) {
       console.error('Error setting key:', error);
-      toast.error('Chyba při nastavování klíče');
+      tst.error(error);
     }
     setLoadingKey(false);
   };
@@ -90,12 +90,12 @@ export function SelfSignTab({ attendanceDayId }: SelfSignTabProps) {
     try {
       await attendanceService.deleteDaySelfSignKey(attendanceDayId);
       setCurrentKey(null);
-      toast.success('Klíč pro samo-zápis byl smazán.');
+      tst.success(tst.SUC.SELFSIGN_KEY_DELETED);
       // Znovu načti data po změně
       await loadDataAsync();
     } catch (error) {
       console.error('Error deleting key:', error);
-      toast.error('Chyba při mazání klíče');
+      tst.error(error);
     }
     setLoadingKey(false);
   };
@@ -115,7 +115,7 @@ export function SelfSignTab({ attendanceDayId }: SelfSignTabProps) {
   const resolveSelfSign = async (selfSignId: number, attendanceValueId: number) => {
     try {
       await attendanceService.resolveDaySelfSign(selfSignId, attendanceValueId);
-      toast.success('Samo-zápis byl úspěšně vyřízen.');
+      tst.success(tst.SUC.SELFSIGN_KEY_RESOLVED);
 
       // Odstraň vyřízený samo-zápis z kolekce selfSigns
       setSet(prevSet => {
@@ -128,7 +128,7 @@ export function SelfSignTab({ attendanceDayId }: SelfSignTabProps) {
       });
     } catch (error) {
       console.error('Error resolving self-sign:', error);
-      toast.error('Chyba při řešení samo-zápisu');
+      tst.error(error);
     }
   }
 
@@ -144,7 +144,7 @@ export function SelfSignTab({ attendanceDayId }: SelfSignTabProps) {
   }
 
   const handleImported = async () => {
-    toast.success('Import dokončen');
+    tst.success(tst.SUC.STUDENTS_IMPORTED);
     await loadDataAsync();
   }
 

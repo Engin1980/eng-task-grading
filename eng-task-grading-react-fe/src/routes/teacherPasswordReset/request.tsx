@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useRequestState } from '../../types/requestState'
 import { useAuthContext } from '../../contexts/AuthContext'
-import toast from 'react-hot-toast'
+import { useToast } from '../../hooks/use-toast'
 
 export const Route = createFileRoute('/teacherPasswordReset/request')({
   component: RouteComponent,
@@ -12,6 +12,7 @@ function RouteComponent() {
   const [email, setEmail] = useState('')
   const reqSubmit = useRequestState();
   const authContext = useAuthContext();
+  const tst = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -21,7 +22,7 @@ function RouteComponent() {
       reqSubmit.setDone();
     } catch (error) {
       reqSubmit.setError(error);
-      toast.error('Došlo k chybě při odesílání požadavku na reset hesla.');
+      tst.error(error);
       reqSubmit.setReady();
     }
   }

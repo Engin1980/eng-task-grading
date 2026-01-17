@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useRequestState } from '../../types/requestState'
 import { useAuthContext } from '../../contexts/AuthContext'
-import toast from 'react-hot-toast'
+import { useToast } from '../../hooks/use-toast'
 
 interface ResetPasswordForm {
   email: string
@@ -23,7 +23,8 @@ function RouteComponent() {
     password: '',
     confirmPassword: ''
   })
-  const authContext = useAuthContext()
+  const authContext = useAuthContext();
+  const tst = useToast();
 
   const handleChange = (field: keyof ResetPasswordForm) => (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({
@@ -36,7 +37,7 @@ function RouteComponent() {
     e.preventDefault()
 
     if (formData.password !== formData.confirmPassword) {
-      toast.error('Hesla se neshodují.')
+      tst.warning(tst.WRN.PASSWORDS_DO_NOT_MATCH);
       return
     }
 
@@ -44,11 +45,11 @@ function RouteComponent() {
       reqSubmit.setBusy()
       await authContext.setNewTeacherPassword(token, formData.email, formData.password);
       reqSubmit.setDone()
-      toast.success('Heslo bylo úspěšně změněno.')
+      tst.success(tst.SUC.PASSWORD_RESET_SUCCESS);
       setTimeout(() => navigate({ to: '/login' }), 2000)
     } catch (error) {
       reqSubmit.setError(error)
-      toast.error('Došlo k chybě při nastavování nového hesla.')
+      tst.error(error);
       reqSubmit.setReady()
     }
   }

@@ -2,11 +2,11 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { studentViewService } from '../../../services/student-view-service'
 import type { CourseDto } from '../../../model/course-dto';
 import { useState, useEffect } from 'react';
-import toast from 'react-hot-toast'
 import { StudentInfo } from '../../../components/studentView'
 import { Loading } from '../../../ui/loading';
 import { LoadingError } from '../../../ui/loadingError';
 import { useLoadingState } from '../../../types/loadingState';
+import { useToast } from '../../../hooks/use-toast';
 
 export const Route = createFileRoute('/studentView/courses/')({
   component: RouteComponent,
@@ -36,6 +36,7 @@ function RouteComponent() {
   const [courses, setCourses] = useState<CourseDto[]>([]);
   const ldgState = useLoadingState();
   const studentNumber = getStudentNumberFromJWT();
+  const tst = useToast();
 
   const loadCourses = async () => {
     try {
@@ -45,7 +46,7 @@ function RouteComponent() {
       ldgState.setDone();
     } catch (error) {
       console.error('Error loading courses:', error);
-      toast.error('Nepodařilo se načíst kurzy. Zkuste to prosím znovu.');
+      tst.error(error);
       ldgState.setError(error);
     }
   }

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { AttendanceDto, AttendanceUpdateDto } from '../../model/attendance-dto';
 import { AppDialog } from '../../ui/AppDialog';
 import { AttendanceEditor, type AttendanceEditorData } from '../../ui/editors/AttendanceEditor';
-import toast from 'react-hot-toast';
+import { useToast } from '../../hooks/use-toast';
 
 interface EditAttendanceModalProps {
   isOpen: boolean;
@@ -15,6 +15,7 @@ export function EditAttendanceModal(props: EditAttendanceModalProps) {
   const cleanData: AttendanceEditorData = { title: props.attendance.title ?? '', minWeight: props.attendance.minWeight };
   const [attendanceEditorData, setAttendanceEditorData] = useState<AttendanceEditorData>(cleanData);
   const [submitting, setSubmitting] = useState(false);
+  const tst = useToast();
 
   const handleSubmit = async () => {
     if (!attendanceEditorData.title.trim()) return;
@@ -28,12 +29,12 @@ export function EditAttendanceModal(props: EditAttendanceModalProps) {
 
       props.onSubmit(attendanceData);
 
-      toast.success("Docházka byla úspěšně upravena.");
+      tst.success(tst.SUC.ITEM_UPDATED);
       setAttendanceEditorData(cleanData);
       props.onClose();
     } catch (error) {
       console.error('Error creating attendance:', error);
-      toast.error("Chyba při úpravě docházky.");
+      tst.error(error);
     } finally {
       setSubmitting(false);
     }

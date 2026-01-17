@@ -1,4 +1,5 @@
 ﻿using EngTaskGradingNetBE.Exceptions;
+using EngTaskGradingNetBE.Exceptions.BadData.Common;
 using EngTaskGradingNetBE.Models.Config;
 using EngTaskGradingNetBE.Services;
 using Microsoft.AspNetCore.Mvc;

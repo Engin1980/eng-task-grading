@@ -2,10 +2,10 @@ import { useEffect, useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { useLogger } from '../../hooks/use-logger';
 import { attendanceService } from '../../services/attendance-service';
-import toast from 'react-hot-toast';
 import type { AttendanceImportAnalysisResultDto, AttendanceImportAnalysisResultWithAttendanceValueDto, AttendanceValueDto } from '../../model/attendance-dto';
 import { AttendanceValueLabelBlock } from '../../ui/attendanceValueLabelBlock';
 import { AttendanceValueLabel } from '../../ui/attendanceValueLabel';
+import { useToast } from '../../hooks/use-toast';
 
 interface ImportAttendanceWizardFirstModalProps {
   isOpen: boolean;
@@ -20,6 +20,7 @@ export function ImportAttendanceWizardFirstModal({ isOpen, onClose, onAnalyzed, 
   const [attendanceValues, setAttendanceValues] = useState<AttendanceValueDto[] | null>(null);
   const [selectedAttendanceValueId, setSelectedAttendanceValueId] = useState<number | null>(null);
   const logger = useLogger("ImportAttendanceWizardFirstModal");
+  const tst = useToast();
 
   const loadData = async () => {
     const vals = await attendanceService.getAttendanceValues();
@@ -52,7 +53,7 @@ export function ImportAttendanceWizardFirstModal({ isOpen, onClose, onAnalyzed, 
       setSelectedAttendanceValueId(null);
       onAnalyzed(result);
     } catch {
-      toast.error('Chyba při analýze textu pro import docházky.');
+      tst.error(tst.ERR.STUDENTS_IMPORT_ANALYSIS_FAILED);
     }
     setIsLoading(false);
   };
@@ -102,7 +103,7 @@ export function ImportAttendanceWizardFirstModal({ isOpen, onClose, onAnalyzed, 
                         attendanceValue={attendanceValue}
                         isSelected={isSelected}
                         key={attendanceValue.id}
-                        onClick={() => setSelectedAttendanceValueId(attendanceValue.id) } />
+                        onClick={() => setSelectedAttendanceValueId(attendanceValue.id)} />
                     );
                   })}
                 </AttendanceValueLabelBlock>

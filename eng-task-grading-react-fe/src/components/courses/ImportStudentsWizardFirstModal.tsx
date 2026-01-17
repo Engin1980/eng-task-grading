@@ -2,8 +2,8 @@ import { useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { useLogger } from '../../hooks/use-logger';
 import { studentService } from '../../services/student-service';
-import toast from 'react-hot-toast';
 import type { StudentImportAnalysisResultDto } from '../../model/student-dto';
+import { useToast } from '../../hooks/use-toast';
 
 interface ImportStudentsWizardFirstModalProps {
   isOpen: boolean;
@@ -15,6 +15,7 @@ export function ImportStudentsWizardFirstModal({ isOpen, onClose, onAnalyzed }: 
   const [importText, setImportText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const logger = useLogger("ImportStudentWizardFirstModal");
+  const tst = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,7 +30,8 @@ export function ImportStudentsWizardFirstModal({ isOpen, onClose, onAnalyzed }: 
       const data: StudentImportAnalysisResultDto = await studentService.analyseForImport(importText);
       onAnalyzed(data);
     } catch {
-      toast.error('Chyba při analýze textu pro import studentů.');
+      //TODO this is twice here (search in the code); why?
+      tst.error(tst.ERR.STUDENTS_IMPORT_ANALYSIS_FAILED);
     }
     setIsLoading(false);
   };

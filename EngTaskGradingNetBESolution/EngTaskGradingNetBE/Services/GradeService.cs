@@ -64,16 +64,16 @@ namespace EngTaskGradingNetBE.Services
     {
       var grade = await Db.Grades.FirstOrDefaultAsync(q => q.Id == gradeId);
       if (grade == null)
-        if (mustExist) throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.GradeNotFound, gradeId);
+        if (mustExist) throw new Exceptions.BadData.NotFound.EntityNotFoundException<Grade>(gradeId);
         else return;
       Db.Grades.Remove(grade);
       await Db.SaveChangesAsync();
     }
 
-    public async Task<Grade> UpdateAsync(int id, Grade grade)
+    public async Task<Grade> UpdateAsync(int gradeId, Grade grade)
     {
-      var existingGrade = await Db.Grades.FirstOrDefaultAsync(q => q.Id == id)
-        ?? throw new Exceptions.EntityNotFoundException(Lib.NotFoundErrorKind.GradeNotFound, id);
+      var existingGrade = await Db.Grades.FirstOrDefaultAsync(q => q.Id == gradeId)
+        ?? throw new Exceptions.BadData.NotFound.EntityNotFoundException<Grade>(gradeId);
 
       existingGrade.Value = grade.Value;
       existingGrade.Comment = grade.Comment;

@@ -4,9 +4,9 @@ import { useState, useCallback, useEffect } from 'react'
 import { Turnstile } from '../../components/turnstille'
 import { SuccessModal } from '../../components/studentView/SuccessModal'
 import AppSettings from '../../config/app-settings'
-import toast from 'react-hot-toast'
 import type { StudentViewLoginDto } from '../../model/student-view-dto'
 import { studentViewService } from '../../services/student-view-service'
+import { useToast } from '../../hooks/use-toast'
 
 export const Route = createFileRoute('/studentView/login')({
   component: RouteComponent,
@@ -16,6 +16,7 @@ function RouteComponent() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [captchaToken, setCaptchaToken] = useState<string | null>(null)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const tst = useToast();
 
   // Cloudflare konfigurace z AppSettings
   const isCloudflareEnabled = AppSettings.cloudflare.enabled
@@ -24,7 +25,7 @@ function RouteComponent() {
   // Toast upozornění pokud chybí site key (pouze pokud je Cloudflare enabled)
   useEffect(() => {
     if (isCloudflareEnabled && !TURNSTILE_SITE_KEY) {
-      toast.error('Chyba: VITE_CLOUDFLARE_SITE_KEY není nastaven v .env.local');
+      tst.error('Chyba: VITE_CLOUDFLARE_SITE_KEY není nastaven v .env.local');
     }
   }, [isCloudflareEnabled, TURNSTILE_SITE_KEY]);
 
@@ -40,7 +41,7 @@ function RouteComponent() {
     onSubmit: async ({ value }) => {
       // Kontrola captcha pouze pokud je Cloudflare enabled
       if (isCloudflareEnabled && !captchaToken) {
-        toast.error('Prosím dokončete ověření captcha')
+        tst.warning(tst.WRN.CAPTCHA_COMPLETION_NEEDED);
         return;
       }
 
@@ -58,7 +59,7 @@ function RouteComponent() {
 
       } catch (error) {
         console.error('Login error:', error)
-        toast.error('Chyba při přihlašování')
+        tst.error(error);
       } finally {
         setIsSubmitting(false)
       }

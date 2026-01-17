@@ -4,8 +4,8 @@ import { studentViewService } from '../../../services/student-view-service';
 import { useEffect, useState } from 'react';
 import type { StudentTokenInfoDto } from '../../../model/student-view-dto';
 import { useLoadingState } from '../../../types/loadingState';
-import toast from 'react-hot-toast'
 import { useAuthContext } from '../../../contexts/AuthContext';
+import { useToast } from '../../../hooks/use-toast';
 
 export const Route = createFileRoute('/studentView/login-management/')({
   component: RouteComponent,
@@ -36,6 +36,7 @@ function RouteComponent() {
   const lds = useLoadingState();
   const navigate = useNavigate();
   const authContext = useAuthContext();
+  const tst = useToast();
 
   useEffect(() => {
     const tmp = async () => {
@@ -58,11 +59,12 @@ function RouteComponent() {
       setTokens([]);
       localStorage.removeItem('studentViewAccessJWT');
       lds.setDone();
-      toast.success('Všechna přihlášení byla úspěšně zrušena.');
+      tst.success(tst.SUC.ALL_LOGINS_REVOKED);
       navigate({ to: '/studentView/login' });
     } catch (error) {
       console.error('Error deleting tokens:', error);
       lds.setError('Chyba při zneplatňování tokenů.');
+      tst.error(error);
     }
   };
 

@@ -15,5 +15,11 @@
           throw new ArgumentNullException(paramName);
       }
     }
+
+    public static void IsTrue(bool condition, string message)
+    {
+      if (!condition)
+        throw new InvalidOperationException(message);
+    }
   }
 }

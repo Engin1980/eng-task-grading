@@ -1,5 +1,4 @@
 import { createFileRoute } from '@tanstack/react-router'
-import toast from 'react-hot-toast';
 import { useLogger } from "../hooks/use-logger";
 import { useNavigate } from '@tanstack/react-router';
 import { Turnstile } from '../components/turnstille'
@@ -7,6 +6,7 @@ import AppSettings from '../config/app-settings'
 import { useCallback, useEffect, useState } from 'react';
 import { useAuthContext } from '../contexts/AuthContext';
 import type { TeacherLoginDto } from '../model/teacher-dto';
+import { useToast } from '../hooks/use-toast';
 
 export const Route = createFileRoute('/login')({
   component: Login,
@@ -24,16 +24,19 @@ function Login() {
   const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams();
   const rawNextPage = searchParams.get('nextPage') || undefined;
   const nextPage = rawNextPage ? decodeURIComponent(rawNextPage) : undefined;
+  const tst = useToast();
 
   // Cloudflare konfigurace z AppSettings
   const isCloudflareEnabled = AppSettings.cloudflare.enabled
   const TURNSTILE_SITE_KEY = AppSettings.cloudflare.siteKey
 
   useEffect(() => {
-    setEmail("marek.vajgl@osu.cz");
-    setPassword("Bublinka#1");
+    if (import.meta.env.DEV) {
+      setEmail("marek.vajgl@osu.cz");
+      setPassword("Bublinka#1");
+    }
     if (isCloudflareEnabled && !TURNSTILE_SITE_KEY) {
-      toast.error('Chyba: VITE_CLOUDFLARE_SITE_KEY není nastaven v .env.local');
+      console.error('Chyba: VITE_CLOUDFLARE_SITE_KEY není nastaven v .env.local');
     }
   }, [isCloudflareEnabled, TURNSTILE_SITE_KEY]);
 
@@ -48,8 +51,8 @@ function Login() {
 
     // Kontrola captcha pouze pokud je Cloudflare enabled
     if (isCloudflareEnabled && !captchaToken) {
-      toast.error('Prosím dokončete ověření captcha')
-      return
+      tst.warning(tst.WRN.CAPTCHA_COMPLETION_NEEDED);
+      return;
     }
 
     const data: TeacherLoginDto = {
@@ -61,7 +64,7 @@ function Login() {
 
     try {
       await loginTeacher(data);
-      toast.success("Učitel úspěšně přihlášen.");
+      tst.success(tst.SUC.LOGIN_SUCCESSFUL);
       // If nextPage provided and appears to be a safe internal path, redirect there.
       if (nextPage && nextPage.startsWith('/')) {
         navigate({ to: nextPage });
@@ -70,7 +73,7 @@ function Login() {
       }
     } catch (ex) {
       logger.error("Přihlášení selhalo", { email, error: ex });
-      toast.error("Přihlášení selhalo: " + ex);
+      tst.error(ex);
     }
   };
 

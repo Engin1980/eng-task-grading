@@ -35,11 +35,25 @@ export class SenderRulesHandler {
   }
 
   moveRuleToIndex(fromIndex: number, toIndex: number) {
-    if (fromIndex < 0 || fromIndex >= this.rules.length || toIndex < 0 || toIndex >= this.rules.length) {
+    if (fromIndex < 0 || fromIndex >= this.rules.length) {
       return;
     }
+    
+    // Allow -1 to mean "last position"
+    let targetIndex = toIndex;
+    if (targetIndex < 0) {
+      targetIndex = this.rules.length - 1;
+    }
+    if (targetIndex >= this.rules.length) {
+      targetIndex = this.rules.length - 1;
+    }
+    
+    if (fromIndex === targetIndex) {
+      return;
+    }
+    
     const [movedRule] = this.rules.splice(fromIndex, 1);
-    this.rules.splice(toIndex, 0, movedRule);
+    this.rules.splice(targetIndex, 0, movedRule);
   }
 
   addRule(pattern: string, level: LogLevel | string) {

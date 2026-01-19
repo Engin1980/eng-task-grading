@@ -88,25 +88,25 @@ function RouteComponent() {
 
   const handleMoveFirst = (index: number) => {
     senderRulesHandler.moveRuleToIndex(index, 0);
-    setRules(senderRulesHandler.getRules());
+    setRules([...senderRulesHandler.getRules()]);
   };
 
   const handleMoveLast = (index: number) => {
-    senderRulesHandler.moveRuleToIndex(index, rules.length - 1);
-    setRules(senderRulesHandler.getRules());
+    senderRulesHandler.moveRuleToIndex(index, -1);
+    setRules([...senderRulesHandler.getRules()]);
   };
 
   const handleMoveUp = (index: number) => {
     if (index > 0) {
       senderRulesHandler.moveRuleToIndex(index, index - 1);
-      setRules(senderRulesHandler.getRules());
+      setRules([...senderRulesHandler.getRules()]);
     }
   };
 
   const handleMoveDown = (index: number) => {
     if (index < rules.length - 1) {
       senderRulesHandler.moveRuleToIndex(index, index + 1);
-      setRules(senderRulesHandler.getRules());
+      setRules([...senderRulesHandler.getRules()]);
     }
   };
 

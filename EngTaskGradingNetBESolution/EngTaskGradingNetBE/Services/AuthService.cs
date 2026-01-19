@@ -24,17 +24,19 @@ namespace EngTaskGradingNetBE.Services
 
     private async Task<Student> GetStudentByLoginTokenOrFailAsync(string loginTokenValue)
     {
+      logger.LogDebug("Attempting to get student by login token at {time}.", DateTime.UtcNow);
       StudentViewToken token = await Db.StudentViewTokens
         .Include(q => q.Student)
         .FirstOrDefaultAsync(q => q.Token == loginTokenValue && q.Type == StudentViewTokenType.Login)
         ?? throw new InvalidTokenException(InvalidTokenException.InvalidationType.NotFound);
-
+      
       Db.StudentViewTokens.Remove(token);
       await Db.SaveChangesAsync();
 
-      if (token.ExpiresAt < DateTime.UtcNow || true) //TODO add token creation datetime test too
+      DateTime utcNow = DateTime.UtcNow;
+      if (utcNow < token.CreatedAt || token.ExpiresAt < utcNow)
       {
-        logger.LogDebug(
+        logger.LogWarning(
           "Student login token expired: {TokenId} for student {StudentId}, token time {TokenCreatedAt}-{TokenExpiresAt}, current time {CurrentUtc}",
           token.Id, token.StudentId, token.CreatedAt, token.ExpiresAt, DateTime.UtcNow);
         throw new InvalidTokenException(InvalidTokenException.InvalidationType.Expired);

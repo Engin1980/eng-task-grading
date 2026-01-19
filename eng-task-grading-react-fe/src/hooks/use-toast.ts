@@ -216,7 +216,7 @@ export function useToast() {
 
   const warning = (messageId: ToastWarnMessageId) => {
     const msg = convertToastWarnMessageIdToMessage(messageId);
-    toast.error(msg);
+    toast.loading(msg);
   };
 
   const success = (messageId: ToastSuccessMessageId) => {

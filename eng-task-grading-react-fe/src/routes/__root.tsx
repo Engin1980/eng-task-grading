@@ -55,12 +55,50 @@ function Root() {
       <Toaster
         position="top-right"
         toastOptions={{
+          // Základní globální styl
           style: {
             borderRadius: '8px',
-            background: '#333',
-            color: '#fff',
+            background: '#FFF',
+            color: '#333',
+            padding: '12px 16px',
           },
           duration: 4000,
+
+          // Styl pro Success
+          success: {
+            iconTheme: {
+              primary: '#10b981',
+              secondary: '#333',
+            },
+            style: {
+              border: '2px solid #10b981',
+              background: '#EFE'
+            },
+          },
+
+          // // Styl pro Error
+          error: {
+            iconTheme: {
+              primary: '#ef4444',
+              secondary: '#333',
+            },
+            style: {
+              border: '2px solid #ef4444',
+              background: '#FEE',
+            },
+          },
+
+          // LOADING PŘESTYLOVANÝ NA WARNING
+          loading: {
+            icon: '⚠️', // Přepisujeme rotující kolečko na varovný trojúhelník
+            duration: 4000, // Nutné přepsat, jinak by loading zůstal svítit navždy
+            style: {
+              border: '2px solid #F90', // Oranžový border
+              color: '#840',            // Oranžový text
+              background: '#FFF8E1',     // Světle žluté pozadí 
+              // background: '#3d2b00',       // Ladící tmavší pozadí do hněda
+            },
+          },
         }}
       />
 

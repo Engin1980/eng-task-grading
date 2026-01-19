@@ -3,10 +3,10 @@ import type { AxiosInstance, AxiosResponse } from "axios";
 import { createLogger } from "./log-service";
 import AppSettings from "../config/app-settings";
 import { useToast } from "../hooks/use-toast";
+import { router } from "./router";
 
 const logger = createLogger("ApiHttp");
 const BASE_URL = AppSettings.backendUrl; //backendUrl; "https://localhost:55556/api";
-
 const tst = useToast();
 
 let getAccessToken: (() => string | null) = () => null;
@@ -81,7 +81,7 @@ axiosInstance.interceptors.response.use(
           tst.error(tst.ERR.LOGIN_EXPIRED);
           if (typeof window !== 'undefined') {
             const next = encodeURIComponent(window.location.pathname + window.location.search);
-            window.location.href = `/login?nextPage=${next}`;
+            router.navigate({ to: `/login?nextPage=${next}` });
           }
           return Promise.reject(error);
         }
@@ -90,7 +90,7 @@ axiosInstance.interceptors.response.use(
         tst.error(refreshError);
         if (typeof window !== 'undefined') {
           const next = encodeURIComponent(window.location.pathname + window.location.search);
-          window.location.href = `/login?nextPage=${next}`;
+          router.navigate({ to: `/login?nextPage=${next}` });
         }
         return Promise.reject(refreshError);
       }

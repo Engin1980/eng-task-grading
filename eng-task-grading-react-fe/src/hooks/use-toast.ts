@@ -1,4 +1,5 @@
 import toast from 'react-hot-toast';
+import { createLogger } from '../services/log-service';
 
 type ErrorKey =
   | "INVALID_CREDENTIALS"
@@ -22,7 +23,7 @@ export const ErrorKeyMessages: Record<ErrorKey, string> = {
   INVALID_CREDENTIALS: "Neplatné přihlašovací údaje.",
   INTERNAL_SERVER_ERROR: "Došlo k vnitřní chybě serveru. Zkuste to prosím později.",
   COURSE_DUPLICATE_CODE: "Kurz s tímto kódem již existuje (%%).",
-  INVALID_TOKEN: "Platnost relace vypršela, přihlaste se znovu.",
+  INVALID_TOKEN: "Platnost tokenu nebo relace vypršela. Přihlaste se znovu.",
   INVALID_STUDENT_SELF_SIGN_KEY: "Neplatný klíč pro samopřihlášení studenta.",
   DUPLICATE_FINAL_GRADE: "Student již má zapsanou finální známku k danému předmětu.",
   TEACHER_EMAIL_ALREADY_EXISTS: "Učitel s tímto e-mailem je již zaregistrován (%%).",
@@ -96,6 +97,7 @@ export type ToastErrorMessageId = typeof TOAST_ERROR_MESSAGES[keyof typeof TOAST
 
 
 export function useToast() {
+  const logger = createLogger("useToast");
 
   const convertToastWarnMessageIdToMessage = (messageId: ToastWarnMessageId): string => {
     var ret;
@@ -223,16 +225,19 @@ export function useToast() {
   };
 
   const error = (error: ToastErrorMessageId | any) => {
-
+    logger.debug("Toast error called with:", JSON.stringify(error));
     const toastErrorMessageId = toToastErrorMessageId(error);
     if (toastErrorMessageId) {
+      logger.debug("Recognized toast error message id:", toastErrorMessageId);
       const msg = convertToastErrorMessageIdToMessage(error);
       toast.error(msg);
     }
     else if (typeof error === "string") {
+      logger.debug("Toast error called as string:", error);
       toast.error(error);
     }
     else {
+      logger.debug("Toast error called as unknown object:", JSON.stringify(error));
       const key = (error as any)?.errorKey;
       const errorParam = (error as any)?.param;
       const msg = convertErrorMessageToMessage(key, errorParam);

@@ -55,7 +55,8 @@ function RouteComponent() {
       navigate({ to: '/studentView/courses' })
     } catch (error) {
       logger.error('Error confirming token:', error);
-      tst.error(token);
+      tst.error(error);
+      navigate({ to: '/studentView/login' })
     }
   }
 

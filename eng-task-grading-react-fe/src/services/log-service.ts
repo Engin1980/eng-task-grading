@@ -23,9 +23,7 @@ export class SenderRulesHandler {
 
   setDefaults() {
     this.rules = [
-      { pattern: /\.tsx/, level: LogLevels.warn },
-      { pattern: /Service/, level: LogLevels.warn },
-      { pattern: /.*/, level: parseLogLevel(AppSettings.logLevel || "info") },
+      { pattern: /.*/, level: parseLogLevel(AppSettings.logLevel || "debug") },
     ];
   }
 

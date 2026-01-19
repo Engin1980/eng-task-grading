@@ -27,6 +27,14 @@ function tryUnwrapAxiosError(error: any): any {
     return error;
 }
 
+function getLoginPageFromUrl(url: string): string {
+  if (url.endsWith("/student/verify")
+    || url.includes("/studentView"))
+    return "/studentView/login";
+  else
+    return "/login";
+}
+
 // Vytvoříme axios instanci
 const axiosInstance: AxiosInstance = axios.create({
   baseURL: "", // změň podle svého backendu
@@ -65,8 +73,8 @@ axiosInstance.interceptors.response.use(
       !originalRequest._retry &&
       !url.endsWith('login') &&
       !url.endsWith('refresh') &&
-      !url.endsWith('studentView/login') &&
-      !url.endsWith('studentView/verify')
+      !url.endsWith('student/login') &&
+      !url.endsWith('student/verify')
     ) {
       originalRequest._retry = true;
       try {
@@ -81,21 +89,27 @@ axiosInstance.interceptors.response.use(
           tst.error(tst.ERR.LOGIN_EXPIRED);
           if (typeof window !== 'undefined') {
             const next = encodeURIComponent(window.location.pathname + window.location.search);
-            router.navigate({ to: `/login?nextPage=${next}` });
+            const loginUrl = getLoginPageFromUrl(url);
+            router.navigate({ to: `${loginUrl}?nextPage=${next}` });
           }
-          return Promise.reject(error);
+          const unwrappedError = tryUnwrapAxiosError(error);
+          return Promise.reject(unwrappedError);
         }
       } catch (refreshError) {
         // refresh attempt threw -> redirect to login with nextPage
         tst.error(refreshError);
         if (typeof window !== 'undefined') {
           const next = encodeURIComponent(window.location.pathname + window.location.search);
-          router.navigate({ to: `/login?nextPage=${next}` });
+          const loginUrl = getLoginPageFromUrl(url);
+          router.navigate({ to: `${loginUrl}?nextPage=${next}` });
         }
-        return Promise.reject(refreshError);
+        const unwrappedRefreshError = tryUnwrapAxiosError(refreshError);
+        return Promise.reject(unwrappedRefreshError);
       }
     }
-    return Promise.reject(error);
+    logger.debug("interceptors.response - non-401 error or retry already attempted");
+    const unwrappedError = tryUnwrapAxiosError(error);
+    return Promise.reject(unwrappedError);
   }
 );
 
@@ -116,7 +130,8 @@ export const apiHttp = {
       return data;
     } catch (error) {
       logger.error("Chyba při obnově tokenu", { error });
-      return null;
+      const uwError = tryUnwrapAxiosError(error);
+      return uwError;
     }
   },
 
@@ -133,8 +148,8 @@ export const apiHttp = {
       return response;
     } catch (error) {
       logger.error(`GET ${url} - ERROR`, { error, config });
-      error = tryUnwrapAxiosError(error);
-      throw error;
+      const uwError = tryUnwrapAxiosError(error);
+      throw uwError;
     }
   },
 
@@ -151,8 +166,8 @@ export const apiHttp = {
       return response;
     } catch (error) {
       logger.error(`POST ${url} - ERROR`, { error, data, config });
-      error = tryUnwrapAxiosError(error);
-      throw error;
+      const uwError = tryUnwrapAxiosError(error);
+      throw uwError;
     }
   },
 
@@ -169,8 +184,8 @@ export const apiHttp = {
       return response;
     } catch (error) {
       logger.error(`PUT ${url} - ERROR`, { error, data, config });
-      error = tryUnwrapAxiosError(error);
-      throw error;
+      const uwError = tryUnwrapAxiosError(error);
+      throw uwError;
     }
   },
 
@@ -187,8 +202,8 @@ export const apiHttp = {
       return response;
     } catch (error) {
       logger.error(`DELETE ${url} - ERROR`, { error, config });
-      error = tryUnwrapAxiosError(error);
-      throw error;
+      const uwError = tryUnwrapAxiosError(error);
+      throw uwError;
     }
   },
 
@@ -205,8 +220,8 @@ export const apiHttp = {
       return response;
     } catch (error) {
       logger.error(`PATCH ${url} - ERROR`, { error, data, config });
-      error = tryUnwrapAxiosError(error);
-      throw error;
+      const uwError = tryUnwrapAxiosError(error);
+      throw uwError;
     }
   },
 

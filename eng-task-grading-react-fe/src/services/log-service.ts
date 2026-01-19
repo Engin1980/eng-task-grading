@@ -13,12 +13,47 @@ type SenderRule = {
   level: LogLevel;
 };
 
-class SenderRulesHandler {
+export class SenderRulesHandler {
   private rules: SenderRule[] = [];
+
+  constructor() {
+    this.setDefaults();
+    this.loadFromStorage();
+  }
+
+  setDefaults() {
+    this.rules = [
+      { pattern: /\.tsx/, level: LogLevels.warn },
+      { pattern: /Service/, level: LogLevels.warn },
+      { pattern: /.*/, level: parseLogLevel(AppSettings.logLevel || "info") },
+    ];
+  }
 
   insertRule(pattern: string, level: LogLevel | string, index: number) {
     const logLevelLevel = parseLogLevel(level);
     this.rules.splice(index, 0, { pattern: new RegExp(pattern), level: logLevelLevel });
+  }
+
+  moveRuleToIndex(fromIndex: number, toIndex: number) {
+    if (fromIndex < 0 || fromIndex >= this.rules.length) {
+      return;
+    }
+    
+    // Allow -1 to mean "last position"
+    let targetIndex = toIndex;
+    if (targetIndex < 0) {
+      targetIndex = this.rules.length - 1;
+    }
+    if (targetIndex >= this.rules.length) {
+      targetIndex = this.rules.length - 1;
+    }
+    
+    if (fromIndex === targetIndex) {
+      return;
+    }
+    
+    const [movedRule] = this.rules.splice(fromIndex, 1);
+    this.rules.splice(targetIndex, 0, movedRule);
   }
 
   addRule(pattern: string, level: LogLevel | string) {
@@ -44,6 +79,35 @@ class SenderRulesHandler {
   getRules(): SenderRule[] {
     return this.rules;
   }
+  saveToStorage() {
+    // save to local storage
+    const serializedRules = this.rules.map(rule => ({
+      pattern: rule.pattern.source,
+      level: rule.level
+    }));
+    localStorage.setItem("logSenderRules", JSON.stringify(serializedRules));
+  }
+  loadFromStorage() {
+    const data = localStorage.getItem("logSenderRules");
+    if (data) {
+      try {
+        const parsedRules = JSON.parse(data);
+        const tmpRules = parsedRules.map((rule: { pattern: string; level: string }) => ({
+          pattern: new RegExp(rule.pattern),
+          level: parseLogLevel(rule.level),
+        }));
+        this.rules = tmpRules;
+      } catch (error) {
+        console.error("Failed to load log sender rules:", error);
+      }
+    }
+  }
+  deleteFromStorage() {
+    localStorage.removeItem("logSenderRules");
+  }
+  clear() {
+    this.rules = [];
+  }
 }
 
 export function parseLogLevel(value: string, defaultLevel: LogLevel = LogLevels.info): LogLevel {
@@ -58,7 +122,7 @@ export function parseLogLevel(value: string, defaultLevel: LogLevel = LogLevels.
 
 const orderedLogLevels: LogLevel[] = [LogLevels.debug, LogLevels.info, LogLevels.warn, LogLevels.error];
 const minimalLogLevel: LogLevel = (AppSettings.logLevel || "info") as LogLevel;
-const senderRulesHandler = new SenderRulesHandler();
+export const senderRulesHandler = new SenderRulesHandler();
 
 interface Logger {
   debug: (message: string, meta?: any) => void;

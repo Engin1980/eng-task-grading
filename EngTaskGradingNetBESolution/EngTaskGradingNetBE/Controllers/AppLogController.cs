@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 namespace EngTaskGradingNetBE.Controllers;
 
 [ApiController]
+[Authorize(Roles = Roles.TEACHER_ROLE)]
 [Route("api/v1/[controller]")]
 public class AppLogController(AppLogService appLogService) : ControllerBase
 {

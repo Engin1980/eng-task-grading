@@ -31,11 +31,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
-app.MapGet("/", context =>
-{
-  context.Response.Redirect("/api/v1/applog");
-  return System.Threading.Tasks.Task.CompletedTask;
-});
+app.MapGet("/", () => "Alive!");
 
 Log.Information("Starting main app");
 

@@ -16,7 +16,8 @@ namespace EngTaskGradingNetBE.Services
   public class AuthService(
     AppDbContext context,
     IEmailService emailService,
-    AppSettingsService appSettingsService) : DbContextBaseService(context)
+    AppSettingsService appSettingsService,
+    ILogger<AuthService> logger) : DbContextBaseService(context)
   {
     private readonly SecuritySettings sett = appSettingsService.GetSettings().Security;
     public record Tokens(string AccessToken, string RefreshToken, bool isForSession);
@@ -31,8 +32,13 @@ namespace EngTaskGradingNetBE.Services
       Db.StudentViewTokens.Remove(token);
       await Db.SaveChangesAsync();
 
-      if (token.ExpiresAt < DateTime.UtcNow)
+      if (token.ExpiresAt < DateTime.UtcNow) //TODO add token creation datetime test too
+      {
+        logger.LogDebug(
+          "Student login token expired: {TokenId} for student {StudentId}, token time {}-{}, current time {}",
+          token.Id, token.StudentId, token.CreatedAt, token.ExpiresAt, DateTime.UtcNow);
         throw new InvalidTokenException(InvalidTokenException.InvalidationType.Expired);
+      }
 
       return token.Student;
     }
@@ -326,7 +332,7 @@ namespace EngTaskGradingNetBE.Services
       Db.TeacherTokens.Remove(token);
       await Db.SaveChangesAsync();
 
-      if (token.ExpirationDate < DateTime.UtcNow)
+      if (token.ExpirationDate < DateTime.UtcNow) //TODO add token creation datetime test too
         throw new InvalidTokenException(InvalidTokenException.InvalidationType.Expired);
 
       await SetPasswordAsync(teacher.Id, password);

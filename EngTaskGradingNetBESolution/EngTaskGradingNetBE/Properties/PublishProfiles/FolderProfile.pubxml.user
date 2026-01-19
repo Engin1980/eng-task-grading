@@ -2,8 +2,8 @@
 <!-- https://go.microsoft.com/fwlink/?LinkID=208121. -->
 <Project>
   <PropertyGroup>
-    <_PublishTargetUrl>D:\repos\eng-task-grading\EngTaskGradingNetBESolution\EngTaskGradingNetBE\publish\</_PublishTargetUrl>
-    <History>True|2025-10-22T20:08:18.3281538Z||;True|2025-10-22T22:03:05.7128341+02:00||;True|2025-10-22T09:51:24.9684410+02:00||;True|2025-10-22T09:13:55.7241959+02:00||;True|2025-10-22T09:11:45.6016615+02:00||;</History>
+    <_PublishTargetUrl>C:\Users\vajgma91\source\repos\EngTaskGrading\EngTaskGradingNetBESolution\EngTaskGradingNetBE\publish\</_PublishTargetUrl>
+    <History>True|2026-01-19T15:06:12.8579058Z||;True|2026-01-19T16:02:21.0276855+01:00||;True|2026-01-19T16:02:15.6423521+01:00||;True|2026-01-19T15:50:01.4458439+01:00||;True|2025-10-22T22:08:18.3281538+02:00||;True|2025-10-22T22:03:05.7128341+02:00||;True|2025-10-22T09:51:24.9684410+02:00||;True|2025-10-22T09:13:55.7241959+02:00||;True|2025-10-22T09:11:45.6016615+02:00||;</History>
     <LastFailureDetails />
   </PropertyGroup>
 </Project>

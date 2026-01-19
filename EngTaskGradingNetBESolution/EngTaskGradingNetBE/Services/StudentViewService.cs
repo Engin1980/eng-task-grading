@@ -131,9 +131,9 @@ namespace EngTaskGradingNetBE.Services
 
     internal async Task<List<StudentViewToken>> GetActiveTokensForStudentAsync(string studyNumber)
     {
-      var now = DateTime.UtcNow;
+      var utcNow = DateTime.UtcNow;
       var tokens = await Db.StudentViewTokens
-        .Where(q => q.Student.Number == studyNumber && q.ExpiresAt > now)
+        .Where(q => q.Student.Number == studyNumber && q.ExpiresAt > utcNow)
         .ToListAsync();
       return tokens;
     }

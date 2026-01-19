@@ -137,7 +137,7 @@ namespace EngTaskGradingNetBE.Services
     {
       FinalGrade finalGrade = await Db.FinalGrades.FirstOrDefaultAsync(q => q.Id == finalGradeId)
         ?? throw new Exceptions.BadData.NotFound.EntityNotFoundException<FinalGrade>(finalGradeId);
-      finalGrade.RecordedDateTime = DateTime.Now;
+      finalGrade.RecordedDateTime = DateTime.UtcNow;
       await Db.SaveChangesAsync();
       return finalGrade;
     }

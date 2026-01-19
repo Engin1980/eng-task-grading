@@ -241,7 +241,7 @@ namespace EngTaskGradingNetBE.Controllers
       {
         AttendanceDayId = dayId,
         Student = student,
-        CreationDateTime = DateTime.Now,
+        CreationDateTime = DateTime.UtcNow,
         IP = Request.Headers["X-Forwarded-For"].FirstOrDefault() ?? Request.HttpContext.Connection.RemoteIpAddress?.ToString() ?? ""
       };
 

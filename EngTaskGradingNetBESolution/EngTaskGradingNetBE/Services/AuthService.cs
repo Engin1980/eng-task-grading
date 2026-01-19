@@ -31,7 +31,7 @@ namespace EngTaskGradingNetBE.Services
       Db.StudentViewTokens.Remove(token);
       await Db.SaveChangesAsync();
 
-      if (token.ExpiresAt < DateTime.Now)
+      if (token.ExpiresAt < DateTime.UtcNow)
         throw new InvalidTokenException(InvalidTokenException.InvalidationType.Expired);
 
       return token.Student;
@@ -43,8 +43,8 @@ namespace EngTaskGradingNetBE.Services
 
       StudentViewToken refreshToken = new()
       {
-        CreatedAt = DateTime.Now,
-        ExpiresAt = DateTime.Now.AddSeconds(durationSeconds),
+        CreatedAt = DateTime.UtcNow,
+        ExpiresAt = DateTime.UtcNow.AddSeconds(durationSeconds),
         StudentId = student.Id,
         Token = SecurityUtils.GenerateSecureToken(sett.RefreshTokenLengthBytes),
         Type = StudentViewTokenType.Access
@@ -92,8 +92,8 @@ namespace EngTaskGradingNetBE.Services
 
       refreshToken.Value = SecurityUtils.GenerateSecureToken(sett.RefreshTokenLengthBytes);
       refreshToken.ExpirationDate = refreshToken.Type == TeacherToken.TokenType.Refresh
-        ? DateTime.Now.AddMinutes(sett.Teacher.SessionRefreshTokenExpiryInMinutes)
-        : DateTime.Now.AddMinutes(sett.Teacher.PersistentRefreshTokenExpiryInMinutes);
+        ? DateTime.UtcNow.AddMinutes(sett.Teacher.SessionRefreshTokenExpiryInMinutes)
+        : DateTime.UtcNow.AddMinutes(sett.Teacher.PersistentRefreshTokenExpiryInMinutes);
       await Db.SaveChangesAsync();
 
       string accessToken = GenerateJwtToken(
@@ -132,16 +132,16 @@ namespace EngTaskGradingNetBE.Services
 
     internal async System.Threading.Tasks.Task FlushTeacherExpiredTokensAsync()
     {
-      var now = DateTime.UtcNow;
-      var expiredTokens = Db.TeacherTokens.Where(t => t.ExpirationDate < now);
+      var utcNow = DateTime.UtcNow;
+      var expiredTokens = Db.TeacherTokens.Where(t => t.ExpirationDate < utcNow);
       Db.TeacherTokens.RemoveRange(expiredTokens);
       await Db.SaveChangesAsync();
     }
 
     private async System.Threading.Tasks.Task FlushExpiredStudentViewTokensAsync()
     {
-      var now = DateTime.UtcNow;
-      var expiredTokens = Db.StudentViewTokens.Where(t => t.ExpiresAt < now);
+      var utcNow = DateTime.UtcNow;
+      var expiredTokens = Db.StudentViewTokens.Where(t => t.ExpiresAt < utcNow);
       Db.StudentViewTokens.RemoveRange(expiredTokens);
       await Db.SaveChangesAsync();
     }
@@ -275,8 +275,8 @@ namespace EngTaskGradingNetBE.Services
 
       token.Value = SecurityUtils.GenerateSecureToken(sett.RefreshTokenLengthBytes);
       token.ExpirationDate = token.Type == TeacherToken.TokenType.Refresh
-        ? DateTime.Now.AddMinutes(sett.Teacher.SessionRefreshTokenExpiryInMinutes)
-        : DateTime.Now.AddMinutes(sett.Teacher.PersistentRefreshTokenExpiryInMinutes);
+        ? DateTime.UtcNow.AddMinutes(sett.Teacher.SessionRefreshTokenExpiryInMinutes)
+        : DateTime.UtcNow.AddMinutes(sett.Teacher.PersistentRefreshTokenExpiryInMinutes);
       await Db.SaveChangesAsync();
 
       string accessToken = GenerateJwtToken(
@@ -298,7 +298,7 @@ namespace EngTaskGradingNetBE.Services
         .FirstOrDefaultAsync(q => q.Token == refreshToken && q.Type == StudentViewTokenType.Access);
       if (tokenEntity == null)
         throw new InvalidCredentialsException();
-      if (tokenEntity.ExpiresAt < DateTime.Now)
+      if (tokenEntity.ExpiresAt < DateTime.UtcNow)
       {
         await FlushExpiredStudentViewTokensAsync();
         throw new InvalidCredentialsException();
@@ -326,7 +326,7 @@ namespace EngTaskGradingNetBE.Services
       Db.TeacherTokens.Remove(token);
       await Db.SaveChangesAsync();
 
-      if (token.ExpirationDate < DateTime.Now)
+      if (token.ExpirationDate < DateTime.UtcNow)
         throw new InvalidTokenException(InvalidTokenException.InvalidationType.Expired);
 
       await SetPasswordAsync(teacher.Id, password);

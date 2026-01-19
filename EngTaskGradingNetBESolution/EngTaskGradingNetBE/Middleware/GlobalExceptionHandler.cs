@@ -51,7 +51,7 @@ namespace EngTaskGradingNetBE.Middleware
       public HttpStatusCode StatusCode { get; init; } = statusCode;
       public string? ErrorKey { get; init; } = key;
       public string? Param { get; init; } = param;
-      public DateTime TimeStamp { get; } = DateTime.Now;
+      public DateTime TimeStamp { get; } = DateTime.UtcNow;
     }
 
 

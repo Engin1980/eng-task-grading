@@ -90,7 +90,7 @@ namespace EngTaskGradingNetBE.Controllers
     [HttpPost]
     public async Task<GradeDto> CreateAsync([FromBody] GradeCreateDto gradeCreateDto)
     {
-      Grade grade = EObjectMapper.From(gradeCreateDto, DateTime.Now);
+      Grade grade = EObjectMapper.From(gradeCreateDto, DateTime.UtcNow);
       var createdGrade = await gradeService.CreateAsync(grade);
       var gradeDto = EObjectMapper.To(createdGrade);
       return gradeDto;

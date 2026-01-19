@@ -15,7 +15,7 @@ BuildSecurity(builder);
 BuildCors(builder);
 BuildDb(builder);
 
-Log.Information("Building main app at " + DateTime.Now);
+Log.Information("Building main app at " + DateTime.UtcNow + " UTC");
 var app = builder.Build();
 
 Log.Information("Initializing database");

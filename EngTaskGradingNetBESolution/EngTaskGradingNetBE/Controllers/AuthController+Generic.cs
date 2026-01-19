@@ -72,7 +72,7 @@ public partial class AuthController
     {
       AuthService.Tokens tmp = await ctx.AuthService.RefreshTeacherAsync(refreshToken);
 
-      DateTime? expiration = tmp.isForSession ? null :
+      DateTime? expiration = tmp.IsForSession ? null :
         DateTime.UtcNow.AddMinutes(securitySettings.Teacher.PersistentRefreshTokenExpiryInMinutes);
       string newRefreshToken = tmp.RefreshToken;
 

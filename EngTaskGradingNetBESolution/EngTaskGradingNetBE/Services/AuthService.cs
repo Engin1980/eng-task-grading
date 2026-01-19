@@ -20,7 +20,7 @@ namespace EngTaskGradingNetBE.Services
     ILogger<AuthService> logger) : DbContextBaseService(context)
   {
     private readonly SecuritySettings sett = appSettingsService.GetSettings().Security;
-    public record Tokens(string AccessToken, string RefreshToken, bool isForSession);
+    public record Tokens(string AccessToken, string RefreshToken, bool IsForSession);
 
     private async Task<Student> GetStudentByLoginTokenOrFailAsync(string loginTokenValue)
     {

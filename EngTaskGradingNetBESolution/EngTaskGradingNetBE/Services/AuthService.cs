@@ -32,10 +32,10 @@ namespace EngTaskGradingNetBE.Services
       Db.StudentViewTokens.Remove(token);
       await Db.SaveChangesAsync();
 
-      if (token.ExpiresAt < DateTime.UtcNow) //TODO add token creation datetime test too
+      if (token.ExpiresAt < DateTime.UtcNow || true) //TODO add token creation datetime test too
       {
         logger.LogDebug(
-          "Student login token expired: {TokenId} for student {StudentId}, token time {}-{}, current time {}",
+          "Student login token expired: {TokenId} for student {StudentId}, token time {TokenCreatedAt}-{TokenExpiresAt}, current time {CurrentUtc}",
           token.Id, token.StudentId, token.CreatedAt, token.ExpiresAt, DateTime.UtcNow);
         throw new InvalidTokenException(InvalidTokenException.InvalidationType.Expired);
       }

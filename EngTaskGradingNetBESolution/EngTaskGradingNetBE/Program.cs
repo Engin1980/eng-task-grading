@@ -96,8 +96,9 @@ static string GetConnectionString(WebApplicationBuilder builder)
 static LoggerConfiguration CreateLoggerConfiguration(WebApplicationBuilder builder, bool addDb)
 {
   var ret = new LoggerConfiguration()
-      .WriteTo.Console()
-      .WriteTo.File("logs/app.log", rollingInterval: RollingInterval.Day);
+    .ReadFrom.Configuration(builder.Configuration)
+    .WriteTo.Console()
+    .WriteTo.File("logs/app.log", rollingInterval: RollingInterval.Day);
   if (addDb)
     ret = ret.WriteTo.MSSqlServer(
           connectionString: GetConnectionString(builder),

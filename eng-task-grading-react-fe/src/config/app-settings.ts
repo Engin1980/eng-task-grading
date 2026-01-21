@@ -28,7 +28,7 @@ const AppSettings = {
     enabled: coerceBool(getRaw('VITE_CLOUDFLARE_ENABLED')),
     siteKey: String(getRaw('VITE_CLOUDFLARE_SITE_KEY') ?? ''),
   },
-  logLevel: String(getRaw('VITE_LOG_LEVEL') ?? 'debug'),
+  logLevel: String(getRaw('VITE_LOG_LEVEL') ?? 'information'),
   presetLoginForm: coerceBool(getRaw('VITE_PRESET_LOGIN_FORM')),
 }
 

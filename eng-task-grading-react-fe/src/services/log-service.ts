@@ -23,7 +23,7 @@ export class SenderRulesHandler {
 
   setDefaults() {
     this.rules = [
-      { pattern: /.*/, level: parseLogLevel(AppSettings.logLevel || "debug") },
+      { pattern: /.*/, level: parseLogLevel(AppSettings.logLevel || "information") },
     ];
   }
 

@@ -32,7 +32,7 @@ function Login() {
 
   useEffect(() => {
     if (import.meta.env.DEV) {
-      logger.debug("Vývojové prostředí: Předvyplňuji přihlašovací údaje");
+      logger.debug("Lokální vývoj; Předvyplňuji přihlašovací údaje");
       setEmail("marek.vajgl@osu.cz");
       setPassword("Bublinka#1");
     }

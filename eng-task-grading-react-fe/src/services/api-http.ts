@@ -21,8 +21,15 @@ export function setRefreshHandler(handler: () => Promise<string | undefined>) {
 }
 
 function tryUnwrapAxiosError(error: any): any {
-  if (axios.isAxiosError(error))
-    return error.response?.data || error.message;
+  if (axios.isAxiosError(error)) {
+    const tmp = error.response?.data || error.message;
+    if (typeof tmp === "string" && tmp.startsWith("timeout of"))
+      return tst.ERR.REQUEST_TIMEOUT;
+    else if (typeof tmp === "string" && tmp.startsWith("Network Error"))
+      return tst.ERR.NETWORK_ERROR;
+    else
+      return tmp;
+  }
   else
     return error;
 }
@@ -79,13 +86,14 @@ axiosInstance.interceptors.response.use(
       originalRequest._retry = true;
       try {
         const newAccessToken: string | undefined = await refreshHandler();
-        logger.debug("interceptors.response - refreshed token:", newAccessToken);
         if (newAccessToken) {
+          logger.debug("interceptors.response - refreshed access token:", newAccessToken);
           originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
           return axiosInstance(originalRequest);
         }
         else {
           // refresh did not return a token -> redirect to login with nextPage
+          logger.debug("interceptors.response - no refreshed access token returned");
           tst.error(tst.ERR.LOGIN_EXPIRED);
           if (typeof window !== 'undefined') {
             const next = encodeURIComponent(window.location.pathname + window.location.search);
@@ -97,6 +105,7 @@ axiosInstance.interceptors.response.use(
         }
       } catch (refreshError) {
         // refresh attempt threw -> redirect to login with nextPage
+        logger.error("interceptors.response - error during token refresh:", refreshError);
         tst.error(refreshError);
         if (typeof window !== 'undefined') {
           const next = encodeURIComponent(window.location.pathname + window.location.search);

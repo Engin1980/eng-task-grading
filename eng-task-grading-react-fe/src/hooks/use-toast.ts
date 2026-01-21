@@ -20,7 +20,7 @@ type ErrorKey =
   | "CLOUDFLARE_TURNISTILLE_VERIFICATION_ERROR";
 
 export const ErrorKeyMessages: Record<ErrorKey, string> = {
-  INVALID_CREDENTIALS: "Neplatné přihlašovací údaje.",
+  INVALID_CREDENTIALS: "Neplatné přihlašovací údaje nebo přihlášení vypršelo.",
   INTERNAL_SERVER_ERROR: "Došlo k vnitřní chybě serveru. Zkuste to prosím později.",
   COURSE_DUPLICATE_CODE: "Kurz s tímto kódem již existuje (%%).",
   INVALID_TOKEN: "Platnost tokenu nebo relace vypršela. Přihlaste se znovu.",
@@ -57,6 +57,9 @@ function toToastErrorMessageId(x: any): ToastErrorMessageId | null {
   if (typeof x === 'string' && x in TOAST_ERROR_MESSAGES) {
     return TOAST_ERROR_MESSAGES[x as keyof typeof TOAST_ERROR_MESSAGES];
   }
+  if (typeof x === 'number' && Object.values(TOAST_ERROR_MESSAGES).includes(x)) {
+    return x as ToastErrorMessageId;
+  }
   return null;
 }
 
@@ -88,7 +91,9 @@ const TOAST_ERROR_MESSAGES = {
   SELFSIGN_KEY_EMPTY: 2,
   EMAIL_MUST_END_WITH_OSU_CZ: 3,
   PASSWORD_MIN_LENGTH: 4,
-  LOGIN_EXPIRED: 5
+  LOGIN_EXPIRED: 5,
+  REQUEST_TIMEOUT: 6,
+  NETWORK_ERROR: 7,
 } as const;
 
 export type ToastSuccessMessageId = typeof TOAST_SUCCESS_MESSAGES[keyof typeof TOAST_SUCCESS_MESSAGES];
@@ -187,6 +192,12 @@ export function useToast() {
         break;
       case TOAST_ERROR_MESSAGES.LOGIN_EXPIRED:
         ret = "Přihlášení vypršelo. Prosím přihlaste se znovu.";
+        break;
+      case TOAST_ERROR_MESSAGES.REQUEST_TIMEOUT:
+        ret = "Vypršel časový limit požadavku. Zkuste to prosím znovu později; případně nahlašte chybu vyučujícímu.";
+        break;
+      case TOAST_ERROR_MESSAGES.NETWORK_ERROR:
+        ret = "Došlo k síťové chybě. Zkontrolujte své připojení k internetu a zkuste to znovu; případně nahlašte chybu vyučujícímu.";
         break;
       default:
         ret = "Došlo k neznámé chybě.";

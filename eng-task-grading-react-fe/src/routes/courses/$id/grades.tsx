@@ -508,72 +508,73 @@ function GradesPage() {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {filteredStudents?.map((student) => (
-              <tr key={student.student.id} className="hover:bg-gray-50">
-                <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 sticky left-0 bg-white z-10">
-                  <div>
-                    <div className="font-semibold">{student.student.surname}, {student.student.name}</div>
-                    <div className="text-xs text-gray-500">{student.student.number}</div>
-                  </div>
-                </td>
-                <td className="px-3 py-4 whitespace-nowrap text-sm text-center sticky left-0 bg-white z-10" style={{ left: '192px' }}>
-                  <div className="font-medium">{student.attendanceSuccessCount} / ??</div>
-                  <div className="font-medium">{student.taskSuccessCount} / ??</div>
-                </td>
-                {/* Buňky pro attendance values */}
-                {showAttendances && tableData?.attendances.map((attendance) => {
-                  const cell = tableData.attendanceCells.find(q => q.studentId == student.student.id && q.attendanceId == attendance.id);
+            {filteredStudents?.map((student) => {
+              const finalGradeCell: FinalGradeCell | undefined = tableData.finalGradeCells.find(fg => fg.studentId === student.student.id);
 
-                  return (
-                    <td
-                      key={`${student.student.id}-attendance-${attendance.id}`}
-                      className="px-2 py-4 text-center text-sm"
-                    >
-                      {cell ? (
-                        <span className={`inline-flex px-4 py-2 text-xs font-semibold rounded-full ${getAttendanceColor(cell.isSuccessful)}`}>
-                          {cell.weight.toFixed(1)}
-                        </span>
-                      ) : (
-                        <span className="text-gray-400 text-xs">—</span>
-                      )}
-                    </td>
-                  );
-                })}
-                {showTasks && filteredTasks?.map((task) => {
-                  const cell = tableData.taskCells.find(q => q.studentId == student.student.id && q.taskId == task.id);
+              return (
+                <tr key={student.student.id} className="hover:bg-gray-50">
+                  <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 sticky left-0 bg-white z-10">
+                    <div>
+                      <div className="font-semibold">{student.student.surname}, {student.student.name}</div>
+                      <div className="text-xs text-gray-500">{student.student.number}</div>
+                    </div>
+                  </td>
+                  <td className="px-3 py-4 whitespace-nowrap text-sm text-center sticky left-0 bg-white z-10" style={{ left: '192px' }}>
+                    <div className="font-medium">{student.attendanceSuccessCount} / ??</div>
+                    <div className="font-medium">{student.taskSuccessCount} / ??</div>
+                  </td>
+                  {/* Buňky pro attendance values */}
+                  {showAttendances && tableData?.attendances.map((attendance) => {
+                    const cell = tableData.attendanceCells.find(q => q.studentId == student.student.id && q.attendanceId == attendance.id);
 
-                  return (
-                    <td
-                      key={`${student.student.id}-${task.id}`}
-                      className={`px-2 py-4 text-center text-sm ${getGradeColor(cell?.isSuccessful ?? null)}`}
-                    >
-                      {cell ? (
-                        <div className="space-y-1">
-                          <span
-                            className="inline-flex px-2 text-xs font-semibold rounded-full"
-                          >
-                            {cell.value ?? "-"} {cell.percentage !== null && `/ ${cell.percentage} %`}
+                    return (
+                      <td
+                        key={`${student.student.id}-attendance-${attendance.id}`}
+                        className="px-2 py-4 text-center text-sm"
+                      >
+                        {cell ? (
+                          <span className={`inline-flex px-4 py-2 text-xs font-semibold rounded-full ${getAttendanceColor(cell.isSuccessful)}`}>
+                            {cell.weight.toFixed(1)}
                           </span>
-                          {cell.otherValues.length > 1 && (
-                            <div className="text-xs opacity-60">
-                              ({cell.otherValues.join(', ')})
-                            </div>
-                          )}
-                          <div className="text-xs opacity-75">
-                            {cell && <div>{new Date(cell.date).toLocaleDateString('cs-CZ')}</div>}
-                          </div>
-                        </div>
-                      ) : (
-                        <span className="text-gray-400 text-xs">—</span>
-                      )}
-                    </td>
-                  );
-                })}
-                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 sticky left-0 bg-white z-10">
-                  {(() => {
-                    const finalGradeCell: FinalGradeCell | undefined = tableData.finalGradeCells.find(fg => fg.studentId === student.student.id);
+                        ) : (
+                          <span className="text-gray-400 text-xs">—</span>
+                        )}
+                      </td>
+                    );
+                  })}
+                  {showTasks && filteredTasks?.map((task) => {
+                    const cell = tableData.taskCells.find(q => q.studentId == student.student.id && q.taskId == task.id);
 
-                    if (finalGradeCell) return (<div>
+                    return (
+                      <td
+                        key={`${student.student.id}-${task.id}`}
+                        className={`px-2 py-4 text-center text-sm ${getGradeColor(cell?.isSuccessful ?? null)}`}
+                      >
+                        {cell ? (
+                          <div className="space-y-1">
+                            <span
+                              className="inline-flex px-2 text-xs font-semibold rounded-full"
+                            >
+                              {cell.value ?? "-"} {cell.percentage !== null && `/ ${cell.percentage} %`}
+                            </span>
+                            {cell.otherValues.length > 1 && (
+                              <div className="text-xs opacity-60">
+                                ({cell.otherValues.join(', ')})
+                              </div>
+                            )}
+                            <div className="text-xs opacity-75">
+                              {cell && <div>{new Date(cell.date).toLocaleDateString('cs-CZ')}</div>}
+                            </div>
+                          </div>
+                        ) : (
+                          <span className="text-gray-400 text-xs">—</span>
+                        )}
+                      </td>
+                    );
+                  })}
+                  <td className={"px-4 py-4 whitespace-nowrap text-sm text-gray-900 sticky left-0 z-10 " + (!finalGradeCell || finalGradeCell?.isRecorded ? "bg-white" : "bg-yellow-200")}>
+                  {finalGradeCell ? (
+                    <div>
                       <div>
                         <span className={"inline-block pl-1 mr-4 w-8 font-bold " + (finalGradeCell.isSuccessfull ? "text-green-700" : "text-red-600")}>
                           {finalGradeCell.value}
@@ -609,55 +610,53 @@ function GradesPage() {
                         </button>
                       </div>
                       {finalGradeCell?.comment && <div className='text-xs pt-2 text-gray-500' >{finalGradeCell.comment ?? ""}</div>}
-                      {finalGradeCell.isRecorded && finalGradeCell.date ? (
+                      {finalGradeCell.isRecorded && finalGradeCell.date && (
                         <div className="text-xs pt-1 text-gray-500">
                           {new Date(finalGradeCell.date).toLocaleDateString('cs-CZ')}
                         </div>
-                      ) : (
-                        <div></div>
                       )}
-                    </div>)
-                    else return (<div>
+                    </div>) : (<div>
                       <button
                         className='inline-flex items-center justify-center w-6 h-6 text-sm font-medium text-white bg-green-600 rounded-full hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500'
                         title="Přidat finální známku"
                         onClick={addCourseFinalGradeAsync(student.student)}>
                         +
                       </button>
-                    </div>)
-                  })()}
+                    </div>)}
                 </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                </tr>
+          );
+            }
+            )}
+        </tbody>
+      </table>
 
-        {/* Zpráva když nejsou výsledky */}
-        {filteredStudents?.length === 0 && studentFilter && (
-          <div className="text-center py-8">
-            <p className="text-gray-500">Žádní studenti neodpovídají filtru "{studentFilter}".</p>
-          </div>
-        )}
-      </div>
-
-      {/* Add Grade Modal */}
-      <AddCourseFinalGradeModal
-        isOpen={isAddCourseFinalGradeModalOpen}
-        onClose={handleCloseAddCourseFinalGradeModal}
-        student={selectedStudent}
-        courseId={id}
-        onGradeAdded={handleFinalCourseGradeAdded}
-      />
-
-      {/* Update Grade Modal */}
-      <EditCourseFinalGradeModal
-        isOpen={isEditCourseFinalGradeModalOpen}
-        onClose={handleCloseEditCourseFinalGradeModal}
-        student={selectedStudent}
-        grade={selectedFinalGrade}
-        onGradeUpdated={handleFinalCourseGradeUpdated}
-      />
+      {/* Zpráva když nejsou výsledky */}
+      {filteredStudents?.length === 0 && studentFilter && (
+        <div className="text-center py-8">
+          <p className="text-gray-500">Žádní studenti neodpovídají filtru "{studentFilter}".</p>
+        </div>
+      )}
     </div>
+
+      {/* Add Grade Modal */ }
+  <AddCourseFinalGradeModal
+    isOpen={isAddCourseFinalGradeModalOpen}
+    onClose={handleCloseAddCourseFinalGradeModal}
+    student={selectedStudent}
+    courseId={id}
+    onGradeAdded={handleFinalCourseGradeAdded}
+  />
+
+  {/* Update Grade Modal */ }
+  <EditCourseFinalGradeModal
+    isOpen={isEditCourseFinalGradeModalOpen}
+    onClose={handleCloseEditCourseFinalGradeModal}
+    student={selectedStudent}
+    grade={selectedFinalGrade}
+    onGradeUpdated={handleFinalCourseGradeUpdated}
+  />
+    </div >
   );
 
 

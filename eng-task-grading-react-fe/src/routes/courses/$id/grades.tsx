@@ -10,8 +10,10 @@ import { useLoadingState } from '../../../types/loadingState';
 import type { CourseDto, CourseOverviewDto, FinalGradeDto } from '../../../model/course-dto';
 import type { StudentDto } from '../../../model/student-dto';
 import type { TaskDto } from '../../../model/task-dto';
+import type { GradeDto } from '../../../model/grade-dto';
 import { AddCourseFinalGradeModal } from '../../../components/courses/AddCourseFinalGradeModal';
 import { EditCourseFinalGradeModal } from '../../../components/courses/EditCourseFinalGrade';
+import { AddGradeModal } from '../../../components/tasks/AddGradeModal';
 
 export const Route = createFileRoute('/courses/$id/grades')({
   component: GradesPage,
@@ -40,6 +42,7 @@ interface TaskHeader {
   title: string;
   description: string | null;
   minGrade: number | null;
+  maxGrade: number | null;
 }
 
 interface AttendanceHeader {
@@ -90,6 +93,8 @@ function GradesPage() {
   const [selectedStudent, setSelectedStudent] = useState<StudentDto | null>(null);
   const [isEditCourseFinalGradeModalOpen, setIsEditCourseFinalGradeModalOpen] = useState(false);
   const [selectedFinalGrade, setSelectedFinalGrade] = useState<FinalGradeDto | null>(null);
+  const [isAddGradeModalOpen, setIsAddGradeModalOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<TaskHeader | null>(null);
 
   const handleFinalCourseGradeUpdated: (grade: FinalGradeDto) => void = (updatedFinalGrade: FinalGradeDto) => {
     setSelectedFinalGrade(null);
@@ -145,6 +150,37 @@ function GradesPage() {
       }
     });
   }
+
+  const handleAddGrade = (student: StudentDto, task: TaskHeader) => {
+    setSelectedStudent(student);
+    setSelectedTask(task);
+    setIsAddGradeModalOpen(true);
+  };
+
+  const handleCloseAddGradeModal = () => {
+    setIsAddGradeModalOpen(false);
+    setSelectedStudent(null);
+    setSelectedTask(null);
+  };
+
+  const handleGradeAdded = (newGrade: GradeDto) => {
+    // Přenačíst data tabulky
+    const data = tableData;
+    if (data) {
+      const task = data.tasks.find(t => t.id === newGrade.taskId);
+      data?.taskCells.push({
+        taskId: newGrade.taskId,
+        studentId: newGrade.studentId,
+        value: newGrade.value,
+        otherValues: [],
+        percentage: gradeService.calculateFinalGradePercentage(newGrade.value, task?.minGrade || null, task?.maxGrade || null),
+        isSuccessful: task?.minGrade && newGrade.value >= task.minGrade ? true : false,
+        date: new Date(newGrade.date)
+      });
+      setTableData({ ...data });
+    }
+    handleCloseAddGradeModal();
+  };
 
   const deleteFinalGradeAsync = (finalGradeId: number) => async () => {
     const confirmed = window.confirm(
@@ -555,7 +591,7 @@ function GradesPage() {
                             <span
                               className="inline-flex px-2 text-xs font-semibold rounded-full"
                             >
-                              {cell.value ?? "-"} {cell.percentage !== null && `/ ${cell.percentage} %`}
+                              {cell.value?.toLocaleString("cs-CZ", {maximumFractionDigits: 2}) ?? "-"} {cell.percentage !== null && `/ ${cell.percentage} %`}
                             </span>
                             {cell.otherValues.length > 1 && (
                               <div className="text-xs opacity-60">
@@ -567,95 +603,114 @@ function GradesPage() {
                             </div>
                           </div>
                         ) : (
-                          <span className="text-gray-400 text-xs">—</span>
+                          <div className="flex flex-col items-center space-y-1">
+                            <button
+                              className="inline-flex items-center justify-center w-6 h-6 text-sm font-medium text-white bg-green-600 rounded-full hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                              onClick={() => handleAddGrade(student.student, task)}
+                              title="Přidat známku"
+                            >
+                              +
+                            </button>
+                          </div>
                         )}
                       </td>
                     );
                   })}
                   <td className={"px-4 py-4 whitespace-nowrap text-sm text-gray-900 sticky left-0 z-10 " + (!finalGradeCell || finalGradeCell?.isRecorded ? "bg-white" : "bg-yellow-200")}>
-                  {finalGradeCell ? (
-                    <div>
+                    {finalGradeCell ? (
                       <div>
-                        <span className={"inline-block pl-1 mr-4 w-8 font-bold " + (finalGradeCell.isSuccessfull ? "text-green-700" : "text-red-600")}>
-                          {finalGradeCell.value}
-                        </span>
-                        <button
-                          className="inline-flex items-center justify-center w-6 h-6 text-sm font-medium text-white bg-blue-500 rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                          title="Upravit známku"
-                          onClick={editCourseFinalGradeAsync(student.student, finalGradeCell.id)}>
-                          🖉
-                        </button>
-                        {
-                          finalGradeCell.isRecorded &&
+                        <div>
+                          <span className={"inline-block pl-1 mr-4 w-8 font-bold " + (finalGradeCell.isSuccessfull ? "text-green-700" : "text-red-600")}>
+                            {finalGradeCell.value}
+                          </span>
                           <button
-                            className='inline-flex items-center justify-center w-6 h-6 ml-1 p-3 text-sm font-medium text-red-300 bg-white border border-red-300 rounded-full hover:bg-red-700 hover:text-white'
-                            title="Odznačit jako zapsáno"
-                            onClick={unmarkAsRecordedAsync(finalGradeCell.id)}>
-                            ☐
+                            className="inline-flex items-center justify-center w-6 h-6 text-sm font-medium text-white bg-blue-500 rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                            title="Upravit známku"
+                            onClick={editCourseFinalGradeAsync(student.student, finalGradeCell.id)}>
+                            🖉
                           </button>
-                        }
-                        {!finalGradeCell.isRecorded &&
+                          {
+                            finalGradeCell.isRecorded &&
+                            <button
+                              className='inline-flex items-center justify-center w-6 h-6 ml-1 p-3 text-sm font-medium text-red-300 bg-white border border-red-300 rounded-full hover:bg-red-700 hover:text-white'
+                              title="Odznačit jako zapsáno"
+                              onClick={unmarkAsRecordedAsync(finalGradeCell.id)}>
+                              ☐
+                            </button>
+                          }
+                          {!finalGradeCell.isRecorded &&
+                            <button
+                              className="inline-flex items-center justify-center ml-1 w-6 h-6 text-sm font-medium text-white bg-green-600 rounded-full hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                              title="Potvrdit známku jako zapsanou v systému"
+                              onClick={markAsRecordedAsync(finalGradeCell.id)}>
+                              🗸
+                            </button>
+                          }
                           <button
-                            className="inline-flex items-center justify-center ml-1 w-6 h-6 text-sm font-medium text-white bg-green-600 rounded-full hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                            title="Potvrdit známku jako zapsanou v systému"
-                            onClick={markAsRecordedAsync(finalGradeCell.id)}>
-                            🗸
+                            className='inline-flex items-center justify-center w-6 h-6 ml-1 p-3 text-sm font-medium text-white bg-red-700 border border-red rounded-full hover:bg-red-700 hover:text-white'
+                            title="Smazat známku"
+                            onClick={deleteFinalGradeAsync(finalGradeCell.id)}>
+                            ⨯
                           </button>
-                        }
-                        <button
-                          className='inline-flex items-center justify-center w-6 h-6 ml-1 p-3 text-sm font-medium text-white bg-red-700 border border-red rounded-full hover:bg-red-700 hover:text-white'
-                          title="Smazat známku"
-                          onClick={deleteFinalGradeAsync(finalGradeCell.id)}>
-                          ⨯
-                        </button>
-                      </div>
-                      {finalGradeCell?.comment && <div className='text-xs pt-2 text-gray-500' >{finalGradeCell.comment ?? ""}</div>}
-                      {finalGradeCell.isRecorded && finalGradeCell.date && (
-                        <div className="text-xs pt-1 text-gray-500">
-                          {new Date(finalGradeCell.date).toLocaleDateString('cs-CZ')}
                         </div>
-                      )}
-                    </div>) : (<div>
-                      <button
-                        className='inline-flex items-center justify-center w-6 h-6 text-sm font-medium text-white bg-green-600 rounded-full hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500'
-                        title="Přidat finální známku"
-                        onClick={addCourseFinalGradeAsync(student.student)}>
-                        +
-                      </button>
-                    </div>)}
-                </td>
+                        {finalGradeCell?.comment && <div className='text-xs pt-2 text-gray-500' >{finalGradeCell.comment ?? ""}</div>}
+                        {finalGradeCell.isRecorded && finalGradeCell.date && (
+                          <div className="text-xs pt-1 text-gray-500">
+                            {new Date(finalGradeCell.date).toLocaleDateString('cs-CZ')}
+                          </div>
+                        )}
+                      </div>) : (<div>
+                        <button
+                          className='inline-flex items-center justify-center w-6 h-6 text-sm font-medium text-white bg-green-600 rounded-full hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500'
+                          title="Přidat finální známku"
+                          onClick={addCourseFinalGradeAsync(student.student)}>
+                          +
+                        </button>
+                      </div>)}
+                  </td>
                 </tr>
-          );
+              );
             }
             )}
-        </tbody>
-      </table>
+          </tbody>
+        </table>
 
-      {/* Zpráva když nejsou výsledky */}
-      {filteredStudents?.length === 0 && studentFilter && (
-        <div className="text-center py-8">
-          <p className="text-gray-500">Žádní studenti neodpovídají filtru "{studentFilter}".</p>
-        </div>
-      )}
-    </div>
+        {/* Zpráva když nejsou výsledky */}
+        {filteredStudents?.length === 0 && studentFilter && (
+          <div className="text-center py-8">
+            <p className="text-gray-500">Žádní studenti neodpovídají filtru "{studentFilter}".</p>
+          </div>
+        )}
+      </div>
 
-      {/* Add Grade Modal */ }
-  <AddCourseFinalGradeModal
-    isOpen={isAddCourseFinalGradeModalOpen}
-    onClose={handleCloseAddCourseFinalGradeModal}
-    student={selectedStudent}
-    courseId={id}
-    onGradeAdded={handleFinalCourseGradeAdded}
-  />
+      {/* Add Grade Modal */}
+      <AddCourseFinalGradeModal
+        isOpen={isAddCourseFinalGradeModalOpen}
+        onClose={handleCloseAddCourseFinalGradeModal}
+        student={selectedStudent}
+        courseId={id}
+        onGradeAdded={handleFinalCourseGradeAdded}
+      />
 
-  {/* Update Grade Modal */ }
-  <EditCourseFinalGradeModal
-    isOpen={isEditCourseFinalGradeModalOpen}
-    onClose={handleCloseEditCourseFinalGradeModal}
-    student={selectedStudent}
-    grade={selectedFinalGrade}
-    onGradeUpdated={handleFinalCourseGradeUpdated}
-  />
+      {/* Update Grade Modal */}
+      <EditCourseFinalGradeModal
+        isOpen={isEditCourseFinalGradeModalOpen}
+        onClose={handleCloseEditCourseFinalGradeModal}
+        student={selectedStudent}
+        grade={selectedFinalGrade}
+        onGradeUpdated={handleFinalCourseGradeUpdated}
+      />
+
+      {/* Add Grade Modal */}
+      <AddGradeModal
+        isOpen={isAddGradeModalOpen}
+        onClose={handleCloseAddGradeModal}
+        student={selectedStudent}
+        taskId={selectedTask?.id.toString() ?? ''}
+        taskMinGrade={selectedTask?.minGrade ?? null}
+        taskMaxGrade={selectedTask?.maxGrade ?? null}
+        onGradeAdded={handleGradeAdded}
+      />
     </div >
   );
 

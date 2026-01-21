@@ -3,6 +3,7 @@ import type { StudentDto } from '../../model/student-dto';
 import type { GradeCreateDto, GradeDto } from '../../model/grade-dto';
 import { gradeService } from '../../services/grade-service';
 import { useLogger } from '../../hooks/use-logger';
+import { useToast } from '../../hooks/use-toast';
 
 interface AddGradeModalProps {
   isOpen: boolean;
@@ -26,7 +27,8 @@ export function AddGradeModal({ isOpen, onClose, student, taskId, taskMinGrade, 
       )
     )
   );
-const logger = useLogger("AddGradeModal");
+  const logger = useLogger("AddGradeModal");
+  const tst = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,10 +53,11 @@ const logger = useLogger("AddGradeModal");
 
       const grade = await gradeService.createGrade(newGrade);
       onGradeAdded(grade);
+      tst.success(tst.SUC.ITEM_CREATED);
       handleClose();
     } catch (error) {
       logger.error('Error adding grade:', error);
-      alert('Chyba při přidávání známky');
+      tst.error(error);
     } finally {
       setIsSubmitting(false);
     }

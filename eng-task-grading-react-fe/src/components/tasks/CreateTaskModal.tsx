@@ -21,7 +21,7 @@ export function CreateTaskModal(props: CreateTaskModalProps) {
     maxGrade: null,
     aggregation: 'avg'
   });
-const tst = useToast();
+  const tst = useToast();
 
   const validateTask = () => {
     if (!taskEditorData.title.trim()) {
@@ -32,6 +32,7 @@ const tst = useToast();
 
   const handleSubmit = async () => {
 
+    //TODO rewrite, this is in the old style where modal is not responsible for saving
     if (!validateTask()) return;
 
     setIsSubmitting(true);

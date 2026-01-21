@@ -373,7 +373,7 @@ function RouteComponent() {
                                 ? 'bg-green-100 text-green-800'
                                 : 'bg-red-100 text-red-800'
                                 }`}>
-                                {studentData.finalValue} {studentData.finalPercentage ? `/ ${studentData.finalPercentage}%` : ''}
+                                {studentData.finalValue?.toLocaleString("cs-CZ", {maximumFractionDigits: 2})} {studentData.finalPercentage ? `/ ${studentData.finalPercentage}%` : ''}
                               </span>
                             </td>
                           )}

@@ -3,6 +3,7 @@ import type { StudentDto } from '../../model/student-dto';
 import type { GradeDto, GradeUpdateDto } from '../../model/grade-dto';
 import { gradeService } from '../../services/grade-service';
 import { useLogger } from '../../hooks/use-logger';
+import { useToast } from '../../hooks/use-toast';
 
 interface EditGradeModalProps {
   isOpen: boolean;
@@ -19,6 +20,7 @@ export function EditGradeModal({ isOpen, onClose, student, grade, taskMinGrade, 
   const [comment, setComment] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const logger = useLogger("EditGradeModal");
+  const tst = useToast();
 
   // Aktualizovat hodnoty když se změní grade
   useEffect(() => {
@@ -52,10 +54,11 @@ export function EditGradeModal({ isOpen, onClose, student, grade, taskMinGrade, 
 
       const updatedGrade = await gradeService.updateGrade(grade.id.toString(), updateData);
       onGradeUpdated(updatedGrade);
+      tst.success(tst.SUC.ITEM_UPDATED);
       handleClose();
     } catch (error) {
       logger.error('Error updating grade:', error);
-      alert('Chyba při aktualizaci známky');
+      tst.error(error);
     } finally {
       setIsSubmitting(false);
     }

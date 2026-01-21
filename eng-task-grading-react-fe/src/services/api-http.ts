@@ -59,7 +59,7 @@ axiosInstance.interceptors.request.use(
     if (token) {
       config.headers = config.headers || {};
       config.headers["Authorization"] = `Bearer ${token}`;
-      logger.debug("interceptors.request - adding accessToken:", token);
+      logger.debug("interceptors.request - adding accessToken:", token.slice(0,4) + "..." + token.slice(-4));
     }
     else
       logger.debug("interceptors.request - no accessToken available");
@@ -84,36 +84,29 @@ axiosInstance.interceptors.response.use(
       !url.endsWith('student/verify')
     ) {
       originalRequest._retry = true;
+
+      let newAccessToken: string | undefined = undefined;
       try {
-        const newAccessToken: string | undefined = await refreshHandler();
-        if (newAccessToken) {
-          logger.debug("interceptors.response - refreshed access token:", newAccessToken);
-          originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
-          return axiosInstance(originalRequest);
-        }
-        else {
-          // refresh did not return a token -> redirect to login with nextPage
-          logger.debug("interceptors.response - no refreshed access token returned");
-          tst.error(tst.ERR.LOGIN_EXPIRED);
-          if (typeof window !== 'undefined') {
-            const next = encodeURIComponent(window.location.pathname + window.location.search);
-            const loginUrl = getLoginPageFromUrl(url);
-            router.navigate({ to: `${loginUrl}?nextPage=${next}` });
-          }
-          const unwrappedError = tryUnwrapAxiosError(error);
-          return Promise.reject(unwrappedError);
-        }
-      } catch (refreshError) {
-        // refresh attempt threw -> redirect to login with nextPage
-        logger.error("interceptors.response - error during token refresh:", refreshError);
-        tst.error(refreshError);
+        newAccessToken = await refreshHandler();
+        logger.debug("interceptors.response - refreshed token:", newAccessToken?.slice(0,4) + "..." + newAccessToken?.slice(-4));
+      } catch (error) {
+        newAccessToken = undefined;
+        logger.debug("interceptors.response - token refresh failed:", error);
+      }
+
+      if (newAccessToken) {
+        originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
+        return axiosInstance(originalRequest);
+      } else {
+        // refresh did not return a token -> redirect to login with nextPage
+        tst.error(tst.ERR.LOGIN_EXPIRED); //TODO this probably should not be here, causing two error toasts
         if (typeof window !== 'undefined') {
           const next = encodeURIComponent(window.location.pathname + window.location.search);
           const loginUrl = getLoginPageFromUrl(url);
           router.navigate({ to: `${loginUrl}?nextPage=${next}` });
         }
-        const unwrappedRefreshError = tryUnwrapAxiosError(refreshError);
-        return Promise.reject(unwrappedRefreshError);
+        const unwrappedError = tryUnwrapAxiosError(error);
+        return Promise.reject(unwrappedError);
       }
     }
     logger.debug("interceptors.response - non-401 error or retry already attempted");

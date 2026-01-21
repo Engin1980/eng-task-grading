@@ -29,7 +29,7 @@ namespace EngTaskGradingNetBE.Services
         .Include(q => q.Student)
         .FirstOrDefaultAsync(q => q.Token == loginTokenValue && q.Type == StudentViewTokenType.Login)
         ?? throw new InvalidTokenException(InvalidTokenException.InvalidationType.NotFound);
-      
+
       Db.StudentViewTokens.Remove(token);
       await Db.SaveChangesAsync();
 
@@ -85,23 +85,16 @@ namespace EngTaskGradingNetBE.Services
       if (!BCrypt.Net.BCrypt.Verify(password, hash))
         throw new InvalidCredentialsException();
 
-      TeacherToken? refreshToken = await Db.TeacherTokens
-        .FirstOrDefaultAsync(t => t.TeacherId == teacher.Id && t.Type == TeacherToken.TokenType.Refresh);
-
-      if (refreshToken == null)
+      var refreshToken = new TeacherToken
       {
-        refreshToken = new TeacherToken
-        {
-          TeacherId = teacher.Id,
-          Type = rememberTeacherOverSessions ? TeacherToken.TokenType.RefreshPersistent : TeacherToken.TokenType.Refresh,
-        };
-        Db.TeacherTokens.Add(refreshToken);
-      }
-
-      refreshToken.Value = SecurityUtils.GenerateSecureToken(sett.RefreshTokenLengthBytes);
+        TeacherId = teacher.Id,
+        Type = rememberTeacherOverSessions ? TeacherToken.TokenType.RefreshPersistent : TeacherToken.TokenType.Refresh,
+        Value = SecurityUtils.GenerateSecureToken(sett.RefreshTokenLengthBytes)
+      };
       refreshToken.ExpirationDate = refreshToken.Type == TeacherToken.TokenType.Refresh
         ? DateTime.UtcNow.AddMinutes(sett.Teacher.SessionRefreshTokenExpiryInMinutes)
         : DateTime.UtcNow.AddMinutes(sett.Teacher.PersistentRefreshTokenExpiryInMinutes);
+      Db.TeacherTokens.Add(refreshToken);
       await Db.SaveChangesAsync();
 
       string accessToken = GenerateJwtToken(
@@ -271,8 +264,8 @@ namespace EngTaskGradingNetBE.Services
 
       TeacherToken? token = await Db.TeacherTokens
           .Include(t => t.Teacher)
-          .FirstOrDefaultAsync(t => t.Value == refreshToken ||
-            (t.Type == TeacherToken.TokenType.Refresh && t.Type == TeacherToken.TokenType.RefreshPersistent))
+          .FirstOrDefaultAsync(t => t.Value == refreshToken &&
+            (t.Type == TeacherToken.TokenType.Refresh || t.Type == TeacherToken.TokenType.RefreshPersistent))
           ?? throw new InvalidCredentialsException();
 
       if (token.ExpirationDate < DateTime.UtcNow)
@@ -294,7 +287,7 @@ namespace EngTaskGradingNetBE.Services
 
       Tokens ret = new(
         accessToken,
-        refreshToken,
+        token.Value,
         token.Type == TeacherToken.TokenType.Refresh);
       return ret;
     }
@@ -303,9 +296,9 @@ namespace EngTaskGradingNetBE.Services
     {
       var tokenEntity = await Db.StudentViewTokens
         .Include(q => q.Student)
-        .FirstOrDefaultAsync(q => q.Token == refreshToken && q.Type == StudentViewTokenType.Access);
-      if (tokenEntity == null)
-        throw new InvalidCredentialsException();
+        .FirstOrDefaultAsync(q => q.Token == refreshToken && q.Type == StudentViewTokenType.Access)
+        ?? throw new InvalidCredentialsException();
+
       if (tokenEntity.ExpiresAt < DateTime.UtcNow)
       {
         await FlushExpiredStudentViewTokensAsync();

@@ -52,7 +52,7 @@ axiosInstance.interceptors.request.use(
     if (token) {
       config.headers = config.headers || {};
       config.headers["Authorization"] = `Bearer ${token}`;
-      logger.debug("interceptors.request - adding accessToken:", token);
+      logger.debug("interceptors.request - adding accessToken:", token.slice(0,4) + "..." + token.slice(-4));
     }
     else
       logger.debug("interceptors.request - no accessToken available");
@@ -81,7 +81,7 @@ axiosInstance.interceptors.response.use(
       let newAccessToken: string | undefined = undefined;
       try {
         newAccessToken = await refreshHandler();
-        logger.debug("interceptors.response - refreshed token:", newAccessToken);
+        logger.debug("interceptors.response - refreshed token:", newAccessToken?.slice(0,4) + "..." + newAccessToken?.slice(-4));
       } catch (error) {
         newAccessToken = undefined;
         logger.debug("interceptors.response - token refresh failed:", error);

@@ -82,7 +82,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const { data } = await apiHttp.post<string>("/v1/auth/refresh");
       setAccessToken(data);
       setLoggedUserByToken(data);
-      logger.info("Token úspěšně obnoven za " + data);
+      logger.info("Token úspěšně obnoven za " + data.slice(0,4) + "..." + data.slice(-4));
       return data;
     } catch (error) {
       logger.error("Chyba při obnově tokenu", { error });

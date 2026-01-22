@@ -71,11 +71,11 @@ namespace EngTaskGradingNetBE.Controllers
 
       CourseDto courseDto = EObjectMapper.To(course);
 
-      TaskDto[] tasksDto = course.Tasks.Select(EObjectMapper.To).ToArray();
+      TaskDto[] tasksDto = course.Tasks.OrderBy(q => q.Title).Select(EObjectMapper.To).ToArray();
       StudentDto[] studentsDto = course.Students.OrderBy(q => q.Surname).ThenBy(q => q.Name).Select(EObjectMapper.To).ToArray();
-      AttendanceDto[] attendancesDto = course.Attendances.Select(EObjectMapper.To).ToArray();
+      AttendanceDto[] attendancesDto = course.Attendances.OrderBy(q=>q.Title).Select(EObjectMapper.To).ToArray();
       AttendanceResultDto[] attendanceDaysDto = buildAttendanceResults(course);
-      GradeDto[] gradesDto = course.Tasks.OrderBy(q => q.Title).SelectMany(q => q.Grades).Select(EObjectMapper.To).ToArray();
+      GradeDto[] gradesDto = course.Tasks.SelectMany(q => q.Grades).Select(EObjectMapper.To).ToArray();
       FinalGradeDto[] finalGradesDto = course.FinalGrades.Select(EObjectMapper.To).ToArray();
 
       ret = new CourseOverviewDto(courseDto, studentsDto,

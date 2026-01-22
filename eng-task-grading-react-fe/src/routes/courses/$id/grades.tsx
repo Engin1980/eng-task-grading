@@ -606,7 +606,7 @@ function GradesPage() {
                         ) : (
                           <div className="flex flex-col items-center space-y-1">
                             <button
-                              className="inline-flex items-center justify-center w-6 h-6 text-sm font-medium text-white bg-green-600 rounded-full hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                              className="inline-flex items-center justify-center w-6 h-6 text-sm font-medium border-1 bg-white text-green-600 rounded-full hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
                               onClick={() => handleAddGrade(student.student, task)}
                               title="Přidat známku"
                             >

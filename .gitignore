@@ -4,6 +4,7 @@ Logs/
 bin/
 obj/
 publish/
+EngTaskGradingNetBESolution/EngTaskGradingNetBE/data/backup
 EngTaskGradingNetBESolution/certs/aspnetapp.pfx
 EngTaskGradingNetBESolution/EngTaskGradingNetBE/appsettings.Release.json
 EngTaskGradingNetBESolution/EngTaskGradingNetBE/appsettings.Production.json

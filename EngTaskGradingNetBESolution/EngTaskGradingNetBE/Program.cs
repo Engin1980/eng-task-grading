@@ -31,7 +31,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
-app.MapGet("/", () => "Alive!");
+string feUrl = builder.Configuration["AppSettings:FrontEndUrl"]!;
+app.MapGet("/", () => $"Alive! Go to <a href=\"{feUrl}\">{feUrl}</a>.");
 
 Log.Information("Starting main app");
 
@@ -69,6 +70,9 @@ static void BuildServices(WebApplicationBuilder builder)
   builder.Services.AddTransient<CloudflareTurnistilleService>();
   builder.Services.AddTransient<StudentViewService>();
   builder.Services.AddTransient<AuthService>();
+
+  builder.Services.AddTransient<DatabaseBackupService>();
+  builder.Services.AddHostedService<DatabaseBackupHostedService>();
 
   builder.Services.AddSingleton<BackgroundTaskQueue>();
   builder.Services.AddHostedService<BackgroundTaskManagerService>();
@@ -196,3 +200,4 @@ static void BuildSecurity(WebApplicationBuilder builder)
 
   builder.Services.AddAuthorization();
 }
+

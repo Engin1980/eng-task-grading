@@ -11,7 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as HomeRouteImport } from './routes/home'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as CoursesIndexRouteImport } from './routes/courses/index'
 import { Route as TeacherPasswordResetRequestRouteImport } from './routes/teacherPasswordReset/request'
 import { Route as TasksIdRouteImport } from './routes/tasks/$id'
@@ -48,9 +48,9 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const HomeRoute = HomeRouteImport.update({
-  id: '/home',
-  path: '/home',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CoursesIndexRoute = CoursesIndexRouteImport.update({
@@ -187,7 +187,7 @@ const AttendanceSelfSignViewInfoIdKeyRoute =
   } as any)
 
 export interface FileRoutesByFullPath {
-  '/home': typeof HomeRoute
+  '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/admin/client-logs': typeof AdminClientLogsRoute
@@ -217,7 +217,7 @@ export interface FileRoutesByFullPath {
   '/studentView/courses/$id/tasks': typeof StudentViewCoursesIdTasksRoute
 }
 export interface FileRoutesByTo {
-  '/home': typeof HomeRoute
+  '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/admin/client-logs': typeof AdminClientLogsRoute
@@ -248,7 +248,7 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/home': typeof HomeRoute
+  '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/admin/client-logs': typeof AdminClientLogsRoute
@@ -280,7 +280,7 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | '/home'
+    | '/'
     | '/login'
     | '/register'
     | '/admin/client-logs'
@@ -310,7 +310,7 @@ export interface FileRouteTypes {
     | '/studentView/courses/$id/tasks'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/home'
+    | '/'
     | '/login'
     | '/register'
     | '/admin/client-logs'
@@ -340,7 +340,7 @@ export interface FileRouteTypes {
     | '/studentView/courses/$id/tasks'
   id:
     | '__root__'
-    | '/home'
+    | '/'
     | '/login'
     | '/register'
     | '/admin/client-logs'
@@ -371,7 +371,7 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  HomeRoute: typeof HomeRoute
+  IndexRoute: typeof IndexRoute
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
   AdminClientLogsRoute: typeof AdminClientLogsRoute
@@ -409,11 +409,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/home': {
-      id: '/home'
-      path: '/home'
-      fullPath: '/home'
-      preLoaderRoute: typeof HomeRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/courses/': {
@@ -640,7 +640,7 @@ const StudentViewCoursesIdRouteWithChildren =
   StudentViewCoursesIdRoute._addFileChildren(StudentViewCoursesIdRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
-  HomeRoute: HomeRoute,
+  IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
   AdminClientLogsRoute: AdminClientLogsRoute,

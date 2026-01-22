@@ -328,7 +328,8 @@ function GradesPage() {
         id: t.id,
         title: t.title,
         description: t.description ?? null,
-        minGrade: t.minGrade ?? null
+        minGrade: t.minGrade ?? null,
+        maxGrade: t.maxGrade ?? null
       })),
       attendances: attendances,
       students: studentRows,
@@ -591,7 +592,7 @@ function GradesPage() {
                             <span
                               className="inline-flex px-2 text-xs font-semibold rounded-full"
                             >
-                              {cell.value?.toLocaleString("cs-CZ", {maximumFractionDigits: 2}) ?? "-"} {cell.percentage !== null && `/ ${cell.percentage} %`}
+                              {cell.value?.toLocaleString("cs-CZ", { maximumFractionDigits: 2 }) ?? "-"} {cell.percentage !== null && `/ ${cell.percentage} %`}
                             </span>
                             {cell.otherValues.length > 1 && (
                               <div className="text-xs opacity-60">

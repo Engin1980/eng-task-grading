@@ -57,7 +57,7 @@ function toToastErrorMessageId(x: any): ToastErrorMessageId | null {
   if (typeof x === 'string' && x in TOAST_ERROR_MESSAGES) {
     return TOAST_ERROR_MESSAGES[x as keyof typeof TOAST_ERROR_MESSAGES];
   }
-  if (typeof x === 'number' && Object.values(TOAST_ERROR_MESSAGES).includes(x)) {
+  if (typeof x === 'number' && Object.values(TOAST_ERROR_MESSAGES).includes(x as ToastErrorMessageId)) {
     return x as ToastErrorMessageId;
   }
   return null;

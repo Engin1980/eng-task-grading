@@ -14,4 +14,5 @@ public class AppLog
   public DateTime? TimeStamp { get; set; }
   public string? Exception { get; set; }
   public string? Properties { get; set; }
+  public string? SourceContext { get; set; }
 }

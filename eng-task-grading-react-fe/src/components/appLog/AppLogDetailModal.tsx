@@ -62,6 +62,11 @@ export function AppLogDetailModal(props: AppLogDetailModalProps) {
               </div>
 
               <div>
+                <strong className="block text-sm font-semibold mb-1">SourceContext:</strong>
+                <div className="text-sm">{currentLog.sourceContext || "N/A"}</div>
+              </div>
+
+              <div>
                 <strong className="block text-sm font-semibold mb-1">Timestamp:</strong>
                 <div className="text-sm">
                   {currentLog.timeStamp ? new Date(currentLog.timeStamp).toLocaleString() : "N/A"}

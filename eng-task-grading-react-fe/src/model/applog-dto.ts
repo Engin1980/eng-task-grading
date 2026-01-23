@@ -6,4 +6,5 @@ export interface AppLogDto {
   timeStamp: Date | null;
   exception: string | null;
   properties: string | null;
+  sourceContext: string | null;
 }

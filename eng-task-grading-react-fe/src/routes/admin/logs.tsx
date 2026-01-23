@@ -7,6 +7,7 @@ import { LoadingError } from '../../ui/loadingError'
 import { useLoadingState } from '../../types/loadingState'
 import { AppLogDetailModal } from '../../components/appLog/AppLogDetailModal'
 import { useLogger } from '../../hooks/use-logger'
+import { useToast } from '../../hooks/use-toast'
 
 export const Route = createFileRoute('/admin/logs')({
   component: RouteComponent,
@@ -19,6 +20,7 @@ function RouteComponent() {
   const [levelFilter, setLevelFilter] = useState('')
   const [selectedLogIndex, setSelectedLogIndex] = useState<number | null>(null)
   const logger = useLogger("/logs.tsx");
+  const tst = useToast();
 
   const loadLogs = async () => {
     try {
@@ -41,7 +43,8 @@ function RouteComponent() {
     const matchesText = !filter ||
       log.message?.toLowerCase().includes(filter.toLowerCase()) ||
       log.messageTemplate?.toLowerCase().includes(filter.toLowerCase()) ||
-      log.properties?.toLowerCase().includes(filter.toLowerCase())
+      log.properties?.toLowerCase().includes(filter.toLowerCase()) ||
+      log.sourceContext?.toLowerCase().includes(filter.toLowerCase())
 
     const matchesLevel = !levelFilter || log.level === levelFilter
 
@@ -75,6 +78,43 @@ function RouteComponent() {
     setSelectedLogIndex(null)
   }
 
+  const handleDeleteAll = async () => {
+    if (!window.confirm('Opravdu chcete smazat všechny logy? Tuto akci nelze vrátit.')) return;
+
+    try {
+      await appLogService.deleteAll();
+      logger.info('All logs deleted');
+      tst.success(tst.SUC.ITEM_DELETED);
+      await loadLogs();
+    } catch (err) {
+      logger.error('Error deleting all logs:', err);
+      tst.error(err);
+    }
+  };
+
+  const handleDeleteOld = async () => {
+    if (!window.confirm('Opravdu chcete smazat staré logy? Tuto akci nelze vrátit.')) return;
+
+    try {
+      await appLogService.deleteOld();
+      logger.info('Old logs deleted');
+      await loadLogs();
+      tst.success(tst.SUC.ITEM_DELETED);
+    } catch (err) {
+      logger.error('Error deleting old logs:', err);
+      tst.error(err);
+    }
+  };
+
+  const handleReloadLogs = async () => {
+    try {
+      await loadLogs();
+    } catch (err) {
+      logger.error('Error reloading logs:', err);
+      tst.error(err);
+    }
+  };
+
   if (ldgState.loading) return (<Loading message="Načítám logy, to může chvilku trvat..." />)
   if (ldgState.error) { return (<LoadingError message={ldgState.error} onRetry={loadLogs} />) }
 
@@ -86,7 +126,7 @@ function RouteComponent() {
 
         {/* Filtry */}
         <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
             <div>
               <label htmlFor="text-filter" className="block text-sm font-medium text-gray-700 mb-2">
                 Vyhledat v logu
@@ -116,6 +156,21 @@ function RouteComponent() {
                   <option key={level} value={level}>{level}</option>
                 ))}
               </select>
+            </div>
+
+            <div className="flex items-center justify-end gap-2">
+              <button
+                className="inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                onClick={handleReloadLogs}
+              >Obnovit</button>
+              <button
+                className="inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-red-700 hover:bg-red-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                onClick={handleDeleteOld}
+              >Vymazat staré</button>
+              <button
+                className="inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-red-100 text-base font-medium text-red-700 hover:bg-red-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                onClick={handleDeleteAll}
+              >Vymazat vše</button>
             </div>
           </div>
 
@@ -171,72 +226,86 @@ function RouteComponent() {
       </div>
 
       {/* Tabulka logů */}
-      {filteredLogs.length === 0 ? (
-        <div className="text-center py-8">
-          <p className="text-gray-500">
-            {filter || levelFilter ? 'Žádné logy neodpovídají filtru.' : 'Nejsou k dispozici žádné logy.'}
-          </p>
-        </div>
-      ) : (
-        <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  {/* První sloupec: stáhneme na minimum, zakážeme zalomení */}
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-px whitespace-nowrap">
-                    Čas
-                  </th>
-                  {/* Druhý sloupec: stejně jako první */}
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-px whitespace-nowrap">
-                    Úroveň
-                  </th>
-                  {/* Třetí sloupec: sebere zbytek místa */}
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Zpráva
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredLogs.map((log) => (
-                  <tr
-                    key={log.id}
-                    onClick={() => handleRowClick(log)}
-                    className="hover:bg-gray-50 cursor-pointer"
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {log.timeStamp ? new Date(log.timeStamp).toLocaleString('cs-CZ') : '-'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full border ${getLogLevelColor(log.level || '')}`}>
-                        {log.level || 'N/A'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-900 max-w-md">
-                      <div className="break-words overflow-wrap-anywhere" title={log.message || ''}>
-                        {log.message || '-'}
-                      </div>
-                      {log.exception && (
-                        <div className="font-mono text-xs text-red-600 mt-1" title={log.exception}>
-                          ... exception details
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      {
+        filteredLogs.length === 0 ? (
+          <div className="text-center py-8">
+            <p className="text-gray-500">
+              {filter || levelFilter ? 'Žádné logy neodpovídají filtru.' : 'Nejsou k dispozici žádné logy.'}
+            </p>
           </div>
-        </div>
-      )}
+        ) : (
+          <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    {/* První sloupec: stáhneme na minimum, zakážeme zalomení */}
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-px whitespace-nowrap">
+                      Čas
+                    </th>
+                    {/* Druhý sloupec: stejně jako první */}
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-px whitespace-nowrap">
+                      Úroveň
+                    </th>
+                    {/* Třetí sloupec: Source/Context */}
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-px whitespace-nowrap">
+                      Zdroj
+                    </th>
 
-      {selectedLogIndex !== null && (
-        <AppLogDetailModal
-          isOpen={selectedLogIndex !== null}
-          logs={filteredLogs}
-          index={selectedLogIndex}
-          onClose={handleCloseModal}
-        />
-      )}
-    </div>)
+                    {/* Čtvrtý sloupec: sebere zbytek místa */}
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Zpráva
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {filteredLogs.map((log) => (
+                    <tr
+                      key={log.id}
+                      onClick={() => handleRowClick(log)}
+                      className="hover:bg-gray-50 cursor-pointer"
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {log.timeStamp ? new Date(log.timeStamp).toLocaleString('cs-CZ') : '-'}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full border ${getLogLevelColor(log.level || '')}`}>
+                          {log.level || 'N/A'}
+                        </span>
+                      </td>
+
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {log.sourceContext || '-'}
+                      </td>
+
+                      <td className="px-6 py-4 text-sm text-gray-900 max-w-md">
+                        <div className="break-words overflow-wrap-anywhere" title={log.message || ''}>
+                          {log.message || '-'}
+                        </div>
+                        {log.exception && (
+                          <div className="font-mono text-xs text-red-600 mt-1" title={log.exception}>
+                            ... exception details
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )
+      }
+
+      {
+        selectedLogIndex !== null && (
+          <AppLogDetailModal
+            isOpen={selectedLogIndex !== null}
+            logs={filteredLogs}
+            index={selectedLogIndex}
+            onClose={handleCloseModal}
+          />
+        )
+      }
+    </div >)
 }

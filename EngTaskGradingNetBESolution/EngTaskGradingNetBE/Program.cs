@@ -6,6 +6,8 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
+using Serilog.Sinks.MSSqlServer;
+using System.Collections.ObjectModel;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -32,7 +34,7 @@ app.UseAuthorization();
 app.MapControllers();
 
 string feUrl = builder.Configuration["AppSettings:FrontEndUrl"]!;
-app.MapGet("/", () => $"Alive! Go to <a href=\"{feUrl}\">{feUrl}</a>.");
+app.MapGet("/", () => $"Alive! Go to '{feUrl}'.");
 
 Log.Information("Starting main app");
 
@@ -99,19 +101,34 @@ static string GetConnectionString(WebApplicationBuilder builder)
 
 static LoggerConfiguration CreateLoggerConfiguration(WebApplicationBuilder builder, bool addDb)
 {
+  string outputTemplate = "[{Timestamp:HH:mm:ss} {Level:u3}] ({SourceContext:l}) {Message:lj}{NewLine}{Exception}";
   var ret = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
-    .WriteTo.Console()
-    .WriteTo.File("logs/app.log", rollingInterval: RollingInterval.Day);
+    .WriteTo.Console(outputTemplate: outputTemplate)
+    .WriteTo.File("logs/app.log", rollingInterval: RollingInterval.Day, outputTemplate: outputTemplate);
   if (addDb)
+  {
+    var columnOptions = new Serilog.Sinks.MSSqlServer.ColumnOptions();
+    columnOptions.AdditionalColumns = new Collection<SqlColumn>
+    {
+      new SqlColumn
+      {
+        ColumnName = "SourceContext",
+        DataType = System.Data.SqlDbType.NVarChar,
+        DataLength = -1,
+        AllowNull = true
+      }
+    };
     ret = ret.WriteTo.MSSqlServer(
           connectionString: GetConnectionString(builder),
           sinkOptions: new Serilog.Sinks.MSSqlServer.MSSqlServerSinkOptions
           {
             TableName = "AppLog",
             AutoCreateSqlTable = false
-          }
+          },
+          columnOptions: columnOptions
       );
+  }
 
   return ret;
 }

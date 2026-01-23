@@ -91,7 +91,7 @@ public static class EObjectMapper
     };
   }
 
-  public static AppLogDto To(AppLog log) => new(log.Id, log.Message, log.MessageTemplate, log.Level, log.TimeStamp, log.Exception, log.Properties);
+  public static AppLogDto To(AppLog log) => new(log.Id, log.Message, log.MessageTemplate, log.Level, log.TimeStamp, log.Exception, log.Properties, log.SourceContext);
 
   public static Attendance From(AttendanceCreateDto attendanceDto)
   {

@@ -17,9 +17,9 @@ namespace EngTaskGradingNetBE.Services
       static bool checkZipFileExists()
       {
         string zipFileNameBeginning = System.IO.Path.GetFileName(GetCurrentBackupZipFileName())[..10];
-        string[] zipFiles = System.IO.Directory.GetFiles(outDir, "*.zip");
+        string[] zipFiles = System.IO.Path.Exists(outDir) ? System.IO.Directory.GetFiles(outDir, "*.zip") : [];
         return zipFiles.Any(q => q.StartsWith(zipFileNameBeginning));
-      };
+      }
 
       Task<bool> t = Task<bool>.Run(checkZipFileExists);
       return await t;

@@ -20,4 +20,16 @@ public class AppLogController(AppLogService appLogService) : ControllerBase
     var ret = logs.Select(EObjectMapper.To).ToList();
     return ret;
   }
+
+  [HttpDelete("All")]
+  public async System.Threading.Tasks.Task DeleteAllAsync()
+  {
+    await appLogService.DeleteAllLogsAsync();
+  }
+
+  [HttpDelete("Old")]
+  public async System.Threading.Tasks.Task DeleteOldAsync()
+  {
+    await appLogService.DeleteOldLogsAsync();
+  }
 }

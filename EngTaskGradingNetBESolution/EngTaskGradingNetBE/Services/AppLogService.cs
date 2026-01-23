@@ -12,5 +12,18 @@ namespace EngTaskGradingNetBE.Services
         .OrderByDescending(log => log.TimeStamp!.Value)
         .ToListAsync();
     }
+
+    internal async System.Threading.Tasks.Task DeleteAllLogsAsync()
+    {
+      await Db.AppLog.ExecuteDeleteAsync();
+    }
+
+    internal async System.Threading.Tasks.Task DeleteOldLogsAsync()
+    {
+      // old are over 7 days //TODO move to config
+      await Db.AppLog
+        .Where(q => q.TimeStamp == null || q.TimeStamp < DateTime.UtcNow.AddDays(-7))
+        .ExecuteDeleteAsync();
+    }
   }
 }

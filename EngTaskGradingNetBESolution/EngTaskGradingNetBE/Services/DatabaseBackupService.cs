@@ -7,18 +7,32 @@ using System.Threading.Tasks;
 
 namespace EngTaskGradingNetBE.Services
 {
-  public class DatabaseBackupService(AppDbContext context) : DbContextBaseService(context)
+  public class DatabaseBackupService(
+    AppDbContext context,
+    ILogger<DatabaseBackupService> logger) : DbContextBaseService(context)
   {
     private static readonly string outDir = Path.Combine("Data", "Backup");
     private const int MAX_BACKUP_FILES_COUNT = 10;
+    private ILogger<DatabaseBackupService> logger = logger;
 
     public async Task<bool> IsBackupNeededAsync()
     {
-      static bool checkZipFileExists()
+      bool checkZipFileExists()
       {
         string zipFileNameBeginning = System.IO.Path.GetFileName(GetCurrentBackupZipFileName())[..10];
         string[] zipFiles = System.IO.Path.Exists(outDir) ? System.IO.Directory.GetFiles(outDir, "*.zip") : [];
-        return zipFiles.Any(q => q.StartsWith(zipFileNameBeginning));
+        string? existingZipFile = zipFiles.FirstOrDefault(q => q.StartsWith(zipFileNameBeginning));
+        if (existingZipFile != null)
+        {
+          this.logger.LogDebug("Backup not needed: zip file beginning '{zipFileNameBeginning}' already exists as '{existingZipFile}'",
+            zipFileNameBeginning, System.IO.Path.GetFullPath(existingZipFile));
+        }
+        else
+        {
+          this.logger.LogDebug("Backup needed: no existing zip file beginning '{zipFileNameBeginning}' found",
+            zipFileNameBeginning);
+        }
+        return existingZipFile == null;
       }
 
       Task<bool> t = Task<bool>.Run(checkZipFileExists);
@@ -74,6 +88,8 @@ namespace EngTaskGradingNetBE.Services
       string zipPath = GetCurrentBackupZipFileName();
       if (System.IO.File.Exists(zipPath))
       {
+        this.logger.LogWarning("Backup zip file '{zipPath}' already exists, skipping backup.",
+          System.IO.Path.GetFullPath(zipPath));
         //already backuped today, skip
         return;
       }
@@ -90,6 +106,8 @@ namespace EngTaskGradingNetBE.Services
         System.Threading.Tasks.Task zipTask = System.Threading.Tasks.Task.Run(
           () => ZipFile.CreateFromDirectory(tempDir, zipPath));
         await zipTask;
+        this.logger.LogInformation("Database backup created at '{zipPath}'",
+          System.IO.Path.GetFullPath(zipPath));
       }
       finally
       {

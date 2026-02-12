@@ -6,6 +6,7 @@ using EngTaskGradingNetBE.Exceptions.BadData.NotFound;
 using EngTaskGradingNetBE.Exceptions.Server;
 using EngTaskGradingNetBE.Exceptions.Server.CloudflareTurnistille;
 using EngTaskGradingNetBE.Lib;
+using EngTaskGradingNetBE.Services;
 using System.Net;
 using System.Text.Json;
 
@@ -154,6 +155,7 @@ namespace EngTaskGradingNetBE.Middleware
     {
       static ErrorData convertCommonBadDataException(Exception e)
       {
+        TokenType[] authTokenTypes = new[] { TokenType.StudentLogin, TokenType.StudentAccess, TokenType.TeacherRefresh };
         ErrorData ret = e switch
         {
           InvalidCredentialsException => new ErrorData(
@@ -165,7 +167,7 @@ namespace EngTaskGradingNetBE.Middleware
             ErrorKeys.INVALID_STUDENT_SELF_SIGN_KEY
             ),
           InvalidTokenException ete => new ErrorData(
-            ete.TokenType == InvalidTokenException.ETokenType.Authentication ? HttpStatusCode.Unauthorized : HttpStatusCode.BadRequest,
+            authTokenTypes.Contains(ete.TokenType) ? HttpStatusCode.Unauthorized : HttpStatusCode.BadRequest,
             ErrorKeys.INVALID_TOKEN
             ),
           PasswordsRequirementsNotFulfilledException => new ErrorData(

@@ -1,11 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
-using System.Security.Cryptography;
+﻿using EngTaskGradingNetBE.Lib;
 using EngTaskGradingNetBE.Models.Config;
 using EngTaskGradingNetBE.Models.DbModel;
 using EngTaskGradingNetBE.Models.Dtos;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using System.Linq;
-using EngTaskGradingNetBE.Lib;
+using System.Security.Cryptography;
+using static EngTaskGradingNetBE.Services.AuthService;
 
 namespace EngTaskGradingNetBE.Services
 {
@@ -13,6 +14,7 @@ namespace EngTaskGradingNetBE.Services
     AppDbContext context,
     ILogger<StudentViewService> logger,
     IEmailService emailService,
+    TokenService tokenService,
     AppSettingsService appSettingsService) : DbContextBaseService(context)
   {
     private readonly StudentSecuritySettings studentSecuritySettings =
@@ -30,8 +32,8 @@ namespace EngTaskGradingNetBE.Services
       logger.LogInformation("Requested access for student {StudentNumber}, verified; will send invitation.", studentNumber);
 
       var sett = appSettingsService.GetSettings().Security.Student;
-      string token = SecurityUtils.GenerateSecureToken(sett.LoginTokenLengthBytes);
-      await SaveLoginTokenToDatabaseAsync(student, token);
+      string token = await tokenService.CreateAsync(TokenType.StudentLogin, studentNumber,
+        TokenUniquessBehavior.DeleteExisting, sett.LoginTokenLengthBytes, studentSecuritySettings.LoginTokenExpiryMinutes);
       SendEmailInBackground(student, token);
       logger.LogInformation("Requested access token for student {StudentNumber} generated & sending requested.", studentNumber);
     }
@@ -61,25 +63,6 @@ namespace EngTaskGradingNetBE.Services
       }
     }
 
-    private async System.Threading.Tasks.Task SaveLoginTokenToDatabaseAsync(Student student, string token)
-    {
-      StudentViewToken tokenEntity = new()
-      {
-        CreatedAt = DateTime.UtcNow,
-        ExpiresAt = DateTime.UtcNow.AddMinutes(studentSecuritySettings.LoginTokenExpiryMinutes),
-        StudentId = student.Id,
-        Token = token,
-        Type = StudentViewTokenType.Login
-      };
-
-      var existing = await Db.StudentViewTokens
-        .Where(q => q.StudentId == student.Id && q.Type == StudentViewTokenType.Login)
-        .ToListAsync();
-      Db.StudentViewTokens.RemoveRange(existing);
-      await Db.StudentViewTokens.AddAsync(tokenEntity);
-      await Db.SaveChangesAsync();
-    }
-
     internal async Task<List<Course>> GetStudentCoursesAsync(string studyNumber)
     {
       var student = await Db.Students.FirstOrDefaultAsync(q => q.Number == studyNumber);
@@ -102,8 +85,11 @@ namespace EngTaskGradingNetBE.Services
       return ret;
     }
 
-    public record StudentCourseDetailResult(Student Student, Course Course, List<Grade> Grades, List<AttendanceRecord> AttendanceRecords
-      );
+    public record StudentCourseDetailResult(
+      Student Student,
+      Course Course,
+      List<Grade> Grades,
+      List<AttendanceRecord> AttendanceRecords);
 
     internal async Task<StudentCourseDetailResult> GetStudentCourseDetailAsync(string studyNumber, int courseId)
     {
@@ -129,19 +115,19 @@ namespace EngTaskGradingNetBE.Services
       return ret;
     }
 
-    internal async Task<List<StudentViewToken>> GetActiveTokensForStudentAsync(string studyNumber)
+    internal async Task<List<Token>> GetActiveTokensForStudentAsync(string studyNumber)
     {
       var utcNow = DateTime.UtcNow;
-      var tokens = await Db.StudentViewTokens
-        .Where(q => q.Student.Number == studyNumber && q.ExpiresAt > utcNow)
+      var tokens = await Db.Tokens
+        .Where(q => q.Key == studyNumber && q.ExpiresAt > utcNow)
         .ToListAsync();
       return tokens;
     }
 
     internal async System.Threading.Tasks.Task DeleteActiveTokensForStudentAsync(string studyNumber)
     {
-      await Db.StudentViewTokens
-        .Where(q => q.Student.Number == studyNumber)
+      await Db.Tokens
+        .Where(q => q.Key == studyNumber)
         .ExecuteDeleteAsync();
     }
   }

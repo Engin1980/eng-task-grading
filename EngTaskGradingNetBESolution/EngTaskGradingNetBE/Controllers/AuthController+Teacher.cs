@@ -19,7 +19,7 @@ public partial class AuthController
       if (ctx.AppSettingsService.GetSettings().CloudFlare.Enabled)
         await ctx.CloudflareTurnistilleService.VerifyAsync(request.CaptchaToken);
 
-      var tmp = await ctx.AuthService.LoginTeacherAsync(request.Email, request.Password, request.RememberMe);
+      var tmp = await ctx.TeacherAuthService.LoginAsync(request.Email, request.Password, request.RememberMe);
 
       string refreshToken = tmp.RefreshToken;
       DateTime? expiresAt = request.RememberMe
@@ -41,7 +41,7 @@ public partial class AuthController
     {
       try
       {
-        await ctx.AuthService.InvokeTeacherPasswordResetProcedure(email);
+        await ctx.TeacherAuthService.InvokePasswordResetProcedure(email);
       }
       catch (BadDataException)
       {
@@ -59,7 +59,7 @@ public partial class AuthController
     {
       try
       {
-        await ctx.AuthService.ResetPasswordAsync(data.Token, data.Email, data.Password);
+        await ctx.TeacherAuthService.ResetPasswordAsync(data.Token, data.Email, data.Password);
       }
       catch (Exception ex)
       {

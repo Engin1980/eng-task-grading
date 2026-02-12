@@ -162,7 +162,7 @@ public static class EObjectMapper
     };
   }
 
-  internal static List<StudentTokenInfoDto> To(List<StudentViewToken> tokens)
+  internal static List<StudentTokenInfoDto> To(List<Token> tokens)
   {
     return tokens.Select(q => new StudentTokenInfoDto(q.Id, q.CreatedAt, q.ExpiresAt)).ToList();
   }

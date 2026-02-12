@@ -29,7 +29,7 @@ function RouteComponent() {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="w-full max-w-xl">
-        <h1 className="text-xl font-semibold text-gray-900 mb-6">Ověřuji samo-přihlášení do docházky kurzu...</h1>
+        <h1 className="text-xl font-semibold text-gray-900 mb-6">Ověřování samo-přihlášení do docházky kurzu...</h1>
 
         {ldg.loading && <Loading message="Probíhá ověření..." />}
 

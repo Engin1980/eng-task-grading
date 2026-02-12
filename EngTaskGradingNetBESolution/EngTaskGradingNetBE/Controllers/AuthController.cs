@@ -25,7 +25,8 @@ namespace EngTaskGradingNetBE.Controllers
     private readonly GenericHandler genericHandler;
 
     public AuthController(
-      AuthService authService,
+      TeacherAuthService teacherAuthService,
+      StudentAuthService studentAuthService,
       AppSettingsService appSettingsService,
       CloudflareTurnistilleService cloudflareTurnistilleService,
       StudentViewService studentViewService,
@@ -35,7 +36,8 @@ namespace EngTaskGradingNetBE.Controllers
         () => this.HttpContext,
         () => appSettingsService,
         () => cloudflareTurnistilleService,
-        () => authService,
+        () => teacherAuthService,
+        () => studentAuthService,
         () => logger,
         () => studentViewService
         );
@@ -49,7 +51,7 @@ namespace EngTaskGradingNetBE.Controllers
     public record StudentViewLoginDto(string StudentNumber, string? CaptchaToken = null);
 
     [HttpPost("refresh")]
-    public async Task<string> RefreshAsync() 
+    public async Task<string> RefreshAsync()
       => await genericHandler.RefreshAsync();
 
     [HttpPost("logout")]
@@ -60,12 +62,12 @@ namespace EngTaskGradingNetBE.Controllers
       => await teacherHandler.LoginTeacherAsync(request);
 
     [HttpPost("teacher/request-password-reset")]
-    public async System.Threading.Tasks.Task RequestPasswordResetAsync([FromBody] string email) 
+    public async System.Threading.Tasks.Task RequestPasswordResetAsync([FromBody] string email)
       => await teacherHandler.RequestPasswordResetAsync(email);
 
     public record SetNewTeacherPasswordRequest(string Token, string Email, string Password);
     [HttpPost("teacher/set-new-teacher-password")]
-    public async System.Threading.Tasks.Task SetNewTeacherPassword([FromBody] SetNewTeacherPasswordRequest data) 
+    public async System.Threading.Tasks.Task SetNewTeacherPassword([FromBody] SetNewTeacherPasswordRequest data)
       => await teacherHandler.SetNewTeacherPassword(data);
 
     [Authorize(Roles = Roles.STUDENT_ROLE)]

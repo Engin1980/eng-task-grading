@@ -3,22 +3,21 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EngTaskGradingNetBE.Models.DbModel
 {
-  public enum StudentViewTokenType
-  {
-    Login = 1,
-    Access = 2,
-    AttendanceDaySelfSign = 3
-  }
-  public class StudentViewToken
+  public class Token
   {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
-    public int StudentId { get; set; }
-    public Student Student { get; set; } = null!;
-    public string Token { get; set; } = null!;
+
+    [Required]
+    public string Value { get; set; } = string.Empty;
+
     public DateTime CreatedAt { get; set; }
     public DateTime ExpiresAt { get; set; }
-    public StudentViewTokenType Type { get; set; }
+
+    public int Type { get; set; }
+
+    public string Key { get; set; } = string.Empty;
+    public string? Tag { get; set; }
   }
 }

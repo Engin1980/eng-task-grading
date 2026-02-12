@@ -350,7 +350,7 @@ namespace EngTaskGradingNetBE.Services
       await Db.SaveChangesAsync();
     }
 
-    internal void WriteAttendanceDaySelfSignVerification(int attendanceDaySelfSignId, int studentId, string verifyIP)
+    internal void WriteAttendanceDaySelfSignVerification(int attendanceDaySelfSignId, string verifyIP)
     {
       AttendanceDaySelfSign entity = Db.AttendanceDaySelfSign
         .FirstOrDefault(q => q.Id == attendanceDaySelfSignId)

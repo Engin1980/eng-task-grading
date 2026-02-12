@@ -1,22 +1,19 @@
-﻿namespace EngTaskGradingNetBE.Exceptions.BadData.Common;
+﻿using EngTaskGradingNetBE.Services;
+
+namespace EngTaskGradingNetBE.Exceptions.BadData.Common;
+
+public enum InvalidationType
+{
+  Expired,
+  NotFound,
+  InvalidOwner
+}
 
 public class InvalidTokenException(
-  InvalidTokenException.ETokenType tokenType,
-  InvalidTokenException.EInvalidationType invalidationType) : BadDataException($"Token not valid : {invalidationType}.")
+  TokenType tokenType,
+  InvalidationType invalidationType) 
+  : BadDataException($"Token not valid : {invalidationType}.")
 {
-  public enum ETokenType
-  {
-    Authentication,
-    Validation
-  }
-
-  public enum EInvalidationType
-  {
-    Expired,
-    NotFound,
-    InvalidOwner
-  }
-
-  public EInvalidationType InvalidationType { get; } = invalidationType;
-  public ETokenType TokenType { get; } = tokenType;
+  public InvalidationType InvalidationType { get; } = invalidationType;
+  public TokenType TokenType { get; } = tokenType;
 }

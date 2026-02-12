@@ -19,7 +19,5 @@ namespace EngTaskGradingNetBE.Models.DbModel
     public bool IsActive { get; set; } = false;
 
     public ICollection<Course> Courses { get; set; } = [];
-
-    public ICollection<TeacherToken> Tokens { get; set; } = [];
   }
 }

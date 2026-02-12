@@ -9,19 +9,14 @@ namespace EngTaskGradingNetBE.Models.DbModel
     public DbSet<Course> Courses => Set<Course>();
     public DbSet<Task> Tasks => Set<Task>();
     public DbSet<Grade> Grades => Set<Grade>();
-    public DbSet<TeacherToken> TeacherTokens => Set<TeacherToken>();
-    public DbSet<StudentViewToken> StudentViewTokens => Set<StudentViewToken>();
     public DbSet<AppLog> AppLog => Set<AppLog>();
-
     public DbSet<Attendance> Attendances => Set<Attendance>();
     public DbSet<AttendanceValue> AttendanceValues => Set<AttendanceValue>();
     public DbSet<AttendanceDay> AttendanceDays => Set<AttendanceDay>();
     public DbSet<AttendanceRecord> AttendanceRecords => Set<AttendanceRecord>();
-
     public DbSet<AttendanceDaySelfSign> AttendanceDaySelfSign => Set<AttendanceDaySelfSign>();
-
     public DbSet<FinalGrade> FinalGrades => Set<FinalGrade>();
-
+    public DbSet<Token> Tokens => Set<Token>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -59,9 +54,9 @@ namespace EngTaskGradingNetBE.Models.DbModel
        .HasIndex(ar => new { ar.AttendanceDayId, ar.StudentId })
        .IsUnique();
 
-      modelBuilder.Entity<StudentViewToken>(e =>
+      modelBuilder.Entity<Token>(e =>
       {
-        e.HasIndex(t => t.Token);
+        e.HasIndex(t => t.Value).IsUnique();
       });
 
       modelBuilder.Entity<AttendanceDaySelfSign>(e =>

@@ -122,6 +122,7 @@ function SelfSignComponent() {
             {!isSubmitted && !selfSignCookieValue && false || true && (
               <button
                 type="submit"
+                disabled={isSubmitted}
                 className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
               >
                 Zapsat docházku
@@ -133,7 +134,7 @@ function SelfSignComponent() {
               </div>)}
             {isSubmitted && (
               <div className="mt-4 text-green-700 text-center text-sm font-semibold">
-                Žádost o zápis byla úspěšně odeslána.
+                Žádost o zápis byla úspěšně odeslána. Pro potvrzení žádosti prosím potvrďte odkaz v zaslaném e-mailu.
               </div>
             )}
           </form>

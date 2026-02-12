@@ -14,7 +14,7 @@ public partial class AuthController
 
     internal async Task ForgetToken([FromBody] string token)
     {
-      await ctx.AuthService.StudentViewForgetAllRefreshsTokenAsync(token);
+      await ctx.StudentAuthService.ForgetAllRefreshsTokenAsync(token);
       Utils.DeleteRefreshToken(ctx.HttpContext, STUDENT_REFRESH_TOKEN_COOKIE_NAME, securitySettings.UseHttps);
     }
 
@@ -35,10 +35,10 @@ public partial class AuthController
 
     internal async Task<string> Verify(VerifyRequest request)
     {
-      AuthService.Tokens res;
+      TokenSet res;
       try
       {
-        res = await ctx.AuthService.StudentViewGrantAccessByLoginTokenAsync(request.Token, request.DurationSeconds);
+        res = await ctx.StudentAuthService.GrantAccessByLoginTokenAsync(request.Token, request.DurationSeconds);
       }
       catch (Exception ex)
       {

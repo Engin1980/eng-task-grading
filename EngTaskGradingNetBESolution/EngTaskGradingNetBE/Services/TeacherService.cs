@@ -46,5 +46,11 @@ namespace EngTaskGradingNetBE.Services
       return await Db.Teachers.FirstOrDefaultAsync(q => q.Email == email)
         ?? throw new Exceptions.BadData.NotFound.EntityNotFoundException<Teacher>(email);
     }
+
+    internal async Task<Teacher> GetByIdAsync(int teacherId)
+    {
+      return await Db.Teachers.FirstOrDefaultAsync(q => q.Id == teacherId)
+        ?? throw new Exceptions.BadData.NotFound.EntityNotFoundException<Teacher>(teacherId);
+    }
   }
 }

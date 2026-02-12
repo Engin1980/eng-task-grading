@@ -13,7 +13,7 @@ namespace EngTaskGradingNetBE.Controllers
   [ApiController]
   [Route("api/v1/teacher")]
   [Authorize(Roles = Roles.TEACHER_ROLE)]
-  public class TeacherController(AuthService authService, TeacherService teacherService) : ControllerBase
+  public class TeacherController(TeacherAuthService teacherAuthService, TeacherService teacherService) : ControllerBase
   {
     [AllowAnonymous]
     [HttpPost]
@@ -21,7 +21,7 @@ namespace EngTaskGradingNetBE.Controllers
     {
       Teacher teacher = EObjectMapper.From(request);
       await teacherService.Create(teacher);
-      await authService.SetPasswordAsync(teacher.Id, request.Password);
+      await teacherAuthService.SetPasswordAsync(teacher.Id, request.Password);
       return EObjectMapper.To(teacher);
     }
 

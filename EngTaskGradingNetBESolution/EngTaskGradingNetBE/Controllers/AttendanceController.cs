@@ -18,7 +18,7 @@ namespace EngTaskGradingNetBE.Controllers
   [Authorize(Roles = Roles.TEACHER_ROLE)]
   public class AttendanceController(
     AttendanceService attendanceService,
-    AuthService authService) : ControllerBase
+    StudentAuthService studentAuthService) : ControllerBase
   {
     [HttpGet("for-course/{courseId}")]
     public async Task<IEnumerable<AttendanceDto>> GetAll(int courseId)
@@ -228,7 +228,7 @@ namespace EngTaskGradingNetBE.Controllers
       AttendanceDay atd = await attendanceService.GetDayByIdAsync(dayId, false);
       if (atd.SelfAssignKey == null || atd.SelfAssignKey.Length == 0 || atd.SelfAssignKey != data.Key)
         throw new InvalidStudentSelfSignKeyException(data.Key);
-      
+
       AttendanceDay attendanceDay = await attendanceService.GetDayByIdForSelfSignAsync(dayId);
       Student student = attendanceDay.Attendance.Course.Students.FirstOrDefault(q => q.Number == data.StudyNumber)
         ?? throw new StudentNotInCourseException(data.StudyNumber, attendanceDay.Attendance.Course.Code);
@@ -242,7 +242,7 @@ namespace EngTaskGradingNetBE.Controllers
       };
 
       await attendanceService.AddAttendanceDaySelfSignAsync(entity);
-      await authService.GenerateAttendanceDaySelfSignTokenAsync(entity);
+      await studentAuthService.GenerateAttendanceDaySelfSignTokenAsync(entity);
     }
 
 
@@ -250,10 +250,9 @@ namespace EngTaskGradingNetBE.Controllers
     [HttpPatch("self/for-day/{token}")]
     public async System.Threading.Tasks.Task VerifySelfAssignToDay([FromRoute] string token)
     {
-      int attendanceDaySelfSignId; int studentId;
-      (attendanceDaySelfSignId, studentId) = await authService.ApplyAttendanceDaySelfSignTokenAsync(token);
+      int attendanceDaySelfSignId = await studentAuthService.ApplyAttendanceDaySelfSignTokenAsync(token);
       string verifyIP = Request.Headers["X-Forwarded-For"].FirstOrDefault() ?? Request.HttpContext.Connection.RemoteIpAddress?.ToString() ?? "";
-      attendanceService.WriteAttendanceDaySelfSignVerification(attendanceDaySelfSignId, studentId, verifyIP);
+      attendanceService.WriteAttendanceDaySelfSignVerification(attendanceDaySelfSignId, verifyIP);
     }
 
 

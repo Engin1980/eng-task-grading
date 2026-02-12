@@ -42,7 +42,7 @@ public partial class AuthController
       {
         try
         {
-          await ctx.AuthService.LogoutTeacherAsync(refreshToken);
+          await ctx.TeacherAuthService.LogoutAsync(refreshToken);
         }
         catch (Exception ex)
         {
@@ -57,7 +57,7 @@ public partial class AuthController
       {
         try
         {
-          await ctx.AuthService.LogoutStudentAsync(refreshToken);
+          await ctx.StudentAuthService.LogoutAsync(refreshToken);
         }
         catch (Exception ex)
         {
@@ -70,7 +70,7 @@ public partial class AuthController
 
     private async Task<string> RefreshTeacherTokenAsync(string refreshToken)
     {
-      AuthService.Tokens tmp = await ctx.AuthService.RefreshTeacherAsync(refreshToken);
+      TokenSet tmp = await ctx.TeacherAuthService.RefreshAsync(refreshToken);
 
       DateTime? expiration = tmp.IsForSession ? null :
         DateTime.UtcNow.AddMinutes(securitySettings.Teacher.PersistentRefreshTokenExpiryInMinutes);
@@ -88,7 +88,7 @@ public partial class AuthController
 
     private async Task<string> RefreshStudentTokenAsync(string refreshToken)
     {
-      string accessToken = await ctx.AuthService.GenerateStudentAccessTokenAsync(refreshToken);
+      string accessToken = await ctx.StudentAuthService.GenerateAccessTokenAsync(refreshToken);
       return accessToken;
     }
   }

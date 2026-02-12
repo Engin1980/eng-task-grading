@@ -69,9 +69,11 @@ static void BuildServices(WebApplicationBuilder builder)
   builder.Services.AddTransient<TaskService>();
   builder.Services.AddTransient<GradeService>();
   builder.Services.AddTransient<AttendanceService>();
+  builder.Services.AddTransient<TokenService>();
   builder.Services.AddTransient<CloudflareTurnistilleService>();
   builder.Services.AddTransient<StudentViewService>();
-  builder.Services.AddTransient<AuthService>();
+  builder.Services.AddTransient<TeacherAuthService>();
+  builder.Services.AddTransient<StudentAuthService>();
 
   builder.Services.AddTransient<DatabaseBackupService>();
   builder.Services.AddHostedService<DatabaseBackupHostedService>();

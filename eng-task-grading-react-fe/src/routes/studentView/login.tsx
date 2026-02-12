@@ -69,105 +69,97 @@ function RouteComponent() {
   })
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Studentské přihlášení
-        </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md">
+        <h1 className="text-2xl font-bold mb-6 text-center text-blue-700">Studentské přihlášení</h1>
+        <p className="text-center text-gray-600 text-sm mb-6">
           Zadejte své studentské číslo pro přihlášení.
           <br />
           Po přihlášení Vám bude zaslán ověřovací odkaz na Váš email.
           <br />
           Přes tento odkaz se dostanete do systému.
         </p>
-      </div>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            form.handleSubmit()
+          }}
+          className="space-y-4"
+        >
+          <form.Field
+            name="studentNumber"
+            validators={{
+              onChange: ({ value }) => {
+                if (!value || value.trim().length === 0) {
+                  return 'Osobní číslo je povinné'
+                }
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault()
-              e.stopPropagation()
-              form.handleSubmit()
+                const studentNumberRegex = /^[A-Za-z]\d{5}$/
+                if (!studentNumberRegex.test(value.trim())) {
+                  return 'Osobní studentské číslo musí být ve formátu: jedno písmeno následované 5 číslicemi (např. A12345)'
+                }
+
+                return undefined
+              },
             }}
-            className="space-y-6"
           >
-            <form.Field
-              name="studentNumber"
-              validators={{
-                onChange: ({ value }) => {
-                  if (!value || value.trim().length === 0) {
-                    return 'Osobní číslo je povinné'
-                  }
-
-                  const studentNumberRegex = /^[A-Za-z]\d{5}$/
-                  if (!studentNumberRegex.test(value.trim())) {
-                    return 'Osobní studentské číslo musí být ve formátu: jedno písmeno následované 5 číslicemi (např. A12345)'
-                  }
-
-                  return undefined
-                },
-              }}
-            >
-              {(field) => (
-                <div>
-                  <label htmlFor="studentNumber" className="block text-sm font-medium text-gray-700">
-                    Osobní studentské číslo
-                  </label>
-                  <div className="mt-1">
-                    <input
-                      id="studentNumber"
-                      name={field.name}
-                      type="text"
-                      value={field.state.value}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      onBlur={field.handleBlur}
-                      placeholder="Např. R99873"
-                      className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                      disabled={isSubmitting}
-                    />
-                  </div>
-                  {field.state.meta.errors.length > 0 && (
-                    <p className="mt-2 text-sm text-red-600">
-                      {field.state.meta.errors[0]}
-                    </p>
-                  )}
-                </div>
-              )}
-            </form.Field>
-
-            {/* Turnstile Captcha */}
-            {isCloudflareEnabled && (
+            {(field) => (
               <div>
-                {TURNSTILE_SITE_KEY ? (
-                  <Turnstile
-                    siteKey={TURNSTILE_SITE_KEY}
-                    onVerify={handleCaptchaVerify}
-                  />
-                ) : (
-                  <div className="text-red-600 text-sm text-center py-4">
-                    Chyba: VITE_CLOUDFLARE_SITE_KEY není nastaven v .env.local
-                  </div>
+                <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="studentNumber">
+                  Osobní studentské číslo
+                </label>
+                <input
+                  id="studentNumber"
+                  name={field.name}
+                  type="text"
+                  value={field.state.value}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                  onBlur={field.handleBlur}
+                  placeholder="Např. R99873"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  disabled={isSubmitting}
+                />
+                {field.state.meta.errors.length > 0 && (
+                  <p className="mt-2 text-sm text-red-600">
+                    {field.state.meta.errors[0]}
+                  </p>
                 )}
               </div>
             )}
+          </form.Field>
 
+          {/* Turnstile Captcha */}
+          {isCloudflareEnabled && (
             <div>
-              <button
-                type="submit"
-                disabled={
-                  isSubmitting ||
-                  !form.state.canSubmit ||
-                  (isCloudflareEnabled && !captchaToken)
-                }
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isSubmitting ? 'Přihlašuji...' : 'Přihlásit se'}
-              </button>
+              {TURNSTILE_SITE_KEY ? (
+                <Turnstile
+                  siteKey={TURNSTILE_SITE_KEY}
+                  onVerify={handleCaptchaVerify}
+                />
+              ) : (
+                <div className="text-red-600 text-sm text-center py-4">
+                  Chyba: VITE_CLOUDFLARE_SITE_KEY není nastaven v .env.local
+                </div>
+              )}
             </div>
-          </form>
-        </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={
+              isSubmitting ||
+              !form.state.canSubmit ||
+              (isCloudflareEnabled && !captchaToken)
+            }
+            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isSubmitting ? 'Přihlašuji...' : 'Přihlásit se'}
+          </button>
+        </form>
+        <p className="text-center text-gray-500 text-sm mt-4">
+          Jste učitel? Přihlašte se <a href="/login" className="text-blue-500 hover:underline">zde</a>.
+        </p>
       </div>
 
       {/* Success Modal */}

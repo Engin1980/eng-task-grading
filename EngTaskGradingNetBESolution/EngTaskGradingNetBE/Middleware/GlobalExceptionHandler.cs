@@ -23,6 +23,8 @@ namespace EngTaskGradingNetBE.Middleware
       public const string DUPLICATE_FINAL_GRADE = "DUPLICATE_FINAL_GRADE";
       public const string TEACHER_EMAIL_ALREADY_EXISTS = "TEACHER_EMAIL_ALREADY_EXISTS ";
       public const string PASSWORD_REQUIREMENTS_NOT_FULFILLED = "PASSWORD_REQUIREMENTS_NOT_FULFILLED";
+      public const string DUPLICATE_ATTENDANCE_DAY_SELF_SIGN = "DUPLICATE_ATTENDANCE_DAY_SELF_SIGN";
+      public const string ATTENDANCE_SELF_SIGN_ALREADY_VERIFIED = "ATTENDANCE_SELF_SIGN_ALREADY_VERIFIED";
 
       public const string NOT_FOUND_COURSE = "NOT_FOUND_COURSE";
       public const string NOT_FOUND_STUDENT = "NOT_FOUND_STUDENT";
@@ -162,13 +164,16 @@ namespace EngTaskGradingNetBE.Middleware
             HttpStatusCode.Unauthorized,
             ErrorKeys.INVALID_STUDENT_SELF_SIGN_KEY
             ),
-          InvalidTokenException => new ErrorData(
-            HttpStatusCode.Unauthorized,
+          InvalidTokenException ete => new ErrorData(
+            ete.TokenType == InvalidTokenException.ETokenType.Authentication ? HttpStatusCode.Unauthorized : HttpStatusCode.BadRequest,
             ErrorKeys.INVALID_TOKEN
             ),
           PasswordsRequirementsNotFulfilledException => new ErrorData(
             HttpStatusCode.BadRequest,
             ErrorKeys.PASSWORD_REQUIREMENTS_NOT_FULFILLED),
+          AttendanceDaySelfSignAlreadyVerifiedException => new ErrorData(
+            HttpStatusCode.Conflict,
+            ErrorKeys.ATTENDANCE_SELF_SIGN_ALREADY_VERIFIED),
           _ => new ErrorData(
             HttpStatusCode.BadRequest,
             ErrorKeys.INTERNAL_SERVER_ERROR,
@@ -198,6 +203,12 @@ namespace EngTaskGradingNetBE.Middleware
             ErrorKeys.TEACHER_EMAIL_ALREADY_EXISTS,
             tmpB.Email
             );
+        else if (e is DuplicateAttendanceDaySelfSignException tmpC)
+        {
+          ret = new ErrorData(
+            HttpStatusCode.Conflict,
+            ErrorKeys.DUPLICATE_ATTENDANCE_DAY_SELF_SIGN);
+        }
         else
         {
           return new ErrorData(

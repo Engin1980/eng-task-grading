@@ -58,10 +58,16 @@ namespace EngTaskGradingNetBE.Models.DbModel
       modelBuilder.Entity<AttendanceRecord>()
        .HasIndex(ar => new { ar.AttendanceDayId, ar.StudentId })
        .IsUnique();
+
       modelBuilder.Entity<StudentViewToken>(e =>
       {
-        e.HasIndex(t => new { t.StudentId, t.ExpiresAt }).IsUnique();
         e.HasIndex(t => t.Token);
+      });
+
+      modelBuilder.Entity<AttendanceDaySelfSign>(e =>
+      {
+        e.HasIndex(s => new { s.AttendanceDayId, s.StudentId })
+         .IsUnique();
       });
 
       modelBuilder.Entity<FinalGrade>()

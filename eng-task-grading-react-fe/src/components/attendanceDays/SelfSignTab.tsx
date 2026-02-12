@@ -263,6 +263,10 @@ export function SelfSignTab({ attendanceDayId }: SelfSignTabProps) {
                         IP adresa
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Čas potvrzení<br />
+                        IP adresa
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Attendance Record
                       </th>
                     </tr>
@@ -288,6 +292,16 @@ export function SelfSignTab({ attendanceDayId }: SelfSignTabProps) {
                             {new Date(selfSign.creationDateTime).toLocaleString('cs-CZ')}
                             <br />
                             {selfSign.ip}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {
+                              selfSign.verificationDateTime && (
+                                <>
+                                  {new Date(selfSign.creationDateTime).toLocaleString('cs-CZ')}
+                                  < br />
+                                  {selfSign.ip})
+                                </>)
+                            }
                           </td>
                           <td className="px-6 py-4">
                             <AttendanceValueLabelBlock>

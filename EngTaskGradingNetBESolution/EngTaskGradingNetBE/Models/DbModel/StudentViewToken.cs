@@ -6,7 +6,8 @@ namespace EngTaskGradingNetBE.Models.DbModel
   public enum StudentViewTokenType
   {
     Login = 1,
-    Access = 2
+    Access = 2,
+    AttendanceDaySelfSign = 3
   }
   public class StudentViewToken
   {

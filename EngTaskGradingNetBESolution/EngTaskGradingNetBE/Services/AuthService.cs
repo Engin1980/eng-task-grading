@@ -8,7 +8,9 @@ using EngTaskGradingNetBE.Models.DbModel;
 using EngTaskGradingNetBE.Models.Dtos;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.Identity.Client;
 using System.Diagnostics.Eventing.Reader;
+using System.Net.Mail;
 using System.Text.RegularExpressions;
 
 namespace EngTaskGradingNetBE.Services
@@ -28,7 +30,7 @@ namespace EngTaskGradingNetBE.Services
       StudentViewToken token = await Db.StudentViewTokens
         .Include(q => q.Student)
         .FirstOrDefaultAsync(q => q.Token == loginTokenValue && q.Type == StudentViewTokenType.Login)
-        ?? throw new InvalidTokenException(InvalidTokenException.InvalidationType.NotFound);
+        ?? throw new InvalidTokenException(InvalidTokenException.ETokenType.Authentication, InvalidTokenException.EInvalidationType.NotFound);
 
       Db.StudentViewTokens.Remove(token);
       await Db.SaveChangesAsync();
@@ -39,7 +41,7 @@ namespace EngTaskGradingNetBE.Services
         logger.LogWarning(
           "Student login token expired: {TokenId} for student {StudentId}, token time {TokenCreatedAt}-{TokenExpiresAt}, current time {CurrentUtc}",
           token.Id, token.StudentId, token.CreatedAt, token.ExpiresAt, DateTime.UtcNow);
-        throw new InvalidTokenException(InvalidTokenException.InvalidationType.Expired);
+        throw new InvalidTokenException(InvalidTokenException.ETokenType.Authentication, InvalidTokenException.EInvalidationType.Expired);
       }
 
       return token.Student;
@@ -318,19 +320,107 @@ namespace EngTaskGradingNetBE.Services
       TeacherToken token = await Db.TeacherTokens
         .Include(q => q.Teacher)
         .FirstOrDefaultAsync(q => q.Value == tokenValue && q.Type == TeacherToken.TokenType.PasswordReset)
-        ?? throw new InvalidTokenException(InvalidTokenException.InvalidationType.NotFound);
+        ?? throw new InvalidTokenException(InvalidTokenException.ETokenType.Validation, InvalidTokenException.EInvalidationType.NotFound);
 
       Teacher teacher = token.Teacher;
       if (teacher.Email != email)
-        throw new InvalidTokenException(InvalidTokenException.InvalidationType.InvalidOwner);
+        throw new InvalidTokenException(InvalidTokenException.ETokenType.Validation, InvalidTokenException.EInvalidationType.InvalidOwner);
 
       Db.TeacherTokens.Remove(token);
       await Db.SaveChangesAsync();
 
       if (token.ExpirationDate < DateTime.UtcNow) //TODO add token creation datetime test too
-        throw new InvalidTokenException(InvalidTokenException.InvalidationType.Expired);
+        throw new InvalidTokenException(InvalidTokenException.ETokenType.Validation, InvalidTokenException.EInvalidationType.Expired);
 
       await SetPasswordAsync(teacher.Id, password);
+    }
+
+    internal async Task<string> GenerateAttendanceDaySelfSignTokenAsync(AttendanceDaySelfSign adss)
+    {
+      int attendanceDaySelfSignId = adss.Id;
+      Student student = adss.Student;
+      AttendanceDay atd = adss.AttendanceDay;
+      Attendance att = atd.Attendance;
+      Course c = att.Course;
+
+      string pureToken = SecurityUtils.GenerateSecureToken(sett.Student.AttendanceDaySelfSignTokenLengtBytes);
+      string finalToken = $"{attendanceDaySelfSignId}_{pureToken}";
+
+      var entity = new StudentViewToken()
+      {
+        CreatedAt = DateTime.UtcNow,
+        ExpiresAt = DateTime.UtcNow.AddMinutes(sett.Student.AttendanceDaySelfSignTokenExpiryInMinutes),
+        Token = finalToken,
+        StudentId = student.Id,
+        Type = StudentViewTokenType.AttendanceDaySelfSign
+      };
+      await Db.StudentViewTokens.AddAsync(entity);
+      await Db.SaveChangesAsync();
+
+      await SendValidationRequestEmailForAttendanceDaySelfSign(student.Email, c, att, atd, finalToken);
+
+      return finalToken;
+    }
+
+    private async System.Threading.Tasks.Task SendValidationRequestEmailForAttendanceDaySelfSign(
+      string emailAddress, Course course, Attendance att, AttendanceDay atd, string token)
+    {
+      string courseRef = course.Name != null ? $"{course.Name} ({course.Code})" : course.Code;
+      string attendanceDayTitle = $"{att.Title} - {atd.Title}";
+
+      string title = $"Potvrzení ručního samo-zápisu do kurzu {course.Name} v systému EngTaskGrading";
+      string feUrl = appSettingsService.GetSettings().FrontEndUrl;
+      string body = $$"""
+        <p>Dobrý den,</p>
+        <p>pro váš účet byla přijata žádost o samozápis  na termín <strong>{{attendanceDayTitle}}</strong>
+        v kurzu <string>{{courseRef}}</strong>. 
+        <p>Pokud jste o tento zápis požádali, klikněte na následující odkaz. </p>
+        <p><a href="{{feUrl}}/self/for-day/{{token}}/verify">Potvrdit docházku na kurzu</a></p>
+        <p>Pokud jste o zápis nepožádali, tento e-mail ignorujte. Pokud se situace opakuje, nebo v případě  dotazů prosím kontaktuje administrátora systému.</p>
+        <p>Hezký den přeje tým EngTaskGrading.</p>
+        """;
+      try
+      {
+        await emailService.SendEmailAsync(emailAddress, title, body);
+      }
+      catch (Exception ex)
+      {
+        throw new InvalidOperationException("Failed to send reset password email.", ex);
+      }
+    }
+
+    internal async Task<(int, int)> ApplyAttendanceDaySelfSignTokenAsync(string tokenString)
+    {
+      static (int, string) splitSelfSignIdAndToken(string tokenString)
+      {
+        int index = tokenString.IndexOf('_');
+        string idString = tokenString.Substring(0, index);
+        int id = int.Parse(idString);
+        string newToken = tokenString.Substring(index + 1);
+        return (id, newToken);
+      }
+
+      int id;
+      string pureTokenString;
+      (id, pureTokenString) = splitSelfSignIdAndToken(tokenString);
+
+      StudentViewToken? token = await Db.StudentViewTokens
+        .FirstOrDefaultAsync(q => q.Token == tokenString && q.Type == StudentViewTokenType.AttendanceDaySelfSign)
+        ?? throw new InvalidTokenException(InvalidTokenException.ETokenType.Validation, InvalidTokenException.EInvalidationType.NotFound);
+
+      DateTime utcNow = DateTime.UtcNow;
+      if (utcNow < token.CreatedAt || token.ExpiresAt < utcNow)
+      {
+        logger.LogWarning(
+          "Student login token expired: {TokenId} for student {StudentId}, token time {TokenCreatedAt}-{TokenExpiresAt}, current time {CurrentUtc}",
+          token.Id, token.StudentId, token.CreatedAt, token.ExpiresAt, DateTime.UtcNow);
+        throw new InvalidTokenException(InvalidTokenException.ETokenType.Validation, InvalidTokenException.EInvalidationType.Expired);
+      }
+
+      Db.StudentViewTokens.Remove(token);
+      await Db.SaveChangesAsync();
+
+      return (id, token.StudentId);
     }
   }
 }

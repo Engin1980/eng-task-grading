@@ -26,6 +26,7 @@ import { Route as StudentViewLoginManagementIndexRouteImport } from './routes/st
 import { Route as StudentViewCoursesIndexRouteImport } from './routes/studentView/courses/index'
 import { Route as TeacherPasswordResetSetNewPasswordTokenRouteImport } from './routes/teacherPasswordReset/set-new-password.$token'
 import { Route as StudentViewVerifyTokenRouteImport } from './routes/studentView/verify/$token'
+import { Route as StudentViewSelfSignVerifyTokenRouteImport } from './routes/studentView/self-sign-verify/$token'
 import { Route as StudentViewCoursesIdRouteImport } from './routes/studentView/courses/$id'
 import { Route as CoursesIdTasksRouteImport } from './routes/courses/$id/tasks'
 import { Route as CoursesIdStudentsRouteImport } from './routes/courses/$id/students'
@@ -126,6 +127,12 @@ const StudentViewVerifyTokenRoute = StudentViewVerifyTokenRouteImport.update({
   path: '/studentView/verify/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StudentViewSelfSignVerifyTokenRoute =
+  StudentViewSelfSignVerifyTokenRouteImport.update({
+    id: '/studentView/self-sign-verify/$token',
+    path: '/studentView/self-sign-verify/$token',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const StudentViewCoursesIdRoute = StudentViewCoursesIdRouteImport.update({
   id: '/studentView/courses/$id',
   path: '/studentView/courses/$id',
@@ -208,6 +215,7 @@ export interface FileRoutesByFullPath {
   '/courses/$id/students': typeof CoursesIdStudentsRoute
   '/courses/$id/tasks': typeof CoursesIdTasksRoute
   '/studentView/courses/$id': typeof StudentViewCoursesIdRouteWithChildren
+  '/studentView/self-sign-verify/$token': typeof StudentViewSelfSignVerifyTokenRoute
   '/studentView/verify/$token': typeof StudentViewVerifyTokenRoute
   '/teacherPasswordReset/set-new-password/$token': typeof TeacherPasswordResetSetNewPasswordTokenRoute
   '/studentView/courses': typeof StudentViewCoursesIndexRoute
@@ -238,6 +246,7 @@ export interface FileRoutesByTo {
   '/courses/$id/students': typeof CoursesIdStudentsRoute
   '/courses/$id/tasks': typeof CoursesIdTasksRoute
   '/studentView/courses/$id': typeof StudentViewCoursesIdRouteWithChildren
+  '/studentView/self-sign-verify/$token': typeof StudentViewSelfSignVerifyTokenRoute
   '/studentView/verify/$token': typeof StudentViewVerifyTokenRoute
   '/teacherPasswordReset/set-new-password/$token': typeof TeacherPasswordResetSetNewPasswordTokenRoute
   '/studentView/courses': typeof StudentViewCoursesIndexRoute
@@ -269,6 +278,7 @@ export interface FileRoutesById {
   '/courses/$id/students': typeof CoursesIdStudentsRoute
   '/courses/$id/tasks': typeof CoursesIdTasksRoute
   '/studentView/courses/$id': typeof StudentViewCoursesIdRouteWithChildren
+  '/studentView/self-sign-verify/$token': typeof StudentViewSelfSignVerifyTokenRoute
   '/studentView/verify/$token': typeof StudentViewVerifyTokenRoute
   '/teacherPasswordReset/set-new-password/$token': typeof TeacherPasswordResetSetNewPasswordTokenRoute
   '/studentView/courses/': typeof StudentViewCoursesIndexRoute
@@ -301,6 +311,7 @@ export interface FileRouteTypes {
     | '/courses/$id/students'
     | '/courses/$id/tasks'
     | '/studentView/courses/$id'
+    | '/studentView/self-sign-verify/$token'
     | '/studentView/verify/$token'
     | '/teacherPasswordReset/set-new-password/$token'
     | '/studentView/courses'
@@ -331,6 +342,7 @@ export interface FileRouteTypes {
     | '/courses/$id/students'
     | '/courses/$id/tasks'
     | '/studentView/courses/$id'
+    | '/studentView/self-sign-verify/$token'
     | '/studentView/verify/$token'
     | '/teacherPasswordReset/set-new-password/$token'
     | '/studentView/courses'
@@ -361,6 +373,7 @@ export interface FileRouteTypes {
     | '/courses/$id/students'
     | '/courses/$id/tasks'
     | '/studentView/courses/$id'
+    | '/studentView/self-sign-verify/$token'
     | '/studentView/verify/$token'
     | '/teacherPasswordReset/set-new-password/$token'
     | '/studentView/courses/'
@@ -386,6 +399,7 @@ export interface RootRouteChildren {
   CoursesIndexRoute: typeof CoursesIndexRoute
   AttendanceSelfSignSelfSignIdRoute: typeof AttendanceSelfSignSelfSignIdRoute
   StudentViewCoursesIdRoute: typeof StudentViewCoursesIdRouteWithChildren
+  StudentViewSelfSignVerifyTokenRoute: typeof StudentViewSelfSignVerifyTokenRoute
   StudentViewVerifyTokenRoute: typeof StudentViewVerifyTokenRoute
   TeacherPasswordResetSetNewPasswordTokenRoute: typeof TeacherPasswordResetSetNewPasswordTokenRoute
   StudentViewCoursesIndexRoute: typeof StudentViewCoursesIndexRoute
@@ -512,6 +526,13 @@ declare module '@tanstack/react-router' {
       path: '/studentView/verify/$token'
       fullPath: '/studentView/verify/$token'
       preLoaderRoute: typeof StudentViewVerifyTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/studentView/self-sign-verify/$token': {
+      id: '/studentView/self-sign-verify/$token'
+      path: '/studentView/self-sign-verify/$token'
+      fullPath: '/studentView/self-sign-verify/$token'
+      preLoaderRoute: typeof StudentViewSelfSignVerifyTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/studentView/courses/$id': {
@@ -655,6 +676,7 @@ const rootRouteChildren: RootRouteChildren = {
   CoursesIndexRoute: CoursesIndexRoute,
   AttendanceSelfSignSelfSignIdRoute: AttendanceSelfSignSelfSignIdRoute,
   StudentViewCoursesIdRoute: StudentViewCoursesIdRouteWithChildren,
+  StudentViewSelfSignVerifyTokenRoute: StudentViewSelfSignVerifyTokenRoute,
   StudentViewVerifyTokenRoute: StudentViewVerifyTokenRoute,
   TeacherPasswordResetSetNewPasswordTokenRoute:
     TeacherPasswordResetSetNewPasswordTokenRoute,

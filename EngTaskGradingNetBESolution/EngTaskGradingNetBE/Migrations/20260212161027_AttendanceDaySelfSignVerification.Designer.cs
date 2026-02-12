@@ -4,6 +4,7 @@ using EngTaskGradingNetBE.Models.DbModel;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EngGradesBE.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260212161027_AttendanceDaySelfSignVerification")]
+    partial class AttendanceDaySelfSignVerification
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -166,10 +169,9 @@ namespace EngGradesBE.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("StudentId");
+                    b.HasIndex("AttendanceDayId");
 
-                    b.HasIndex("AttendanceDayId", "StudentId")
-                        .IsUnique();
+                    b.HasIndex("StudentId");
 
                     b.ToTable("AttendanceDaySelfSign");
                 });
@@ -387,9 +389,10 @@ namespace EngGradesBE.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("StudentId");
-
                     b.HasIndex("Token");
+
+                    b.HasIndex("StudentId", "ExpiresAt")
+                        .IsUnique();
 
                     b.ToTable("StudentViewTokens");
                 });

@@ -99,6 +99,8 @@ export interface AttendanceDaySelfSignDto {
   student: StudentDto;
   creationDateTime: Date;
   ip: string;
+  verificationDateTime: Date | null;
+  verificationIP: string | null;
 }
 
 export interface AttendanceImportAnalysisResultDto {

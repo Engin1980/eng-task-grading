@@ -14,7 +14,6 @@ interface CourseEditorProps {
 }
 
 export function CourseEditor({ courseData, onChange }: CourseEditorProps) {
-  console.log("### CourseEditor render", courseData);
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const target = e.target as HTMLInputElement;
     const { name, value, type, checked } = target;

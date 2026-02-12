@@ -1,5 +1,6 @@
 ﻿using EngTaskGradingNetBE.Controllers;
 using EngTaskGradingNetBE.Exceptions;
+using EngTaskGradingNetBE.Exceptions.BadData.Duplicate;
 using EngTaskGradingNetBE.Models.DbModel;
 using EngTaskGradingNetBE.Models.Dtos;
 using Microsoft.EntityFrameworkCore;
@@ -213,6 +214,13 @@ namespace EngTaskGradingNetBE.Services
 
     internal async System.Threading.Tasks.Task AddAttendanceDaySelfSignAsync(AttendanceDaySelfSign entity)
     {
+      var existing = await Db.AttendanceDaySelfSign
+        .Where(q => q.AttendanceDayId == entity.AttendanceDay.Id)
+        .Where(q => q.StudentId == entity.Student.Id)
+        .AnyAsync();
+      if (existing)
+        throw new DuplicateAttendanceDaySelfSignException();
+
       await Db.AttendanceDaySelfSign.AddAsync(entity);
       await Db.SaveChangesAsync();
     }
@@ -340,6 +348,30 @@ namespace EngTaskGradingNetBE.Services
       }
 
       await Db.SaveChangesAsync();
+    }
+
+    internal void WriteAttendanceDaySelfSignVerification(int attendanceDaySelfSignId, int studentId, string verifyIP)
+    {
+      AttendanceDaySelfSign entity = Db.AttendanceDaySelfSign
+        .FirstOrDefault(q => q.Id == attendanceDaySelfSignId)
+        ?? throw new Exceptions.BadData.NotFound.EntityNotFoundException<AttendanceDaySelfSign>(attendanceDaySelfSignId);
+
+      if (entity.VerificationDateTime != null)
+        throw new Exceptions.BadData.Common.AttendanceDaySelfSignAlreadyVerifiedException();
+
+      entity.VerificationDateTime = DateTime.UtcNow;
+      entity.VerificationIP = verifyIP;
+      Db.SaveChanges();
+    }
+
+    internal async Task<AttendanceDay> GetDayByIdForSelfSignAsync(int attendanceDayId)
+    {
+      AttendanceDay ret = await Db.AttendanceDays
+        .Include(q => q.Attendance).ThenInclude(q => q.Course).ThenInclude(q => q.Students)
+        .FirstOrDefaultAsync(q => q.Id == attendanceDayId)
+        ?? throw new Exceptions.BadData.NotFound.EntityNotFoundException<AttendanceDay>(attendanceDayId);
+
+      return ret;
     }
   }
 }

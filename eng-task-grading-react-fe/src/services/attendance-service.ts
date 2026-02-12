@@ -1,7 +1,9 @@
-import type { AttendanceCreateDto, AttendanceDayCreateDto, AttendanceDayDto, AttendanceDaySelfSignCreateDto, 
-  AttendanceDaySelfSignSetDto, AttendanceDaySetDto, AttendanceDayUpdateDto, 
-  AttendanceDto, AttendanceImportAnalysisResultDto, AttendanceRecordDto, AttendanceUpdateDto, 
-  AttendanceValueDto } from "../model/attendance-dto";
+import type {
+  AttendanceCreateDto, AttendanceDayCreateDto, AttendanceDayDto, AttendanceDaySelfSignCreateDto,
+  AttendanceDaySelfSignSetDto, AttendanceDaySetDto, AttendanceDayUpdateDto,
+  AttendanceDto, AttendanceImportAnalysisResultDto, AttendanceRecordDto, AttendanceUpdateDto,
+  AttendanceValueDto
+} from "../model/attendance-dto";
 import type { StudentDto } from "../model/student-dto";
 import { apiHttp } from "./api-http";
 
@@ -106,5 +108,10 @@ export const attendanceService = {
   importAttendanceToDay: async (attendanceDayId: number, attendanceValueId: number, students: StudentDto[]) => {
     const studentIds = students.map(s => +s.id);
     await apiHttp.post(`/v1/attendance/days/${attendanceDayId}/import`, { attendanceValueId, studentIds });
+  },
+
+  verifySelfSignKey: async (token: string) => {
+    const { data } = await apiHttp.patch(`/v1/attendance/self/for-day/${token}`);
+    return data;
   }
 }

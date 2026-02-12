@@ -17,7 +17,8 @@ namespace EngTaskGradingNetBE.Models.DbModel
     public Student Student { get; set; } = null!;
 
     public DateTime CreationDateTime { get; set; }
+    public DateTime? VerificationDateTime { get; set; }
     public string IP { get; set; } = string.Empty;
-
+    public string VerificationIP { get; set; } = string.Empty;
   }
 }

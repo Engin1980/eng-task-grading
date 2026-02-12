@@ -42,7 +42,8 @@ public static class EObjectMapper
   public static Course From(CourseUpdateDto courseDto) => new()
   {
     Code = courseDto.Code,
-    Name = courseDto.Name
+    Name = courseDto.Name,
+    IsActive = courseDto.IsActive
   };
 
 
@@ -148,7 +149,8 @@ public static class EObjectMapper
 
   public static AttendanceRecordDto To(AttendanceRecord sa) => new AttendanceRecordDto(sa.Id, sa.StudentId, sa.AttendanceDayId, sa.AttendanceValueId);
 
-  public static AttendanceDaySelfSignDto To(AttendanceDaySelfSign s) => new(s.Id, EObjectMapper.To(s.Student), s.CreationDateTime, s.IP);
+  public static AttendanceDaySelfSignDto To(AttendanceDaySelfSign s)
+    => new(s.Id, EObjectMapper.To(s.Student), s.CreationDateTime, s.IP, s.VerificationDateTime, s.VerificationIP);
 
   internal static Teacher From(TeacherCreateDto request)
   {

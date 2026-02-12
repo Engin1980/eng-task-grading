@@ -7,7 +7,6 @@ namespace EngTaskGradingNetBE.Models.Config
     public EmailSettings Email { get; set; } = new EmailSettings();
     //public KeycloakSettings Keycloak { get; set; } = new KeycloakSettings();
     public string FrontEndUrl { get; set; } = string.Empty;
-    public int SelfSignCookieExpirationInMinutes { get; set; } = 5;
   }
 
   public class SecuritySettings
@@ -28,7 +27,10 @@ namespace EngTaskGradingNetBE.Models.Config
     public int LoginTokenLengthBytes { get; set; } = 32;
     public int LoginTokenExpiryMinutes { get; set; } = 15;
     public int AccessTokenExpiryMinutes { get; set; } = 5;
+    public int AttendanceDaySelfSignTokenExpiryInMinutes { get; set; } = 5;
     public int SessionRefreshTokenExpiryInMinutes { get; set; } = 15;
+    public int SelfSignCookieExpirationInMinutes { get; set; } = 5;
+    public int AttendanceDaySelfSignTokenLengtBytes { get; set; } = 32;
   }
 
   public class TeacherSecuritySettings

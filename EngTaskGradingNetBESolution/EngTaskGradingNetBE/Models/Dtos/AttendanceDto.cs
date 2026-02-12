@@ -92,5 +92,5 @@ public record AttendanceDaySelfSignSetDto(
   List<AttendanceDaySelfSignDto> SelfSigns
   );
 
-public record AttendanceDaySelfSignDto(int Id, StudentDto Student, DateTime CreationDateTime, string IP);
+public record AttendanceDaySelfSignDto(int Id, StudentDto Student, DateTime CreationDateTime, string IP, DateTime? VerificationDateTime, string VerificationIP);
 

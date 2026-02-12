@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Client;
 using Microsoft.IdentityModel.Tokens;
+using System.Configuration;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace EngTaskGradingNetBE.Controllers
@@ -17,11 +18,8 @@ namespace EngTaskGradingNetBE.Controllers
   [Authorize(Roles = Roles.TEACHER_ROLE)]
   public class AttendanceController(
     AttendanceService attendanceService,
-    StudentService studentService,
-    AppSettingsService appSettingsService) : ControllerBase
+    AuthService authService) : ControllerBase
   {
-    private const string SELF_SIGN_USED_COOKIE_NAME = "self-sign-used";
-
     [HttpGet("for-course/{courseId}")]
     public async Task<IEnumerable<AttendanceDto>> GetAll(int courseId)
     {
@@ -227,34 +225,37 @@ namespace EngTaskGradingNetBE.Controllers
     [HttpPost("self/for-day/{dayId}")]
     public async System.Threading.Tasks.Task SelfAssignStudentToDay([FromRoute] int dayId, AttendanceDaySelfSignCreateDto data)
     {
-      //if (Request.Cookies.ContainsKey(SELF_SIGN_USED_COOKIE_NAME))
-      //  throw new CommonBadDataException(Lib.CommonErrorKind.SelfSignAlreadyUsed, "");
-
       AttendanceDay atd = await attendanceService.GetDayByIdAsync(dayId, false);
       if (atd.SelfAssignKey == null || atd.SelfAssignKey.Length == 0 || atd.SelfAssignKey != data.Key)
-      {
         throw new InvalidStudentSelfSignKeyException(data.Key);
-      }
-      Student student = await studentService.GetByStudyNumberAsync(data.StudyNumber);
+      
+      AttendanceDay attendanceDay = await attendanceService.GetDayByIdForSelfSignAsync(dayId);
+      Student student = attendanceDay.Attendance.Course.Students.FirstOrDefault(q => q.Number == data.StudyNumber)
+        ?? throw new StudentNotInCourseException(data.StudyNumber, attendanceDay.Attendance.Course.Code);
 
       AttendanceDaySelfSign entity = new()
       {
-        AttendanceDayId = dayId,
+        AttendanceDay = attendanceDay,
         Student = student,
         CreationDateTime = DateTime.UtcNow,
         IP = Request.Headers["X-Forwarded-For"].FirstOrDefault() ?? Request.HttpContext.Connection.RemoteIpAddress?.ToString() ?? ""
       };
 
       await attendanceService.AddAttendanceDaySelfSignAsync(entity);
-
-      Response.Cookies.Append(SELF_SIGN_USED_COOKIE_NAME, $"{dayId}-{data.Key}-{data.StudyNumber}",
-        new CookieOptions()
-        {
-          Expires = DateTime.UtcNow.AddMinutes(appSettingsService.GetSettings().SelfSignCookieExpirationInMinutes),
-          HttpOnly = false,
-          Secure = true
-        });
+      await authService.GenerateAttendanceDaySelfSignTokenAsync(entity);
     }
+
+
+    [AllowAnonymous]
+    [HttpPatch("self/for-day/{token}")]
+    public async System.Threading.Tasks.Task VerifySelfAssignToDay([FromRoute] string token)
+    {
+      int attendanceDaySelfSignId; int studentId;
+      (attendanceDaySelfSignId, studentId) = await authService.ApplyAttendanceDaySelfSignTokenAsync(token);
+      string verifyIP = Request.Headers["X-Forwarded-For"].FirstOrDefault() ?? Request.HttpContext.Connection.RemoteIpAddress?.ToString() ?? "";
+      attendanceService.WriteAttendanceDaySelfSignVerification(attendanceDaySelfSignId, studentId, verifyIP);
+    }
+
 
     [HttpPost("self/{selfSignId}")]
     public async System.Threading.Tasks.Task ResolveSelfSigns([FromRoute] int selfSignId, [FromBody] int attendanceValueId)

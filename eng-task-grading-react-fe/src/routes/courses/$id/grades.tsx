@@ -14,6 +14,7 @@ import type { GradeDto } from '../../../model/grade-dto';
 import { AddCourseFinalGradeModal } from '../../../components/courses/AddCourseFinalGradeModal';
 import { EditCourseFinalGradeModal } from '../../../components/courses/EditCourseFinalGrade';
 import { AddGradeModal } from '../../../components/tasks/AddGradeModal';
+import { useToast } from '../../../hooks/use-toast';
 
 export const Route = createFileRoute('/courses/$id/grades')({
   component: GradesPage,
@@ -95,6 +96,7 @@ function GradesPage() {
   const [selectedFinalGrade, setSelectedFinalGrade] = useState<FinalGradeDto | null>(null);
   const [isAddGradeModalOpen, setIsAddGradeModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<TaskHeader | null>(null);
+  const tst = useToast();
 
   const handleFinalCourseGradeUpdated: (grade: FinalGradeDto) => void = (updatedFinalGrade: FinalGradeDto) => {
     setSelectedFinalGrade(null);
@@ -196,8 +198,10 @@ function GradesPage() {
           finalGradeCells: old.finalGradeCells.filter(cell => cell.id !== finalGradeId)
         };
       });
+      tst.success(tst.SUC.ITEM_DELETED);
     } catch (error) {
       logger.error('Error deleting final grade:', error);
+      tst.error(error);
     }
   }
 
@@ -213,8 +217,10 @@ function GradesPage() {
           )
         };
       });
+      tst.success(tst.SUC.ITEM_UPDATED);
     } catch (error) {
       logger.error('Error marking final grade as recorded:', error);
+      tst.error(error);
     }
   }
   const unmarkAsRecordedAsync = (finalGradeId: number) => async () => {
@@ -234,8 +240,10 @@ function GradesPage() {
           )
         };
       });
+      tst.success(tst.SUC.ITEM_UPDATED);
     } catch (error) {
       logger.error('Error unmarking final grade as recorded:', error);
+      tst.error(error);
     }
   }
   const addCourseFinalGradeAsync = (student: StudentDto) => async () => {

@@ -164,7 +164,8 @@ static void BuildDb(WebApplicationBuilder builder)
   }
   Log.Debug("Using connection string: {connectionString}", connectionString);
   builder.Services.AddDbContext<AppDbContext>(options =>
-      options.UseSqlServer(connectionString));
+      options.UseSqlServer(connectionString,
+      o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)));
 }
 
 static void InitDb(WebApplication app)

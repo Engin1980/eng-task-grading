@@ -17,6 +17,7 @@ namespace EngTaskGradingNetBE.Controllers
     public async Task<CourseDto> CreateCourseAsync([FromBody] CourseCreateDto courseCreateDto)
     {
       Course course = EObjectMapper.From(courseCreateDto);
+      course.IsActive = true;
       var createdCourse = await courseService.CreateAsync(course);
       var courseDto = EObjectMapper.To(createdCourse);
       return courseDto;
@@ -35,7 +36,7 @@ namespace EngTaskGradingNetBE.Controllers
       var courses = await courseService.GetAllAsync();
       var courseDtos = courses
         .Select(EObjectMapper.To)
-        .OrderBy(c => c.Code)
+        .OrderByDescending(q=>q.IsActive).ThenBy(c => c.Code)
         .ToList();
       return courseDtos;
     }
@@ -73,7 +74,7 @@ namespace EngTaskGradingNetBE.Controllers
 
       TaskDto[] tasksDto = course.Tasks.OrderBy(q => q.Title).Select(EObjectMapper.To).ToArray();
       StudentDto[] studentsDto = course.Students.OrderBy(q => q.Surname).ThenBy(q => q.Name).Select(EObjectMapper.To).ToArray();
-      AttendanceDto[] attendancesDto = course.Attendances.OrderBy(q=>q.Title).Select(EObjectMapper.To).ToArray();
+      AttendanceDto[] attendancesDto = course.Attendances.OrderBy(q => q.Title).Select(EObjectMapper.To).ToArray();
       AttendanceResultDto[] attendanceDaysDto = buildAttendanceResults(course);
       GradeDto[] gradesDto = course.Tasks.SelectMany(q => q.Grades).Select(EObjectMapper.To).ToArray();
       FinalGradeDto[] finalGradesDto = course.FinalGrades.Select(EObjectMapper.To).ToArray();

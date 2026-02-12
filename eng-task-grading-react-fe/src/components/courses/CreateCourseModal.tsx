@@ -14,7 +14,7 @@ interface CreateCourseModalProps {
 
 
 export function CreateCourseModal(props: CreateCourseModalProps) {
-  const [courseEditorData, setCourseEditorData] = useState<CourseEditorData>({ code: '', name: '' })
+  const [courseEditorData, setCourseEditorData] = useState<CourseEditorData>({ code: '', name: '', isActive: true })
   const tst = useToast();
 
   const handleCreateCourse = async () => {
@@ -26,7 +26,7 @@ export function CreateCourseModal(props: CreateCourseModalProps) {
     try {
       await courseService.createCourse(courseData);
       tst.success(tst.SUC.ITEM_CREATED);
-      setCourseEditorData({ code: '', name: '' });
+      setCourseEditorData({ code: '', name: '', isActive: true });
       props.onCourseCreated(courseData);
       props.onClose();
     } catch (err) {
@@ -35,7 +35,7 @@ export function CreateCourseModal(props: CreateCourseModalProps) {
   }
 
   const handleClose = () => {
-    setCourseEditorData({ code: '', name: '' });
+    setCourseEditorData({ code: '', name: '', isActive: true });
     props.onClose();
   }
 

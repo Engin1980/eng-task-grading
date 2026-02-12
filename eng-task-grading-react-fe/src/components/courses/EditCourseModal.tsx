@@ -16,19 +16,21 @@ interface EditCourseModalProps {
 export function EditCourseModal(props: EditCourseModalProps) {
   const [courseEditorData, setCourseEditorData] = useState<CourseEditorData>({
     code: props.course.code ?? '',
-    name: props.course.name ?? ''
+    name: props.course.name ?? '',
+    isActive: props.course.isActive
   });
 
   const handleEditCourse = async () => {
     const courseData: CourseEditDto = {
       code: courseEditorData.code,
-      name: courseEditorData.name
+      name: courseEditorData.name,
+      isActive: courseEditorData.isActive
     }
 
     try {
       props.onSubmit(courseData);
       toast.success(`Kurz ${courseData.code} byl úspěšně upraven.`);
-      setCourseEditorData({ code: '', name: '' });
+      // setCourseEditorData({ code: '', name: '', isActive: true });
       props.onClose();
     } catch (err) {
       toast.error(`Chyba při úpravě kurzu.`);
@@ -36,7 +38,7 @@ export function EditCourseModal(props: EditCourseModalProps) {
   }
 
   const handleClose = () => {
-    setCourseEditorData({ code: '', name: '' });
+    // setCourseEditorData({ code: '', name: '', isActive: true });
     props.onClose();
   }
 

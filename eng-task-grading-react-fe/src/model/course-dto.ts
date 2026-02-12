@@ -11,12 +11,14 @@ export interface CourseCreateDto {
 export interface CourseEditDto {
   code: string;
   name?: string;
+  isActive: boolean;
 }
 
 export interface CourseDto {
   id: number;
   code: string;
   name?: string;
+  isActive: boolean;
   studentsCount: number;
   tasksCount: number;
   attendancesCount: number;

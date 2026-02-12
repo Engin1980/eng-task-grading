@@ -70,8 +70,11 @@ function CourseDetailPage() {
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-4">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <h1 className={`text-3xl font-bold text-gray-${course.isActive ? '900' : '500'} mb-2`}>
             {course?.name || course?.code || `Kurz ${id}`}
+            {!course.isActive && <span className='ml-4'>
+              &lt;inactive&gt;
+            </span>}
           </h1>
           <button
             className="pl-3"

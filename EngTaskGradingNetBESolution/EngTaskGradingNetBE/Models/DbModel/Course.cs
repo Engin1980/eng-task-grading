@@ -15,6 +15,8 @@ public class Course
 
   public string? Name { get; set; }
 
+  public bool IsActive { get; set; }
+
   public ICollection<Student> Students { get; set; } = [];
   public ICollection<Teacher> Teachers { get; set; } = [];
   public ICollection<Task> Tasks { get; set; } = [];

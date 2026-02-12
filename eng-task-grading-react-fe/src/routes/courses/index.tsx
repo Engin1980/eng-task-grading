@@ -75,7 +75,7 @@ function CoursesPage() {
           {courses.map((course) => (
             <div
               key={course.id}
-              className="border rounded-lg p-4 shadow hover:shadow-lg transition-shadow"
+              className={`border rounded-lg p-4 shadow hover:shadow-lg transition-shadow ${!course.isActive ? 'text-gray-500 border-dotted' : ''}`}
             >
               <h2 className="text-xl font-semibold mb-2">
                 {course.name || course.code}

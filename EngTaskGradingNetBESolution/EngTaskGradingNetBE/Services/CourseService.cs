@@ -97,6 +97,7 @@ namespace EngTaskGradingNetBE.Services
       }
     }
 
+
     public async Task<Course> UpdateAsync(int courseId, Course updatedCourse)
     {
       var existingCourse = await Db.Courses.FirstOrDefaultAsync(q => q.Id == courseId)
@@ -104,6 +105,7 @@ namespace EngTaskGradingNetBE.Services
 
       existingCourse.Name = updatedCourse.Name;
       existingCourse.Code = updatedCourse.Code;
+      existingCourse.IsActive = updatedCourse.IsActive;
 
       await Db.SaveChangesAsync();
       return existingCourse;

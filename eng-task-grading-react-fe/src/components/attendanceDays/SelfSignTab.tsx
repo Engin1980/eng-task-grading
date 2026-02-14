@@ -252,6 +252,9 @@ export function SelfSignTab({ attendanceDayId }: SelfSignTabProps) {
 
             {set && set.selfSigns && set.selfSigns.length > 0 ? (
               <div className="overflow-x-auto">
+                <div className="mb-3 text-sm text-gray-600">
+                  Počet studentů zapsaných/verifikovaných: {set.selfSigns.length}/{set.selfSigns.filter(s => s.verificationDateTime).length}
+                </div>
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>

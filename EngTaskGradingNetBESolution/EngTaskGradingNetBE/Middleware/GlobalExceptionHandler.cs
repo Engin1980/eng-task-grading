@@ -26,6 +26,7 @@ namespace EngTaskGradingNetBE.Middleware
       public const string PASSWORD_REQUIREMENTS_NOT_FULFILLED = "PASSWORD_REQUIREMENTS_NOT_FULFILLED";
       public const string DUPLICATE_ATTENDANCE_DAY_SELF_SIGN = "DUPLICATE_ATTENDANCE_DAY_SELF_SIGN";
       public const string ATTENDANCE_SELF_SIGN_ALREADY_VERIFIED = "ATTENDANCE_SELF_SIGN_ALREADY_VERIFIED";
+      public const string STUDENT_NOT_IN_COURSE = "STUDENT_NOT_IN_COURSE";
 
       public const string NOT_FOUND_COURSE = "NOT_FOUND_COURSE";
       public const string NOT_FOUND_STUDENT = "NOT_FOUND_STUDENT";
@@ -161,6 +162,11 @@ namespace EngTaskGradingNetBE.Middleware
           InvalidCredentialsException => new ErrorData(
             HttpStatusCode.Unauthorized,
             ErrorKeys.INVALID_CREDENTIALS
+            ),
+          StudentNotInCourseException snice => new ErrorData(
+            HttpStatusCode.BadRequest,
+            ErrorKeys.STUDENT_NOT_IN_COURSE,
+            $"{snice.StudentNumber} / {snice.CourseCode}"
             ),
           InvalidStudentSelfSignKeyException => new ErrorData(
             HttpStatusCode.Unauthorized,

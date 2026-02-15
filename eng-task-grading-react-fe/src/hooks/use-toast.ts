@@ -19,6 +19,7 @@ type ErrorKey =
   | "PASSWORD_REQUIREMENTS_NOT_FULFILLED"
   | "DUPLICATE_ATTENDANCE_DAY_SELF_SIGN"
   | "ATTENDANCE_SELF_SIGN_ALREADY_VERIFIED"
+  | "STUDENT_NOT_IN_COURSE"
   | "CLOUDFLARE_TURNISTILLE_VERIFICATION_ERROR";
 
 export const ErrorKeyMessages: Record<ErrorKey, string> = {
@@ -31,6 +32,7 @@ export const ErrorKeyMessages: Record<ErrorKey, string> = {
   TEACHER_EMAIL_ALREADY_EXISTS: "Učitel s tímto e-mailem je již zaregistrován (%%).",
   DUPLICATE_ATTENDANCE_DAY_SELF_SIGN: "Den docházky již obsahuje záznam o samopřihlášení pro tohoto studenta.",
   ATTENDANCE_SELF_SIGN_ALREADY_VERIFIED: "Záznam o samopřihlášení již byl ověřen a nelze jej znovu ověřit.",
+  STUDENT_NOT_IN_COURSE: "Student není přihlášen k danému kurzu (%%).",
 
   NOT_FOUND_COURSE: "Kurz nebyl nalezen (%%). Zkuste obnovit stránku?",
   NOT_FOUND_STUDENT: "Student nebyl nalezen (%%). Zkuste obnovit stránku?",

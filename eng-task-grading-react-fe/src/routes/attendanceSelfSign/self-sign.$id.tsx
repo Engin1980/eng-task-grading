@@ -2,12 +2,9 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import type { AttendanceDaySelfSignCreateDto } from '../../model/attendance-dto'
 import { attendanceService } from '../../services/attendance-service'
-import Cookies from "js-cookie";
 import { useToast } from '../../hooks/use-toast';
 import { useLogger } from '../../hooks/use-logger';
 import { useLoadingState } from '../../types/loadingState';
-
-const SELF_SIGN_USED_COOKIE_NAME = "self-sign-used";
 
 export const Route = createFileRoute('/attendanceSelfSign/self-sign/$id')({
   component: SelfSignComponent,

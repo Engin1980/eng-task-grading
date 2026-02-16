@@ -20,5 +20,7 @@ export default defineConfig({
       key: fs.readFileSync("./certs/localhost-key.pem"),
       cert: fs.readFileSync("./certs/localhost.pem"),
     },
-  }
+  },
+  define: {
+  "import.meta.env.VITE_APP_VERSION": JSON.stringify(process.env.npm_package_version),}
 })

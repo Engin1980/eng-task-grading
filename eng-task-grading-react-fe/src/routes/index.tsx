@@ -1,10 +1,29 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { useEffect, useState } from 'react';
+import { appService } from '../services/app-service';
 
 export const Route = createFileRoute('/')({
   component: Home,
 });
 
 function Home() {
+  const feVersion = import.meta.env.VITE_APP_VERSION;
+  const [beVersion, setBeVersion] = useState<string>('...');
+
+  useEffect(() => {
+    fetchBackendVersion();
+  }, []);
+
+  const fetchBackendVersion = async () => {
+    try {
+      const tmp = await appService.getBackendVersion();
+      setBeVersion(tmp);
+    } catch (error) {
+      console.error('Error fetching backend version:', error);
+      setBeVersion('(err)');
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
       {/* Header Section */}
@@ -128,6 +147,10 @@ function Home() {
             </p>
           </div>
         </div>
+      </div>
+
+      <div className="fixed bottom-4 right-4 p-2 bg-gray-400 text-white text-xs rounded pointer-events-none z-50">
+        v{feVersion} / v{beVersion}
       </div>
     </div>
   );

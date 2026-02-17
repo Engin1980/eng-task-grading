@@ -8,7 +8,7 @@ export const Route = createFileRoute('/')({
 
 function Home() {
   const feVersion = import.meta.env.VITE_APP_VERSION;
-  const [beVersion, setBeVersion] = useState<string>('...');
+  const [beVersion, setBeVersion] = useState<string>('⏳');
 
   useEffect(() => {
     fetchBackendVersion();

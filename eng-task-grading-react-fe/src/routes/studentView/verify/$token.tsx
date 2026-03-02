@@ -1,47 +1,47 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useState } from 'react'
-import { useAuthContext } from '../../../contexts/AuthContext'
-import { useToast } from '../../../hooks/use-toast'
-import { useLogger } from '../../../hooks/use-logger'
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
+import { useAuthContext } from "../../../contexts/AuthContext";
+import { useToast } from "../../../hooks/use-toast";
+import { useLogger } from "../../../hooks/use-logger";
 
-export const Route = createFileRoute('/studentView/verify/$token')({
+export const Route = createFileRoute("/studentView/verify/$token")({
   component: RouteComponent,
-})
+});
 
 function convertDurationToSeconds(duration: string): number {
   // Parse the duration string and convert to seconds
-  const match = duration.match(/^(\d+)([mMhdwy])$/)
+  const match = duration.match(/^(\d+)([mMhdwy])$/);
 
   if (!match) {
-    throw new Error(`Invalid duration format: ${duration}`)
+    throw new Error(`Invalid duration format: ${duration}`);
   }
 
-  const value = parseInt(match[1], 10)
-  const unit = match[2]
+  const value = parseInt(match[1], 10);
+  const unit = match[2];
 
   switch (unit) {
-    case 'm': // minutes
-      return value * 60
-    case 'h': // hours
-      return value * 60 * 60
-    case 'd': // days
-      return value * 60 * 60 * 24
-    case 'w': // weeks
-      return value * 60 * 60 * 24 * 7
-    case 'M': // months (approximated as 30 days)
-      return value * 60 * 60 * 24 * 30
-    case 'y': // years (approximated as 365 days)
-      return value * 60 * 60 * 24 * 365
+    case "m": // minutes
+      return value * 60;
+    case "h": // hours
+      return value * 60 * 60;
+    case "d": // days
+      return value * 60 * 60 * 24;
+    case "w": // weeks
+      return value * 60 * 60 * 24 * 7;
+    case "M": // months (approximated as 30 days)
+      return value * 60 * 60 * 24 * 30;
+    case "y": // years (approximated as 365 days)
+      return value * 60 * 60 * 24 * 365;
     default:
-      throw new Error(`Unsupported duration unit: ${unit}`)
+      throw new Error(`Unsupported duration unit: ${unit}`);
   }
 }
 
 function RouteComponent() {
-  const { token } = Route.useParams()
-  const navigate = useNavigate()
-  const [selectedDuration, setSelectedDuration] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
+  const { token } = Route.useParams();
+  const navigate = useNavigate();
+  const [selectedDuration, setSelectedDuration] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const { loginStudent } = useAuthContext();
   const tst = useToast();
   const logger = useLogger("/studentView/verify/$token.tsx");
@@ -52,61 +52,89 @@ function RouteComponent() {
     try {
       await loginStudent(token, durationSeconds);
       // Navigate to courses page after successful verification
-      navigate({ to: '/studentView/courses' })
+      logger.debug("Token confirmed successfully, navigating to courses page");
+      navigate({ to: "/studentView/courses" });
     } catch (error) {
-      logger.error('Error confirming token:', error);
+      logger.error("Error confirming token:", error);
       tst.error(error);
-      navigate({ to: '/studentView/login' })
+      navigate({ to: "/studentView/login" });
     }
-  }
+  };
 
   const handleConfirm = async () => {
-    if (!selectedDuration) return
+    if (!selectedDuration) return;
 
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      await confirmTokenAndDuration(token, selectedDuration)
+      await confirmTokenAndDuration(token, selectedDuration);
     } catch (error) {
-      logger.error('Error confirming token:', error)
+      logger.error("Error confirming token:", error);
 
       //TODO resolve and unify error handling w.r.t. tst/toast usage
       // Check if it's a 401 Unauthorized error
-      if (error instanceof Error && error.message.includes('401')) {
-        tst.error('Token je neplatný nebo vypršel. Požádejte o nový odkaz pro ověření.')
+      if (error instanceof Error && error.message.includes("401")) {
+        tst.error(
+          "Token je neplatný nebo vypršel. Požádejte o nový odkaz pro ověření.",
+        );
       } else if (error instanceof Response && error.status === 401) {
-        tst.error('Token je neplatný nebo vypršel. Požádejte o nový odkaz pro ověření.')
+        tst.error(
+          "Token je neplatný nebo vypršel. Požádejte o nový odkaz pro ověření.",
+        );
       } else {
-        tst.error('Došlo k chybě při ověřování. Zkuste to prosím znovu.')
+        tst.error("Došlo k chybě při ověřování. Zkuste to prosím znovu.");
       }
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const durationOptions = [
-    { value: '5m', label: '5 minut', description: 'Krátká relace pro rychlé úkoly' },
-    { value: '30m', label: '30 minut', description: 'Standardní práce s úkoly' },
-    { value: '1d', label: '1 den', description: 'Celý den práce' },
-    { value: '1w', label: '1 týden', description: 'Týdenní přístup' },
-    { value: '1M', label: '1 měsíc', description: 'Měsíční přístup' },
-    { value: '2M', label: '2 měsíce', description: 'Dlouhodobější přístup' },
-    { value: '6M', label: '6 měsíců', description: 'Půlroční přístup' },
-    { value: '1y', label: '1 rok', description: 'Roční přístup' },
-  ]
+    {
+      value: "5m",
+      label: "5 minut",
+      description: "Krátká relace pro rychlé úkoly",
+    },
+    {
+      value: "30m",
+      label: "30 minut",
+      description: "Standardní práce s úkoly",
+    },
+    { value: "1d", label: "1 den", description: "Celý den práce" },
+    { value: "1w", label: "1 týden", description: "Týdenní přístup" },
+    { value: "1M", label: "1 měsíc", description: "Měsíční přístup" },
+    { value: "2M", label: "2 měsíce", description: "Dlouhodobější přístup" },
+    { value: "6M", label: "6 měsíců", description: "Půlroční přístup" },
+    { value: "1y", label: "1 rok", description: "Roční přístup" },
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg shadow-xl p-8 w-full max-w-4xl">
         <div className="text-center mb-6">
           <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
-            <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            <svg
+              className="w-8 h-8 text-green-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              ></path>
             </svg>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Ověření přístupu</h1>
-          <p className="text-gray-600">Vyberte, jak dlouho chcete mít aktivní přístup z tohoto prohlížeče.</p>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+            Ověření přístupu
+          </h1>
           <p className="text-gray-600">
-            Po uplynutí lhůty nebo odhlášení budete muset znovu ověřit svůj přístup pomocí odkazu zaslaného na váš email.
+            Vyberte, jak dlouho chcete mít aktivní přístup z tohoto prohlížeče.
+          </p>
+          <p className="text-gray-600">
+            Po uplynutí lhůty nebo odhlášení budete muset znovu ověřit svůj
+            přístup pomocí odkazu zaslaného na váš email.
           </p>
         </div>
 
@@ -114,10 +142,11 @@ function RouteComponent() {
           {durationOptions.map((option) => (
             <label
               key={option.value}
-              className={`block p-4 border-2 rounded-lg cursor-pointer transition-all hover:bg-gray-50 ${selectedDuration === option.value
-                ? 'border-blue-500 bg-blue-50'
-                : 'border-gray-200'
-                }`}
+              className={`block p-4 border-2 rounded-lg cursor-pointer transition-all hover:bg-gray-50 ${
+                selectedDuration === option.value
+                  ? "border-blue-500 bg-blue-50"
+                  : "border-gray-200"
+              }`}
             >
               <input
                 type="radio"
@@ -129,13 +158,20 @@ function RouteComponent() {
               />
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="font-medium text-gray-900">{option.label}</div>
-                  <div className="text-sm text-gray-500">{option.description}</div>
+                  <div className="font-medium text-gray-900">
+                    {option.label}
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    {option.description}
+                  </div>
                 </div>
-                <div className={`w-4 h-4 rounded-full border-2 ${selectedDuration === option.value
-                  ? 'border-blue-500 bg-blue-500'
-                  : 'border-gray-300'
-                  }`}>
+                <div
+                  className={`w-4 h-4 rounded-full border-2 ${
+                    selectedDuration === option.value
+                      ? "border-blue-500 bg-blue-500"
+                      : "border-gray-300"
+                  }`}
+                >
                   {selectedDuration === option.value && (
                     <div className="w-2 h-2 bg-white rounded-full mx-auto mt-0.5"></div>
                   )}
@@ -148,10 +184,11 @@ function RouteComponent() {
         <button
           onClick={handleConfirm}
           disabled={!selectedDuration || isLoading}
-          className={`w-full py-3 px-4 rounded-lg font-medium transition-all ${!selectedDuration || isLoading
-            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-            : 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-4 focus:ring-blue-200'
-            }`}
+          className={`w-full py-3 px-4 rounded-lg font-medium transition-all ${
+            !selectedDuration || isLoading
+              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+              : "bg-blue-600 text-white hover:bg-blue-700 focus:ring-4 focus:ring-blue-200"
+          }`}
         >
           {isLoading ? (
             <div className="flex items-center justify-center">
@@ -159,7 +196,7 @@ function RouteComponent() {
               Ověřuji...
             </div>
           ) : (
-            'Potvrdit a aktivovat přístup'
+            "Potvrdit a aktivovat přístup"
           )}
         </button>
 
@@ -170,5 +207,5 @@ function RouteComponent() {
         </div>
       </div>
     </div>
-  )
+  );
 }

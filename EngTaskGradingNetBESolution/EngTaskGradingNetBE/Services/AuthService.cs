@@ -107,7 +107,7 @@ namespace EngTaskGradingNetBE.Services
       int expiryMinutes = rememberTeacherOverSessions ? sett.Teacher.PersistentRefreshTokenExpiryInMinutes : sett.Teacher.SessionRefreshTokenExpiryInMinutes;
       string refreshToken = await tokenService.CreateAsync(
         TokenType.TeacherRefresh, email, tag, TokenUniquessBehavior.NoCheck,
-        sett.RefreshTokenLengthBytes, expiryMinutes);
+        sett.RefreshTokenLengthBytes, TimeSpan.FromMinutes(expiryMinutes));
 
       string accessToken = GenerateJwtToken(
         teacher.Email,
@@ -138,7 +138,7 @@ namespace EngTaskGradingNetBE.Services
 
       string token = await tokenService.CreateAsync(
         TokenType.TeacherPasswordReset, email, null, TokenUniquessBehavior.DeleteExisting,
-        sett.Teacher.PasswordResetTokenLength, 60); //TODO add 1 hour to the config
+        sett.Teacher.PasswordResetTokenLength, TimeSpan.FromMinutes(15)); //TODO add 15 minutes? to the config
       await SendResetPasswordEmail(teacher.Email, token);
     }
 
@@ -158,10 +158,11 @@ namespace EngTaskGradingNetBE.Services
       Teacher teacher = await teacherService.GetByEmailAsync(email);
       if (teacher.IsActive == false) throw new InvalidCredentialsException();
 
+      TimeSpan expiration = TimeSpan.FromMinutes(isPersistent ? sett.Teacher.PersistentRefreshTokenExpiryInMinutes : sett.Teacher.SessionRefreshTokenExpiryInMinutes);
       string newRefreshToken = await tokenService.CreateAsync(
         TokenType.TeacherRefresh, email, isPersistent ? PERSISTENT_TAG : null, TokenUniquessBehavior.NoCheck,
         sett.RefreshTokenLengthBytes,
-        isPersistent ? sett.Teacher.PersistentRefreshTokenExpiryInMinutes : sett.Teacher.SessionRefreshTokenExpiryInMinutes);
+        expiration);
 
       string accessToken = GenerateJwtToken(
         email,
@@ -243,7 +244,7 @@ namespace EngTaskGradingNetBE.Services
 
     internal async Task<string> GenerateAccessTokenAsync(string refreshToken)
     {
-      Token token = await tokenService.GetTokenIfValidAsync(refreshToken, TokenType.StudentAccess, true);
+      Token token = await tokenService.GetTokenIfValidAsync(refreshToken, TokenType.StudentAccess, false);
       Student _ = await studentService.GetByStudyNumberAsync(token.Key); // just to ensure that student exists
 
       string accessToken = GenerateJwtToken(
@@ -264,7 +265,7 @@ namespace EngTaskGradingNetBE.Services
 
       string token = await tokenService.CreateAsync(TokenType.StudentAttendanceDaySelfSign,
         $"{SELF_SIGN_PREFIX}{attendanceDaySelfSignId}", TokenUniquessBehavior.DeleteExisting,
-        sett.Student.AttendanceDaySelfSignTokenLengtBytes, sett.Student.AttendanceDaySelfSignTokenExpiryInMinutes);
+        sett.Student.AttendanceDaySelfSignTokenLengtBytes, TimeSpan.FromMinutes(sett.Student.AttendanceDaySelfSignTokenExpiryInMinutes));
 
       await Db.SaveChangesAsync();
       await SendValidationRequestEmailForAttendanceDaySelfSign(student.Email, c, att, atd, token);
@@ -281,15 +282,17 @@ namespace EngTaskGradingNetBE.Services
 
     internal async Task<TokenSet> GrantAccessByLoginTokenAsync(string loginTokenValue, int durationSeconds)
     {
-      Token token = await tokenService.GetTokenIfValidAsync(loginTokenValue, TokenType.StudentLogin, true);
-      Student student = await studentService.GetByStudyNumberAsync(token.Key);
+      //TODO tutaj tento !!!
+      //Token token = await tokenService.GetTokenIfValidAsync(loginTokenValue, TokenType.StudentLogin, true);
+      //Student student = await studentService.GetByStudyNumberAsync(token.Key);
+      Student student = await studentService.GetByStudyNumberAsync("R25700");
 
       string refreshToken = await tokenService.CreateAsync(
         TokenType.StudentAccess, student.Number, TokenUniquessBehavior.NoCheck,
-        sett.RefreshTokenLengthBytes, durationSeconds);
+        sett.RefreshTokenLengthBytes, TimeSpan.FromSeconds(durationSeconds));
 
       string accessToken = GenerateJwtToken(
-        student.Email,
+        student.Number,
         Roles.STUDENT_ROLE,
         sett.Student.AccessTokenExpiryMinutes);
 

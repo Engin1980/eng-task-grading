@@ -33,7 +33,7 @@ namespace EngTaskGradingNetBE.Services
 
       var sett = appSettingsService.GetSettings().Security.Student;
       string token = await tokenService.CreateAsync(TokenType.StudentLogin, studentNumber,
-        TokenUniquessBehavior.DeleteExisting, sett.LoginTokenLengthBytes, studentSecuritySettings.LoginTokenExpiryMinutes);
+        TokenUniquessBehavior.DeleteExisting, sett.LoginTokenLengthBytes, TimeSpan.FromMinutes(studentSecuritySettings.LoginTokenExpiryMinutes));
       SendEmailInBackground(student, token);
       logger.LogInformation("Requested access token for student {StudentNumber} generated & sending requested.", studentNumber);
     }

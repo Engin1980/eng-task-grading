@@ -1,5 +1,5 @@
 import type { CourseDto } from "../model/course-dto";
-import type { StudentTokenInfoDto, StudentViewCourseDto, StudentViewTokenDto } from "../model/student-view-dto";
+import type { StudentTokenInfoDto, StudentViewCourseDto } from "../model/student-view-dto";
 import type { StudentViewLoginDto } from "../model/student-view-dto";
 import { apiHttp } from "./api-http";
 
@@ -14,7 +14,7 @@ export const studentViewService = {
       token: token,
       durationSeconds: durationSeconds
     };
-    const { data } = await apiHttp.post<StudentViewTokenDto>('/v1/auth/student/verify', request);
+    const { data } = await apiHttp.post<string>('/v1/auth/student/verify', request);
     return data;
   },
 

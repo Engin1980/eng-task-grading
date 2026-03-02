@@ -101,7 +101,7 @@ function RouteComponent() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg> */}
                       <TaskIcon />
-                      {courseData.course.tasksCount} úkolů
+                      {courseData.course.tasksCount}<span className='hidden sm:block' > úkolů</span>
                     </div>
                   )}
                   {courseData.course.attendancesCount > 0 && (
@@ -110,7 +110,7 @@ function RouteComponent() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg> */}
                       <AttendanceIcon />
-                      {courseData.course.attendancesCount} docházek
+                      {courseData.course.attendancesCount}<span className='hidden sm:block' > docházek</span>
                     </div>
                   )}
                 </div>

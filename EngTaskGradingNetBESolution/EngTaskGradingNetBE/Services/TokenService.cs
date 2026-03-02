@@ -31,7 +31,7 @@ public class TokenService(AppDbContext ctx) : DbContextBaseService(ctx)
     string key,
     TokenUniquessBehavior uniquessBehavior,
     int length,
-    int expirationMinutes) => await CreateAsync(type, key, null, uniquessBehavior, length, expirationMinutes);
+    TimeSpan expiration) => await CreateAsync(type, key, null, uniquessBehavior, length, expiration);
 
   public async Task<string> CreateAsync(
     TokenType type,
@@ -39,12 +39,12 @@ public class TokenService(AppDbContext ctx) : DbContextBaseService(ctx)
     string? tag,
     TokenUniquessBehavior uniquessBehavior,
     int length,
-    int expirationMinutes)
+    TimeSpan expiration)
   {
     int typeInt = (int)type;
     await CheckForExistingTokensAsync(type, key, uniquessBehavior, typeInt);
 
-    Token token = await CreateNewTokenAsync(typeInt, key, tag, length, expirationMinutes);
+    Token token = await CreateNewTokenAsync(typeInt, key, tag, length, expiration);
     return token.Value;
   }
 
@@ -79,13 +79,13 @@ public class TokenService(AppDbContext ctx) : DbContextBaseService(ctx)
     await Db.Tokens.Where(t => t.ExpiresAt < DateTime.UtcNow).ExecuteDeleteAsync();
   }
 
-  private async Task<Token> CreateNewTokenAsync(int typeInt, string key, string? tag, int length, int expirationMinutes)
+  private async Task<Token> CreateNewTokenAsync(int typeInt, string key, string? tag, int length, TimeSpan expiration)
   {
     string tokenString = GenerateSecureToken(length);
     Token token = new()
     {
       CreatedAt = DateTime.UtcNow,
-      ExpiresAt = DateTime.UtcNow.AddMinutes(expirationMinutes),
+      ExpiresAt = DateTime.UtcNow.Add(expiration),
       Key = key,
       Tag = tag,
       Type = typeInt,

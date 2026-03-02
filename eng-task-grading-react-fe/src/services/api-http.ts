@@ -45,7 +45,7 @@ function getLoginPageFromUrl(url: string): string {
 // Vytvoříme axios instanci
 const axiosInstance: AxiosInstance = axios.create({
   baseURL: "", // změň podle svého backendu
-  timeout: 5000,
+  timeout: 120000,
   withCredentials: true, // pro zasílání cookies
   headers: {
     "Content-Type": "application/json",

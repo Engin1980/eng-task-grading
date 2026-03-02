@@ -26,8 +26,8 @@ const TopMenu: React.FC = () => {
       <div className='p-4 bg-gray-100'>
         <h1 className="text-3xl font-bold text-gray-800">Eng Task Grading</h1>
         <div>
-          <nav className="flex items-center justify-between pt-2">
-            <div className="flex flex-col justify-center">
+          <nav className="flex flex-col sm:flex-row sm:items-center sm:justify-between items-center justify-between pt-2">
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
               <div className="flex items-center">
                 {!loggedUser && (
                   <>
@@ -46,7 +46,7 @@ const TopMenu: React.FC = () => {
                 </>)}
               </div>
             </div>
-            <div className="flex items-center ml-auto h-full">
+            <div className="flex items-center justify-end sm:ml-auto">
               <div className="px-4 py-2 flex items-center min-w-[180px] justify-end gap-2">
                 {loggedUser && (
                   <>

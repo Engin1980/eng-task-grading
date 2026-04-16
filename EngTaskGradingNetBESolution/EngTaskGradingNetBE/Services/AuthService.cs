@@ -282,10 +282,8 @@ namespace EngTaskGradingNetBE.Services
 
     internal async Task<TokenSet> GrantAccessByLoginTokenAsync(string loginTokenValue, int durationSeconds)
     {
-      //TODO tutaj tento !!!
-      //Token token = await tokenService.GetTokenIfValidAsync(loginTokenValue, TokenType.StudentLogin, true);
-      //Student student = await studentService.GetByStudyNumberAsync(token.Key);
-      Student student = await studentService.GetByStudyNumberAsync("R25700");
+      Token token = await tokenService.GetTokenIfValidAsync(loginTokenValue, TokenType.StudentLogin, true);
+      Student student = await studentService.GetByStudyNumberAsync(token.Key);
 
       string refreshToken = await tokenService.CreateAsync(
         TokenType.StudentAccess, student.Number, TokenUniquessBehavior.NoCheck,

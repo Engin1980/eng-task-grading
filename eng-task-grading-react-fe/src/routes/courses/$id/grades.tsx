@@ -1,25 +1,28 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { useState, useEffect } from 'react';
-import { useNavigate } from '@tanstack/react-router';
-import { useLogger } from '../../../hooks/use-logger';
-import { gradeService } from '../../../services/grade-service';
-import { courseService } from '../../../services/course-service';
-import { Loading } from '../../../ui/loading';
-import { LoadingError } from '../../../ui/loadingError';
-import { useLoadingState } from '../../../types/loadingState';
-import type { CourseDto, CourseOverviewDto, FinalGradeDto } from '../../../model/course-dto';
-import type { StudentDto } from '../../../model/student-dto';
-import type { TaskDto } from '../../../model/task-dto';
-import type { GradeDto } from '../../../model/grade-dto';
-import { AddCourseFinalGradeModal } from '../../../components/courses/AddCourseFinalGradeModal';
-import { EditCourseFinalGradeModal } from '../../../components/courses/EditCourseFinalGrade';
-import { AddGradeModal } from '../../../components/tasks/AddGradeModal';
-import { useToast } from '../../../hooks/use-toast';
+import { createFileRoute } from "@tanstack/react-router";
+import { useState, useEffect } from "react";
+import { useNavigate } from "@tanstack/react-router";
+import { useLogger } from "../../../hooks/use-logger";
+import { gradeService } from "../../../services/grade-service";
+import { courseService } from "../../../services/course-service";
+import { Loading } from "../../../ui/loading";
+import { LoadingError } from "../../../ui/loadingError";
+import { useLoadingState } from "../../../types/loadingState";
+import type {
+  CourseDto,
+  CourseOverviewDto,
+  FinalGradeDto,
+} from "../../../model/course-dto";
+import type { StudentDto } from "../../../model/student-dto";
+import type { TaskDto } from "../../../model/task-dto";
+import type { GradeDto } from "../../../model/grade-dto";
+import { AddCourseFinalGradeModal } from "../../../components/courses/AddCourseFinalGradeModal";
+import { EditCourseFinalGradeModal } from "../../../components/courses/EditCourseFinalGrade";
+import { AddGradeModal } from "../../../components/tasks/AddGradeModal";
+import { useToast } from "../../../hooks/use-toast";
 
-export const Route = createFileRoute('/courses/$id/grades')({
+export const Route = createFileRoute("/courses/$id/grades")({
   component: GradesPage,
-})
-
+});
 
 interface TaskGradeCell {
   taskId: number;
@@ -79,7 +82,7 @@ interface CourseTable {
 }
 
 function GradesPage() {
-  const { id } = Route.useParams()
+  const { id } = Route.useParams();
   const courseId = id;
 
   const logger = useLogger("GradesTab");
@@ -90,22 +93,30 @@ function GradesPage() {
   const [taskFilter, setTaskFilter] = useState<string>("");
   const [showTasks, setShowTasks] = useState(true);
   const [showAttendances, setShowAttendances] = useState(true);
-  const [isAddCourseFinalGradeModalOpen, setIsAddCourseFinalGradeModalOpen] = useState(false);
-  const [selectedStudent, setSelectedStudent] = useState<StudentDto | null>(null);
-  const [isEditCourseFinalGradeModalOpen, setIsEditCourseFinalGradeModalOpen] = useState(false);
-  const [selectedFinalGrade, setSelectedFinalGrade] = useState<FinalGradeDto | null>(null);
+  const [showClosedStudents, setShowClosedStudents] = useState(false);
+  const [isAddCourseFinalGradeModalOpen, setIsAddCourseFinalGradeModalOpen] =
+    useState(false);
+  const [selectedStudent, setSelectedStudent] = useState<StudentDto | null>(
+    null,
+  );
+  const [isEditCourseFinalGradeModalOpen, setIsEditCourseFinalGradeModalOpen] =
+    useState(false);
+  const [selectedFinalGrade, setSelectedFinalGrade] =
+    useState<FinalGradeDto | null>(null);
   const [isAddGradeModalOpen, setIsAddGradeModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<TaskHeader | null>(null);
   const tst = useToast();
 
-  const handleFinalCourseGradeUpdated: (grade: FinalGradeDto) => void = (updatedFinalGrade: FinalGradeDto) => {
+  const handleFinalCourseGradeUpdated: (grade: FinalGradeDto) => void = (
+    updatedFinalGrade: FinalGradeDto,
+  ) => {
     setSelectedFinalGrade(null);
     setSelectedStudent(null);
-    setTableData(old => {
+    setTableData((old) => {
       if (!old) return old;
       return {
         ...old,
-        finalGradeCells: old.finalGradeCells.map(cell => {
+        finalGradeCells: old.finalGradeCells.map((cell) => {
           if (cell.id === updatedFinalGrade.id) {
             return {
               id: updatedFinalGrade.id,
@@ -114,11 +125,11 @@ function GradesPage() {
               isRecorded: updatedFinalGrade.recordedDateTime != null,
               date: updatedFinalGrade.recordedDateTime!,
               isSuccessfull: updatedFinalGrade.value >= 50,
-              comment: updatedFinalGrade.comment ?? null
+              comment: updatedFinalGrade.comment ?? null,
             };
           }
           return cell;
-        })
+        }),
       };
     });
   };
@@ -133,7 +144,9 @@ function GradesPage() {
     setIsAddCourseFinalGradeModalOpen(false);
     setSelectedStudent(null);
   };
-  const handleFinalCourseGradeAdded: (grade: FinalGradeDto) => void = (newFinalGrade: FinalGradeDto) => {
+  const handleFinalCourseGradeAdded: (grade: FinalGradeDto) => void = (
+    newFinalGrade: FinalGradeDto,
+  ) => {
     setSelectedStudent(null);
     const tmp: FinalGradeCell = {
       id: newFinalGrade.id,
@@ -142,16 +155,16 @@ function GradesPage() {
       isRecorded: newFinalGrade.recordedDateTime != null,
       date: newFinalGrade.recordedDateTime!,
       isSuccessfull: newFinalGrade.value >= 50,
-      comment: newFinalGrade.comment ?? null
+      comment: newFinalGrade.comment ?? null,
     };
-    setTableData(old => {
+    setTableData((old) => {
       if (!old) return old;
       return {
         ...old,
-        finalGradeCells: [...old.finalGradeCells, tmp]
-      }
+        finalGradeCells: [...old.finalGradeCells, tmp],
+      };
     });
-  }
+  };
 
   const handleAddGrade = (student: StudentDto, task: TaskHeader) => {
     setSelectedStudent(student);
@@ -169,15 +182,20 @@ function GradesPage() {
     // Přenačíst data tabulky
     const data = tableData;
     if (data) {
-      const task = data.tasks.find(t => t.id === newGrade.taskId);
+      const task = data.tasks.find((t) => t.id === newGrade.taskId);
       data?.taskCells.push({
         taskId: newGrade.taskId,
         studentId: newGrade.studentId,
         value: newGrade.value,
         otherValues: [],
-        percentage: gradeService.calculateFinalGradePercentage(newGrade.value, task?.minGrade || null, task?.maxGrade || null),
-        isSuccessful: task?.minGrade && newGrade.value >= task.minGrade ? true : false,
-        date: new Date(newGrade.date)
+        percentage: gradeService.calculateFinalGradePercentage(
+          newGrade.value,
+          task?.minGrade || null,
+          task?.maxGrade || null,
+        ),
+        isSuccessful:
+          task?.minGrade && newGrade.value >= task.minGrade ? true : false,
+        date: new Date(newGrade.date),
       });
       setTableData({ ...data });
     }
@@ -186,85 +204,97 @@ function GradesPage() {
 
   const deleteFinalGradeAsync = (finalGradeId: number) => async () => {
     const confirmed = window.confirm(
-      'Opravdu chceš smazat finální známku? Tuto akci nelze vrátit zpět.'
+      "Opravdu chceš smazat finální známku? Tuto akci nelze vrátit zpět.",
     );
     if (!confirmed) return;
     try {
       await courseService.deleteFinalGradeAsync(finalGradeId);
-      setTableData(old => {
+      setTableData((old) => {
         if (!old) return old;
         return {
           ...old,
-          finalGradeCells: old.finalGradeCells.filter(cell => cell.id !== finalGradeId)
+          finalGradeCells: old.finalGradeCells.filter(
+            (cell) => cell.id !== finalGradeId,
+          ),
         };
       });
       tst.success(tst.SUC.ITEM_DELETED);
     } catch (error) {
-      logger.error('Error deleting final grade:', error);
+      logger.error("Error deleting final grade:", error);
       tst.error(error);
     }
-  }
+  };
 
   const markAsRecordedAsync = (finalGradeId: number) => async () => {
     try {
-      const res = await courseService.markFinalGradeAsRecordedAsync(finalGradeId);
-      setTableData(old => {
+      const res =
+        await courseService.markFinalGradeAsRecordedAsync(finalGradeId);
+      setTableData((old) => {
         if (!old) return old;
         return {
           ...old,
-          finalGradeCells: old.finalGradeCells.map(cell =>
-            cell.id === finalGradeId ? { ...cell, isRecorded: true, date: res.recordedDateTime } : cell
-          )
+          finalGradeCells: old.finalGradeCells.map((cell) =>
+            cell.id === finalGradeId
+              ? { ...cell, isRecorded: true, date: res.recordedDateTime }
+              : cell,
+          ),
         };
       });
       tst.success(tst.SUC.ITEM_UPDATED);
     } catch (error) {
-      logger.error('Error marking final grade as recorded:', error);
+      logger.error("Error marking final grade as recorded:", error);
       tst.error(error);
     }
-  }
+  };
   const unmarkAsRecordedAsync = (finalGradeId: number) => async () => {
     const confirmed = window.confirm(
-      'Opravdu chceš zrušit označení známky jako zapsané?'
+      "Opravdu chceš zrušit označení známky jako zapsané?",
     );
     if (!confirmed) return;
 
     try {
       await courseService.unmarkFinalGradeAsRecordedAsync(finalGradeId);
-      setTableData(old => {
+      setTableData((old) => {
         if (!old) return old;
         return {
           ...old,
-          finalGradeCells: old.finalGradeCells.map(cell =>
-            cell.id === finalGradeId ? { ...cell, isRecorded: false, date: null } : cell
-          )
+          finalGradeCells: old.finalGradeCells.map((cell) =>
+            cell.id === finalGradeId
+              ? { ...cell, isRecorded: false, date: null }
+              : cell,
+          ),
         };
       });
       tst.success(tst.SUC.ITEM_UPDATED);
     } catch (error) {
-      logger.error('Error unmarking final grade as recorded:', error);
+      logger.error("Error unmarking final grade as recorded:", error);
       tst.error(error);
     }
-  }
+  };
   const addCourseFinalGradeAsync = (student: StudentDto) => async () => {
     setSelectedStudent(student);
     setIsAddCourseFinalGradeModalOpen(true);
-  }
+  };
 
-  const editCourseFinalGradeAsync = (student: StudentDto, finalGradeId: number) => async () => {
-    const finalGradeCell = tableData?.finalGradeCells.find(fg => fg.id === finalGradeId);
-    const finalGrade: FinalGradeDto = {
-      id: finalGradeCell!.id,
-      studentId: finalGradeCell!.studentId,
-      value: finalGradeCell!.value,
-      comment: finalGradeCell!.comment,
-      recordedDateTime: finalGradeCell!.isRecorded ? finalGradeCell!.date : null,
-      courseId: +courseId
+  const editCourseFinalGradeAsync =
+    (student: StudentDto, finalGradeId: number) => async () => {
+      const finalGradeCell = tableData?.finalGradeCells.find(
+        (fg) => fg.id === finalGradeId,
+      );
+      const finalGrade: FinalGradeDto = {
+        id: finalGradeCell!.id,
+        studentId: finalGradeCell!.studentId,
+        value: finalGradeCell!.value,
+        comment: finalGradeCell!.comment,
+        recordedDateTime: finalGradeCell!.isRecorded
+          ? finalGradeCell!.date
+          : null,
+        courseId: +courseId,
+      };
+      setSelectedStudent(student);
+      setSelectedFinalGrade(finalGrade);
+      setIsEditCourseFinalGradeModalOpen(true);
     };
-    setSelectedStudent(student);
-    setSelectedFinalGrade(finalGrade);
-    setIsEditCourseFinalGradeModalOpen(true);
-  }
 
   const buildLocalDataStructure = (data: CourseOverviewDto): CourseTable => {
     const tasks = data.tasks;
@@ -275,41 +305,57 @@ function GradesPage() {
     const studentRows: CourseStudentRow[] = [];
     const finalGradeCells: FinalGradeCell[] = [];
 
-    data.students.forEach(studentDto => {
-      const taskTmp = data.tasks.map(task => {
-        const taskDto: TaskDto = data.tasks.find(q => q.id == task.id)!;
-        const taskGradesDto = data.grades.filter(g => g.taskId == task.id && g.studentId == studentDto.id);
-        if (taskGradesDto.length > 0) {
-          const taskFinalGrade = gradeService.evaluateFinalGrade(
-            taskDto.aggregation,
-            taskGradesDto)!;
-          const tmp: TaskGradeCell = {
-            taskId: task.id,
-            studentId: studentDto.id,
-            percentage: gradeService.calculateFinalGradePercentage(taskFinalGrade.value, taskDto.minGrade, taskDto.maxGrade),
-            value: taskFinalGrade.value,
-            otherValues: taskGradesDto.map(g => g.value),
-            isSuccessful: taskDto.minGrade ? taskFinalGrade.value >= taskDto.minGrade : null,
-            date: taskFinalGrade.date
-          };
-          return tmp;
-        }
-      }).filter((t): t is TaskGradeCell => t !== undefined);
-      taskTmp.forEach(tc => taskCells.push(tc));
-      const attTmp = data.attendances.map(attendance => {
-        const attDto = data.attendances.find(a => a.id == attendance.id)!;
-        const attendanceResults = data.attendanceOverview.filter(ar => ar.attendanceId == attendance.id && ar.studentId == studentDto.id);
+    data.students.forEach((studentDto) => {
+      const taskTmp = data.tasks
+        .map((task) => {
+          const taskDto: TaskDto = data.tasks.find((q) => q.id == task.id)!;
+          const taskGradesDto = data.grades.filter(
+            (g) => g.taskId == task.id && g.studentId == studentDto.id,
+          );
+          if (taskGradesDto.length > 0) {
+            const taskFinalGrade = gradeService.evaluateFinalGrade(
+              taskDto.aggregation,
+              taskGradesDto,
+            )!;
+            const tmp: TaskGradeCell = {
+              taskId: task.id,
+              studentId: studentDto.id,
+              percentage: gradeService.calculateFinalGradePercentage(
+                taskFinalGrade.value,
+                taskDto.minGrade,
+                taskDto.maxGrade,
+              ),
+              value: taskFinalGrade.value,
+              otherValues: taskGradesDto.map((g) => g.value),
+              isSuccessful: taskDto.minGrade
+                ? taskFinalGrade.value >= taskDto.minGrade
+                : null,
+              date: taskFinalGrade.date,
+            };
+            return tmp;
+          }
+        })
+        .filter((t): t is TaskGradeCell => t !== undefined);
+      taskTmp.forEach((tc) => taskCells.push(tc));
+      const attTmp = data.attendances.map((attendance) => {
+        const attDto = data.attendances.find((a) => a.id == attendance.id)!;
+        const attendanceResults = data.attendanceOverview.filter(
+          (ar) =>
+            ar.attendanceId == attendance.id && ar.studentId == studentDto.id,
+        );
         const weight = attendanceResults.reduce((sum, ar) => sum + ar.value, 0);
         const tmp: AttendanceCell = {
           attendanceId: attendance.id,
           studentId: studentDto.id,
           weight: weight,
-          isSuccessful: attDto.minWeight ? weight >= attDto.minWeight : null
+          isSuccessful: attDto.minWeight ? weight >= attDto.minWeight : null,
         };
         return tmp;
       });
-      attTmp.forEach(ac => attendanceCells.push(ac));
-      const fgTmp = data.finalGrades.find(fg => fg.studentId === studentDto.id);
+      attTmp.forEach((ac) => attendanceCells.push(ac));
+      const fgTmp = data.finalGrades.find(
+        (fg) => fg.studentId === studentDto.id,
+      );
       if (fgTmp) {
         const finGradeCell: FinalGradeCell | null = {
           studentId: studentDto.id,
@@ -318,32 +364,33 @@ function GradesPage() {
           date: fgTmp.recordedDateTime,
           isSuccessfull: fgTmp.value >= 50,
           id: fgTmp.id,
-          comment: fgTmp.comment ?? null
+          comment: fgTmp.comment ?? null,
         };
         finalGradeCells.push(finGradeCell);
       }
       const row: CourseStudentRow = {
-        student: data.students.find(s => s.id == studentDto.id)!,
-        attendanceSuccessCount: attendanceCells.filter(a => a.isSuccessful).length,
-        taskSuccessCount: taskCells.filter(t => t.isSuccessful).length
+        student: data.students.find((s) => s.id == studentDto.id)!,
+        attendanceSuccessCount: attendanceCells.filter((a) => a.isSuccessful)
+          .length,
+        taskSuccessCount: taskCells.filter((t) => t.isSuccessful).length,
       };
       studentRows.push(row);
     });
 
     const ret: CourseTable = {
       course: data.course,
-      tasks: tasks.map(t => ({
+      tasks: tasks.map((t) => ({
         id: t.id,
         title: t.title,
         description: t.description ?? null,
         minGrade: t.minGrade ?? null,
-        maxGrade: t.maxGrade ?? null
+        maxGrade: t.maxGrade ?? null,
       })),
       attendances: attendances,
       students: studentRows,
       taskCells: taskCells,
       attendanceCells: attendanceCells,
-      finalGradeCells: finalGradeCells
+      finalGradeCells: finalGradeCells,
     };
 
     return ret;
@@ -357,7 +404,7 @@ function GradesPage() {
       setTableData(tmp);
       ldgState.setDone();
     } catch (error) {
-      logger.error('Error loading grades:', error);
+      logger.error("Error loading grades:", error);
       ldgState.setError(error);
     }
   };
@@ -371,19 +418,31 @@ function GradesPage() {
     navigate({ to: `/tasks/${taskId}` });
   };
 
-  const filteredStudents = tableData?.students.filter(student => {
-    if (!studentFilter.trim()) return true;
+  const filteredStudents = tableData?.students.filter((student) => {
+    let isNameMatch;
 
-    const searchText = studentFilter.toLowerCase();
-    return (
-      student.student.number.toLowerCase().includes(searchText) ||
-      (student.student.name?.toLowerCase().includes(searchText) ?? false) ||
-      (student.student.surname?.toLowerCase().includes(searchText) ?? false)
-    );
+    if (!studentFilter.trim()) isNameMatch = true;
+    else {
+      const searchText = studentFilter.toLowerCase();
+      isNameMatch =
+        student.student.number.toLowerCase().includes(searchText) ||
+        (student.student.name?.toLowerCase().includes(searchText) ?? false) ||
+        (student.student.surname?.toLowerCase().includes(searchText) ?? false);
+    }
+
+    let isFinalCellMatch;
+    if (!showClosedStudents) isFinalCellMatch = true;
+    else {
+      const finalGradeCell = tableData?.finalGradeCells.find(
+        (fg) => fg.studentId === student.student.id,
+      );
+      isFinalCellMatch = finalGradeCell ? !finalGradeCell.isRecorded : true;
+    }
+    return isNameMatch && isFinalCellMatch;
   });
 
   // Funkce pro filtrování tasků
-  const filteredTasks = tableData?.tasks.filter(task => {
+  const filteredTasks = tableData?.tasks.filter((task) => {
     if (!taskFilter.trim()) return true;
 
     const searchText = taskFilter.toLowerCase();
@@ -393,26 +452,30 @@ function GradesPage() {
   const getGradeColor = (isSuccessful: boolean | null) => {
     if (isSuccessful === null) return "";
     if (isSuccessful) {
-      return 'bg-green-100 text-green-800 border border-green-200';
+      return "bg-green-100 text-green-800 border border-green-200";
     } else {
-      return 'bg-red-100 text-red-800 border border-red-200';
+      return "bg-red-100 text-red-800 border border-red-200";
     }
   };
 
   const getAttendanceColor = (isSuccessful: boolean | null) => {
     if (isSuccessful === null) {
-      return 'bg-blue-100 text-blue-800';
+      return "bg-blue-100 text-blue-800";
     } else if (isSuccessful) {
-      return 'bg-green-100 text-green-800 border border-green-200';
+      return "bg-green-100 text-green-800 border border-green-200";
     } else {
-      return 'bg-red-100 text-red-800 border border-red-200';
+      return "bg-red-100 text-red-800 border border-red-200";
     }
   };
 
   logger.debug(`Rendering grades tab for course ${courseId}`);
 
-  if (ldgState.loading) { return (<Loading message="Načítám známky..." />); }
-  if (ldgState.error) { return (<LoadingError message={ldgState.error} onRetry={loadGradeSet} />); }
+  if (ldgState.loading) {
+    return <Loading message="Načítám známky..." />;
+  }
+  if (ldgState.error) {
+    return <LoadingError message={ldgState.error} onRetry={loadGradeSet} />;
+  }
 
   if (!tableData) throw new Error("Set is null, unexpectingly.");
 
@@ -422,7 +485,10 @@ function GradesPage() {
       <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="student-filter" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="student-filter"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Filtr studentů
             </label>
             <input
@@ -432,8 +498,8 @@ function GradesPage() {
               value={studentFilter}
               onChange={(e) => setStudentFilter(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === 'Escape') {
-                  setStudentFilter('');
+                if (e.key === "Escape") {
+                  setStudentFilter("");
                 }
               }}
               className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -441,7 +507,10 @@ function GradesPage() {
           </div>
 
           <div>
-            <label htmlFor="task-filter" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="task-filter"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Filtr úkolů
             </label>
             <input
@@ -451,8 +520,8 @@ function GradesPage() {
               value={taskFilter}
               onChange={(e) => setTaskFilter(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === 'Escape') {
-                  setTaskFilter('');
+                if (e.key === "Escape") {
+                  setTaskFilter("");
                 }
               }}
               className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -464,19 +533,32 @@ function GradesPage() {
             <input
               type="checkbox"
               checked={showAttendances}
-              onChange={e => setShowAttendances(e.target.checked)}
+              onChange={(e) => setShowAttendances(e.target.checked)}
               className="form-checkbox h-4 w-4 text-blue-600"
             />
-            <span className="ml-2 text-sm text-gray-700">Zobrazit docházku</span>
+            <span className="ml-2 text-sm text-gray-700">
+              Zobrazit docházku
+            </span>
           </label>
           <label className="inline-flex items-center">
             <input
               type="checkbox"
               checked={showTasks}
-              onChange={e => setShowTasks(e.target.checked)}
+              onChange={(e) => setShowTasks(e.target.checked)}
               className="form-checkbox h-4 w-4 text-blue-600"
             />
             <span className="ml-2 text-sm text-gray-700">Zobrazit úkoly</span>
+          </label>
+          <label className="inline-flex items-center">
+            <input
+              type="checkbox"
+              checked={showClosedStudents}
+              onChange={(e) => setShowClosedStudents(e.target.checked)}
+              className="form-checkbox h-4 w-4 text-blue-600"
+            />
+            <span className="ml-2 text-sm text-gray-700">
+              Zobrazit uzavřené studenty
+            </span>
           </label>
         </div>
 
@@ -484,7 +566,7 @@ function GradesPage() {
           <div className="mt-3 flex gap-2">
             {studentFilter && (
               <button
-                onClick={() => setStudentFilter('')}
+                onClick={() => setStudentFilter("")}
                 className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full hover:bg-blue-200"
               >
                 Studenti: "{studentFilter}"
@@ -493,7 +575,7 @@ function GradesPage() {
             )}
             {taskFilter && (
               <button
-                onClick={() => setTaskFilter('')}
+                onClick={() => setTaskFilter("")}
                 className="inline-flex items-center px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full hover:bg-green-200"
               >
                 Úkoly: "{taskFilter}"
@@ -512,41 +594,52 @@ function GradesPage() {
               <th className="px-4 py-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky left-0 bg-gray-50 z-10 w-48">
                 Student
               </th>
-              <th className="px-3 py-3 border-b border-gray-200 text-center text-xs font-medium text-gray-500 uppercase tracking-wider sticky left-0 bg-gray-50 z-10 w-24" style={{ left: '192px' }}>
+              <th
+                className="px-3 py-3 border-b border-gray-200 text-center text-xs font-medium text-gray-500 uppercase tracking-wider sticky left-0 bg-gray-50 z-10 w-24"
+                style={{ left: "192px" }}
+              >
                 Úspěšnost doch. <br /> úkolů
               </th>
               {/* Sloupce pro attendances */}
-              {showAttendances && tableData.attendances.map((attendance) => (
-                <th
-                  key={`attendance-${attendance.id}`}
-                  className="min-w-24 max-w-48 px-2 py-3 border-b border-gray-200 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  title={`Attendance: ${attendance.title}`}
-                >
-                  <button
-                    onClick={() => navigate({ to: `/attendances/${attendance.id}` })}
-                    className="break-words hyphens-auto text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+              {showAttendances &&
+                tableData.attendances.map((attendance) => (
+                  <th
+                    key={`attendance-${attendance.id}`}
+                    className="min-w-24 max-w-48 px-2 py-3 border-b border-gray-200 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    title={`Attendance: ${attendance.title}`}
                   >
-                    {attendance.title}
-                  </button>
-                  <div className="text-xs text-gray-400 font-normal">Min: {attendance.minWeight ?? "-"}</div>
-                </th>
-              ))}
+                    <button
+                      onClick={() =>
+                        navigate({ to: `/attendances/${attendance.id}` })
+                      }
+                      className="break-words hyphens-auto text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                    >
+                      {attendance.title}
+                    </button>
+                    <div className="text-xs text-gray-400 font-normal">
+                      Min: {attendance.minWeight ?? "-"}
+                    </div>
+                  </th>
+                ))}
               {/* Sloupce pro tasks */}
-              {showTasks && filteredTasks?.map((task) => (
-                <th
-                  key={task.id}
-                  className="min-w-24 max-w-48 px-2 py-3 border-b border-gray-200 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  title={task.description || task.title}
-                >
-                  <button
-                    onClick={() => handleTaskDetail(task.id)}
-                    className="break-words hyphens-auto text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+              {showTasks &&
+                filteredTasks?.map((task) => (
+                  <th
+                    key={task.id}
+                    className="min-w-24 max-w-48 px-2 py-3 border-b border-gray-200 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    title={task.description || task.title}
                   >
-                    {task.title}
-                  </button>
-                  <div className="text-xs text-gray-400 font-normal">Min: {task.minGrade ?? "-"}</div>
-                </th>
-              ))}
+                    <button
+                      onClick={() => handleTaskDetail(task.id)}
+                      className="break-words hyphens-auto text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                    >
+                      {task.title}
+                    </button>
+                    <div className="text-xs text-gray-400 font-normal">
+                      Min: {task.minGrade ?? "-"}
+                    </div>
+                  </th>
+                ))}
               <th className="px-4 py-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky left-0 bg-gray-50 z-10 w-48">
                 Final
               </th>
@@ -554,140 +647,207 @@ function GradesPage() {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {filteredStudents?.map((student) => {
-              const finalGradeCell: FinalGradeCell | undefined = tableData.finalGradeCells.find(fg => fg.studentId === student.student.id);
+              const finalGradeCell: FinalGradeCell | undefined =
+                tableData.finalGradeCells.find(
+                  (fg) => fg.studentId === student.student.id,
+                );
 
               return (
                 <tr key={student.student.id} className="hover:bg-gray-50">
                   <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 sticky left-0 bg-white z-10">
                     <div>
-                      <div className="font-semibold">{student.student.surname}, {student.student.name}</div>
-                      <div className="text-xs text-gray-500">{student.student.number}</div>
+                      <div className="font-semibold">
+                        {student.student.surname}, {student.student.name}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {student.student.number}
+                      </div>
                     </div>
                   </td>
-                  <td className="px-3 py-4 whitespace-nowrap text-sm text-center sticky left-0 bg-white z-10" style={{ left: '192px' }}>
-                    <div className="font-medium">{student.attendanceSuccessCount} / ??</div>
-                    <div className="font-medium">{student.taskSuccessCount} / ??</div>
+                  <td
+                    className="px-3 py-4 whitespace-nowrap text-sm text-center sticky left-0 bg-white z-10"
+                    style={{ left: "192px" }}
+                  >
+                    <div className="font-medium">
+                      {student.attendanceSuccessCount} / ??
+                    </div>
+                    <div className="font-medium">
+                      {student.taskSuccessCount} / ??
+                    </div>
                   </td>
                   {/* Buňky pro attendance values */}
-                  {showAttendances && tableData?.attendances.map((attendance) => {
-                    const cell = tableData.attendanceCells.find(q => q.studentId == student.student.id && q.attendanceId == attendance.id);
+                  {showAttendances &&
+                    tableData?.attendances.map((attendance) => {
+                      const cell = tableData.attendanceCells.find(
+                        (q) =>
+                          q.studentId == student.student.id &&
+                          q.attendanceId == attendance.id,
+                      );
 
-                    return (
-                      <td
-                        key={`${student.student.id}-attendance-${attendance.id}`}
-                        className="px-2 py-4 text-center text-sm"
-                      >
-                        {cell ? (
-                          <span className={`inline-flex px-4 py-2 text-xs font-semibold rounded-full ${getAttendanceColor(cell.isSuccessful)}`}>
-                            {cell.weight.toFixed(1)}
-                          </span>
-                        ) : (
-                          <span className="text-gray-400 text-xs">—</span>
-                        )}
-                      </td>
-                    );
-                  })}
-                  {showTasks && filteredTasks?.map((task) => {
-                    const cell = tableData.taskCells.find(q => q.studentId == student.student.id && q.taskId == task.id);
-
-                    return (
-                      <td
-                        key={`${student.student.id}-${task.id}`}
-                        className={`px-2 py-4 text-center text-sm ${getGradeColor(cell?.isSuccessful ?? null)}`}
-                      >
-                        {cell ? (
-                          <div className="space-y-1">
+                      return (
+                        <td
+                          key={`${student.student.id}-attendance-${attendance.id}`}
+                          className="px-2 py-4 text-center text-sm"
+                        >
+                          {cell ? (
                             <span
-                              className="inline-flex px-2 text-xs font-semibold rounded-full"
+                              className={`inline-flex px-4 py-2 text-xs font-semibold rounded-full ${getAttendanceColor(cell.isSuccessful)}`}
                             >
-                              {cell.value?.toLocaleString("cs-CZ", { maximumFractionDigits: 2 }) ?? "-"} {cell.percentage !== null && `/ ${cell.percentage} %`}
+                              {cell.weight.toFixed(1)}
                             </span>
-                            {cell.otherValues.length > 1 && (
-                              <div className="text-xs opacity-60">
-                                ({cell.otherValues.join(', ')})
+                          ) : (
+                            <span className="text-gray-400 text-xs">—</span>
+                          )}
+                        </td>
+                      );
+                    })}
+                  {showTasks &&
+                    filteredTasks?.map((task) => {
+                      const cell = tableData.taskCells.find(
+                        (q) =>
+                          q.studentId == student.student.id &&
+                          q.taskId == task.id,
+                      );
+
+                      return (
+                        <td
+                          key={`${student.student.id}-${task.id}`}
+                          className={`px-2 py-4 text-center text-sm ${getGradeColor(cell?.isSuccessful ?? null)}`}
+                        >
+                          {cell ? (
+                            <div className="space-y-1">
+                              <span className="inline-flex px-2 text-xs font-semibold rounded-full">
+                                {cell.value?.toLocaleString("cs-CZ", {
+                                  maximumFractionDigits: 2,
+                                }) ?? "-"}{" "}
+                                {cell.percentage !== null &&
+                                  `/ ${cell.percentage} %`}
+                              </span>
+                              {cell.otherValues.length > 1 && (
+                                <div className="text-xs opacity-60">
+                                  ({cell.otherValues.join(", ")})
+                                </div>
+                              )}
+                              <div className="text-xs opacity-75">
+                                {cell && (
+                                  <div>
+                                    {new Date(cell.date).toLocaleDateString(
+                                      "cs-CZ",
+                                    )}
+                                  </div>
+                                )}
                               </div>
-                            )}
-                            <div className="text-xs opacity-75">
-                              {cell && <div>{new Date(cell.date).toLocaleDateString('cs-CZ')}</div>}
                             </div>
-                          </div>
-                        ) : (
-                          <div className="flex flex-col items-center space-y-1">
-                            <button
-                              className="inline-flex items-center justify-center w-6 h-6 text-sm font-medium border-1 bg-white text-green-600 rounded-full hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                              onClick={() => handleAddGrade(student.student, task)}
-                              title="Přidat známku"
-                            >
-                              +
-                            </button>
-                          </div>
-                        )}
-                      </td>
-                    );
-                  })}
-                  <td className={"px-4 py-4 whitespace-nowrap text-sm text-gray-900 sticky left-0 z-10 " + (!finalGradeCell || finalGradeCell?.isRecorded ? "bg-white" : "bg-yellow-200")}>
+                          ) : (
+                            <div className="flex flex-col items-center space-y-1">
+                              <button
+                                className="inline-flex items-center justify-center w-6 h-6 text-sm font-medium border-1 bg-white text-green-600 rounded-full hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                                onClick={() =>
+                                  handleAddGrade(student.student, task)
+                                }
+                                title="Přidat známku"
+                              >
+                                +
+                              </button>
+                            </div>
+                          )}
+                        </td>
+                      );
+                    })}
+                  <td
+                    className={
+                      "px-4 py-4 whitespace-nowrap text-sm text-gray-900 sticky left-0 z-10 " +
+                      (!finalGradeCell || finalGradeCell?.isRecorded
+                        ? "bg-white"
+                        : "bg-yellow-200")
+                    }
+                  >
                     {finalGradeCell ? (
                       <div>
                         <div>
-                          <span className={"inline-block pl-1 mr-4 w-8 font-bold " + (finalGradeCell.isSuccessfull ? "text-green-700" : "text-red-600")}>
+                          <span
+                            className={
+                              "inline-block pl-1 mr-4 w-8 font-bold " +
+                              (finalGradeCell.isSuccessfull
+                                ? "text-green-700"
+                                : "text-red-600")
+                            }
+                          >
                             {finalGradeCell.value}
                           </span>
                           <button
                             className="inline-flex items-center justify-center w-6 h-6 text-sm font-medium text-white bg-blue-500 rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                             title="Upravit známku"
-                            onClick={editCourseFinalGradeAsync(student.student, finalGradeCell.id)}>
+                            onClick={editCourseFinalGradeAsync(
+                              student.student,
+                              finalGradeCell.id,
+                            )}
+                          >
                             🖉
                           </button>
-                          {
-                            finalGradeCell.isRecorded &&
+                          {finalGradeCell.isRecorded && (
                             <button
-                              className='inline-flex items-center justify-center w-6 h-6 ml-1 p-3 text-sm font-medium text-red-300 bg-white border border-red-300 rounded-full hover:bg-red-700 hover:text-white'
+                              className="inline-flex items-center justify-center w-6 h-6 ml-1 p-3 text-sm font-medium text-red-300 bg-white border border-red-300 rounded-full hover:bg-red-700 hover:text-white"
                               title="Odznačit jako zapsáno"
-                              onClick={unmarkAsRecordedAsync(finalGradeCell.id)}>
+                              onClick={unmarkAsRecordedAsync(finalGradeCell.id)}
+                            >
                               ☐
                             </button>
-                          }
-                          {!finalGradeCell.isRecorded &&
+                          )}
+                          {!finalGradeCell.isRecorded && (
                             <button
                               className="inline-flex items-center justify-center ml-1 w-6 h-6 text-sm font-medium text-white bg-green-600 rounded-full hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
                               title="Potvrdit známku jako zapsanou v systému"
-                              onClick={markAsRecordedAsync(finalGradeCell.id)}>
+                              onClick={markAsRecordedAsync(finalGradeCell.id)}
+                            >
                               🗸
                             </button>
-                          }
+                          )}
                           <button
-                            className='inline-flex items-center justify-center w-6 h-6 ml-1 p-3 text-sm font-medium text-white bg-red-700 border border-red rounded-full hover:bg-red-700 hover:text-white'
+                            className="inline-flex items-center justify-center w-6 h-6 ml-1 p-3 text-sm font-medium text-white bg-red-700 border border-red rounded-full hover:bg-red-700 hover:text-white"
                             title="Smazat známku"
-                            onClick={deleteFinalGradeAsync(finalGradeCell.id)}>
+                            onClick={deleteFinalGradeAsync(finalGradeCell.id)}
+                          >
                             ⨯
                           </button>
                         </div>
-                        {finalGradeCell?.comment && <div className='text-xs pt-2 text-gray-500' >{finalGradeCell.comment ?? ""}</div>}
-                        {finalGradeCell.isRecorded && finalGradeCell.date && (
-                          <div className="text-xs pt-1 text-gray-500">
-                            {new Date(finalGradeCell.date).toLocaleDateString('cs-CZ')}
+                        {finalGradeCell?.comment && (
+                          <div className="text-xs pt-2 text-gray-500">
+                            {finalGradeCell.comment ?? ""}
                           </div>
                         )}
-                      </div>) : (<div>
+                        {finalGradeCell.isRecorded && finalGradeCell.date && (
+                          <div className="text-xs pt-1 text-gray-500">
+                            {new Date(finalGradeCell.date).toLocaleDateString(
+                              "cs-CZ",
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div>
                         <button
-                          className='inline-flex items-center justify-center w-6 h-6 text-sm font-medium text-white bg-green-600 rounded-full hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500'
+                          className="inline-flex items-center justify-center w-6 h-6 text-sm font-medium text-white bg-green-600 rounded-full hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
                           title="Přidat finální známku"
-                          onClick={addCourseFinalGradeAsync(student.student)}>
+                          onClick={addCourseFinalGradeAsync(student.student)}
+                        >
                           +
                         </button>
-                      </div>)}
+                      </div>
+                    )}
                   </td>
                 </tr>
               );
-            }
-            )}
+            })}
           </tbody>
         </table>
 
         {/* Zpráva když nejsou výsledky */}
         {filteredStudents?.length === 0 && studentFilter && (
           <div className="text-center py-8">
-            <p className="text-gray-500">Žádní studenti neodpovídají filtru "{studentFilter}".</p>
+            <p className="text-gray-500">
+              Žádní studenti neodpovídají filtru "{studentFilter}".
+            </p>
           </div>
         )}
       </div>
@@ -715,13 +875,11 @@ function GradesPage() {
         isOpen={isAddGradeModalOpen}
         onClose={handleCloseAddGradeModal}
         student={selectedStudent}
-        taskId={selectedTask?.id.toString() ?? ''}
+        taskId={selectedTask?.id.toString() ?? ""}
         taskMinGrade={selectedTask?.minGrade ?? null}
         taskMaxGrade={selectedTask?.maxGrade ?? null}
         onGradeAdded={handleGradeAdded}
       />
-    </div >
+    </div>
   );
-
-
 }

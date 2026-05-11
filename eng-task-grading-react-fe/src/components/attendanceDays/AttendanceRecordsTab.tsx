@@ -27,7 +27,14 @@ export function AttendanceRecordsTab({ attendanceDayId }: AttendanceRecordsTabPr
       setValues(tmpZ.sort((a, b) => b.weight - a.weight)); // Seřaď podle weight sestupně
 
       const tmpA = await attendanceService.getStudentsByDayId(+attendanceDayId);
-      setStudents(tmpA);
+      // Seřaď studenty podle příjmení; pokud je příjmení prázdné, použij `number`
+      setStudents((tmpA || []).sort((a, b) => {
+        const sa = a.surname?.trim();
+        const sb = b.surname?.trim();
+        if (sa && sb) return sa.localeCompare(sb);
+        if (!sa && !sb) return (Number(a.number ?? 0) - Number(b.number ?? 0));
+        return sa ? -1 : 1;
+      }));
 
       const tmpB = await attendanceService.getRecordsForDay(attendanceDayId);
       setRecords(tmpB);

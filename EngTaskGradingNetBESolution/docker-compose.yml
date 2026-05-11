@@ -1,8 +1,10 @@
+name: EngTaskGrading
+
 services:
 
   eng-task-grading-db:
     image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: mssql
+    container_name: eng-task-grading-mssql
     environment:
       - ACCEPT_EULA=Y
       - SA_PASSWORD=Bublinka#1   # must be >= 8 chars, incl. upper/lowercase & digit
@@ -15,6 +17,7 @@ services:
 
   eng-task-grading-be:
     image: ${DOCKER_REGISTRY-}engtaskgradingnetbe
+    container_name: eng-task-grading-be
     build:
       context: .
       dockerfile: EngTaskGradingNetBE/Dockerfile

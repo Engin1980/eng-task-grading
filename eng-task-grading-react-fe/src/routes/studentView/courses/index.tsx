@@ -65,7 +65,7 @@ function RouteComponent() {
 
   return (
     <div className="mx-auto">
-      <div className="bg-white rounded-lg shadow-sm">
+      <div className="bg-white rounded-lg">
         <div className="px-6 py-4 border-b border-gray-200">
           <div className="flex justify-between items-start">
             <div>
@@ -74,7 +74,6 @@ function RouteComponent() {
                 Přehled kurzů, do kterých jste zapsáni
               </p>
             </div>
-            <StudentInfo studentNumber={studentNumber} />
           </div>
         </div>
 
@@ -105,7 +104,7 @@ function RouteComponent() {
             {courses.map((course) => (
               <div
                 key={course.id}
-                className="bg-white shadow-sm rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
+                className="bg-white rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
                 onClick={() =>
                   navigate({ to: `/studentView/courses/${course.id}/tasks` })
                 }

@@ -134,7 +134,7 @@ function RouteComponent() {
                   className="flex items-center justify-between border rounded border-gray-200 p-3"
                 >
                   <div>
-                    <div className="text-sm text-gray-500">Hodnota</div>
+                    <div className="text-sm text-gray-500">Body</div>
                     <div
                       className={`text-xl font-semibold ${
                         fg.value <= 50 ? "text-red-600" : "text-green-600"
@@ -146,7 +146,7 @@ function RouteComponent() {
                   <div className="text-right text-sm text-gray-500">
                     {fg.recordedDateTime
                       ? new Date(fg.recordedDateTime).toLocaleDateString()
-                      : "—"}
+                      : "(předběžné)"}
                     {fg.comment && (
                       <div className="text-gray-700 mt-1">{fg.comment}</div>
                     )}

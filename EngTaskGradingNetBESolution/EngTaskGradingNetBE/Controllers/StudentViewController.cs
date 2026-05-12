@@ -15,7 +15,7 @@ namespace EngTaskGradingNetBE.Controllers;
 [Authorize(Roles = Roles.STUDENT_ROLE)]
 public class StudentViewController(
   StudentViewService studentViewService) : ControllerBase
-{  
+{
 
   [HttpGet("courses")]
   public async Task<List<CourseDto>> GetCourses()
@@ -56,7 +56,8 @@ public class StudentViewController(
       courseData.Course.Tasks.Select(EObjectMapper.To).ToList(),
       courseData.Course.Attendances.Select(EObjectMapper.To).ToList(),
       courseData.Grades.Select(EObjectMapper.To).ToList(),
-      courseData.AttendanceRecords.Select(q => new AttendanceDaySetRecordDto(q.Id, q.StudentId, q.AttendanceDayId, q.Value.Title, q.Value.Weight))
+      courseData.AttendanceRecords.Select(q => new AttendanceDaySetRecordDto(q.Id, q.StudentId, q.AttendanceDayId, q.Value.Title, q.Value.Weight)).ToList(),
+      courseData.FinalGrades.Select(EObjectMapper.To).ToList()
       .ToList());
 
     return ret;

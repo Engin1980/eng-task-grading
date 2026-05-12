@@ -18,23 +18,6 @@ export const Route = createFileRoute("/studentView/courses/$id")({
   component: RouteComponent,
 });
 
-// Helper function to extract sub from JWT token
-function getStudentNumberFromJWT(): string | null {
-  try {
-    const token = localStorage.getItem("studentViewAccessJWT");
-    if (!token) return null;
-
-    // Decode JWT payload (base64url decode)
-    const payload = token.split(".")[1];
-    if (!payload) return null;
-
-    const decodedPayload = JSON.parse(atob(payload));
-    return decodedPayload.sub || null;
-  } catch (error) {
-    //TODO silent error, is it ok?
-    return null;
-  }
-}
 
 function RouteComponent() {
   const { id } = Route.useParams();
@@ -42,7 +25,6 @@ function RouteComponent() {
     null,
   );
   const ldgState = useLoadingState();
-  const studentNumber = getStudentNumberFromJWT();
   const tst = useToast();
   const logger = useLogger("/studentView/courses/$id.tsx");
 
@@ -137,9 +119,44 @@ function RouteComponent() {
                   )}
                 </div>
               </div>
-              <StudentInfo studentNumber={studentNumber} />
             </div>
           </div>
+        </div>
+
+        {/* Celkové hodnocení */}
+        <div className="bg-white rounded-lg shadow-sm mb-6 p-4">
+          <h2 className="text-lg font-medium text-gray-900 mb-2">Celkové hodnocení</h2>
+          {courseData.finalGrades && courseData.finalGrades.length > 0 ? (
+            <div className="space-y-2">
+              {courseData.finalGrades.map((fg) => (
+                <div
+                  key={fg.id}
+                  className="flex items-center justify-between border rounded border-gray-200 p-3"
+                >
+                  <div>
+                    <div className="text-sm text-gray-500">Hodnota</div>
+                    <div
+                      className={`text-xl font-semibold ${
+                        fg.value <= 50 ? "text-red-600" : "text-green-600"
+                      }`}
+                    >
+                      {fg.value}
+                    </div>
+                  </div>
+                  <div className="text-right text-sm text-gray-500">
+                    {fg.recordedDateTime
+                      ? new Date(fg.recordedDateTime).toLocaleDateString()
+                      : "—"}
+                    {fg.comment && (
+                      <div className="text-gray-700 mt-1">{fg.comment}</div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-gray-500">Zatím žádné celkové hodnocení</div>
+          )}
         </div>
 
         {/* Tabs - nová navigace přes Link */}

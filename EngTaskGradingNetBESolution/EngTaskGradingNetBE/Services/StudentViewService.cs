@@ -89,7 +89,8 @@ namespace EngTaskGradingNetBE.Services
       Student Student,
       Course Course,
       List<Grade> Grades,
-      List<AttendanceRecord> AttendanceRecords);
+      List<AttendanceRecord> AttendanceRecords,
+      List<FinalGrade> FinalGrades);
 
     internal async Task<StudentCourseDetailResult> GetStudentCourseDetailAsync(string studyNumber, int courseId)
     {
@@ -111,7 +112,12 @@ namespace EngTaskGradingNetBE.Services
         .Where(q => q.StudentId == student.Id)
         .ToListAsync();
 
-      StudentCourseDetailResult ret = new StudentCourseDetailResult(student, courseWithTasks, grades, attendanceRecords);
+      var finalGradeRecords = await Db.FinalGrades
+        .Where(q => q.StudentId == student.Id)
+        .Where(q => q.CourseId == courseId)
+        .ToListAsync();      
+
+      StudentCourseDetailResult ret = new StudentCourseDetailResult(student, courseWithTasks, grades, attendanceRecords, finalGradeRecords);
       return ret;
     }
 

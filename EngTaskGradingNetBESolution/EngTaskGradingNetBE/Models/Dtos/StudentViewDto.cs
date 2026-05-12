@@ -6,7 +6,8 @@
     CourseDto Course,
     List<TaskDto> Tasks, List<AttendanceDto> Attendances,
     List<GradeDto> Grades,
-    List<AttendanceDaySetRecordDto> AttendanceRecords);
+    List<AttendanceDaySetRecordDto> AttendanceRecords,
+    List<FinalGradeDto> FinalGrades);
 
   public record StudentTokenInfoDto(
     int Id,

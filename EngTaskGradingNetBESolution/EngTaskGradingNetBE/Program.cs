@@ -59,7 +59,7 @@ void BuildCors(WebApplicationBuilder builder)
 static void BuildServices(WebApplicationBuilder builder)
 {
   // Configure settings
-  builder.Services.AddHttpClient();
+  builder.Services.AddHttpClient();  
   builder.Services.AddTransient<AppSettingsService>();
   builder.Services.AddTransient<AppLogService>();
   builder.Services.AddTransient<IEmailService, EmailService>();
@@ -74,6 +74,7 @@ static void BuildServices(WebApplicationBuilder builder)
   builder.Services.AddTransient<StudentViewService>();
   builder.Services.AddTransient<TeacherAuthService>();
   builder.Services.AddTransient<StudentAuthService>();
+  builder.Services.AddTransient<HealthService>();
 
   builder.Services.AddTransient<DatabaseBackupService>();
   builder.Services.AddHostedService<DatabaseBackupHostedService>();

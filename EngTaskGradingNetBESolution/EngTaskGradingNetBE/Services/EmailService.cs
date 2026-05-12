@@ -9,11 +9,13 @@ namespace EngTaskGradingNetBE.Services
   {
     public Task SendEmailAsync(string recipient, string title, string htmlBody);
     public void SendEmailInBackground(string recipient, string title, string htmlBody);
+
+    public Task TryReachSmtpServerAsync();
   }
 
   public class EmailService(
-    AppSettingsService appSettingsService, 
-    BackgroundTaskQueue backgroundTaskQueue, 
+    AppSettingsService appSettingsService,
+    BackgroundTaskQueue backgroundTaskQueue,
     ILogger<EmailService> logger) : IEmailService
   {
     private class SmtpConfig
@@ -70,7 +72,7 @@ namespace EngTaskGradingNetBE.Services
     private static MimeMessage BuildMimeMessage(string recipient, string title, string htmlBody, SmtpConfig config)
     {
       var message = new MimeMessage();
-      
+
       message.From.Add(new MailboxAddress(config.SenderName, config.SenderEmail));
       message.To.Add(new MailboxAddress("", recipient));
       message.Subject = title;
@@ -79,7 +81,7 @@ namespace EngTaskGradingNetBE.Services
         HtmlBody = htmlBody
       };
       message.Body = bodyBuilder.ToMessageBody();
-      
+
       return message;
     }
 
@@ -87,29 +89,29 @@ namespace EngTaskGradingNetBE.Services
     private async Task SendEmailInternalAsync(string recipient, string title, string htmlBody, CancellationToken cancellationToken = default)
     {
       var finalRecipient = AdjustDebugRecipientIfRequired(recipient);
-      
+
       var config = GetCurrentSmtpConfig();
       var message = BuildMimeMessage(finalRecipient, title, htmlBody, config);
 
       using var client = new SmtpClient();
-      
+
       // Konfigurace timeoutu
       client.Timeout = 30000;
 
       logger.LogInformation($"Connecting to SMTP server {config.SmtpServer}:{config.SmtpPort}");
-      
+
       // Připojení s automatickou detekcí SSL/TLS
       await client.ConnectAsync(config.SmtpServer, config.SmtpPort, SecureSocketOptions.Auto, cancellationToken);
-      
+
       logger.LogInformation("Authenticating...");
       await client.AuthenticateAsync(config.SenderEmail, config.SenderPassword, cancellationToken);
-      
+
       logger.LogInformation($"Sending email to {finalRecipient}...");
       await client.SendAsync(message, cancellationToken);
-      
+
       logger.LogInformation("Disconnecting...");
       await client.DisconnectAsync(true, cancellationToken);
-      
+
       logger.LogInformation($"Email sent successfully to {finalRecipient}");
     }
 
@@ -129,7 +131,7 @@ namespace EngTaskGradingNetBE.Services
     public void SendEmailInBackground(string recipient, string title, string htmlBody)
     {
       logger.LogInformation($"Enqueueing background email task for {recipient}");
-      
+
       async ValueTask doSend(CancellationToken ct)
       {
         logger.LogInformation("Background email task started");
@@ -147,6 +149,25 @@ namespace EngTaskGradingNetBE.Services
       var result = backgroundTaskQueue.Enqueue(doSend);
       logger.LogInformation($"Email task enqueued, result: {result.IsCompleted}");
     }
+
+    public async Task TryReachSmtpServerAsync()
+    {
+      var config = GetCurrentSmtpConfig();
+      using var client = new SmtpClient();
+      client.Timeout = 3000;
+      try
+      {
+        logger.LogInformation($"Trying to connect to SMTP server {config.SmtpServer}:{config.SmtpPort}...");
+        await client.ConnectAsync(config.SmtpServer, config.SmtpPort, SecureSocketOptions.Auto);
+        await client.DisconnectAsync(true);
+        logger.LogInformation("Connection test successful.");
+      }
+      catch (Exception ex)
+      {
+        logger.LogError(ex, $"Failed to connect to SMTP server {config.SmtpServer}:{config.SmtpPort}");
+        throw;
+      }
+    }
   }
 
   public class MockEmailService(ILogger<MockEmailService> logger) : IEmailService
@@ -161,6 +182,12 @@ namespace EngTaskGradingNetBE.Services
     public void SendEmailInBackground(string recipient, string title, string htmlBody)
     {
       _ = Task.Run(async () => await SendEmailAsync(recipient, title, htmlBody));
+    }
+
+    public Task TryReachSmtpServerAsync()
+    {
+      logger.LogInformation("Mock TryReachSmtpServerAsync called - assuming success.");
+      return Task.CompletedTask;
     }
   }
 }

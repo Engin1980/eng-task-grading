@@ -431,7 +431,7 @@ function GradesPage() {
     }
 
     let isFinalCellMatch;
-    if (!showClosedStudents) isFinalCellMatch = true;
+    if (showClosedStudents) isFinalCellMatch = true;
     else {
       const finalGradeCell = tableData?.finalGradeCells.find(
         (fg) => fg.studentId === student.student.id,

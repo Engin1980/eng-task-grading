@@ -2,7 +2,6 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { studentViewService } from "../../../services/student-view-service";
 import type { CourseDto } from "../../../model/course-dto";
 import { useState, useEffect } from "react";
-import { StudentInfo } from "../../../components/studentView";
 import { Loading } from "../../../ui/loading";
 import { LoadingError } from "../../../ui/loadingError";
 import { useLoadingState } from "../../../types/loadingState";
@@ -13,29 +12,10 @@ export const Route = createFileRoute("/studentView/courses/")({
   component: RouteComponent,
 });
 
-// Helper function to extract sub from JWT token
-function getStudentNumberFromJWT(): string | null {
-  try {
-    const token = localStorage.getItem("studentViewAccessJWT");
-    if (!token) return null;
-
-    // Decode JWT payload (base64url decode)
-    const payload = token.split(".")[1];
-    if (!payload) return null;
-
-    const decodedPayload = JSON.parse(atob(payload));
-    return decodedPayload.sub || null;
-  } catch (error) {
-    //TODO silent error, is it ok?
-    return null;
-  }
-}
-
 function RouteComponent() {
   const navigate = useNavigate();
   const [courses, setCourses] = useState<CourseDto[]>([]);
   const ldgState = useLoadingState();
-  const studentNumber = getStudentNumberFromJWT();
   const tst = useToast();
   const logger = useLogger("/studentView/courses/index.tsx");
 

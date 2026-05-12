@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { studentViewService } from "../../../services/student-view-service";
 import type { StudentViewCourseDto } from "../../../model/student-view-dto";
 import { StudentViewDataContext } from "../../../contexts/StudentViewDataContext";
-import { StudentInfo } from "../../../components/studentView";
 import { TaskIcon } from "../../../ui/icons/taskIcon";
 import { AttendanceIcon } from "../../../ui/icons/attendanceIcon";
 import { TabLabelLink } from "../../../ui/tabLabelLink";

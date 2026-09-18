@@ -10,7 +10,8 @@ public class Task
     Min,
     Max,
     Avg,
-    Last
+    Last,
+    Sum
   }
 
   [Key]

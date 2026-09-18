@@ -65,6 +65,7 @@ public static class EObjectMapper
       "min" => Task.AggregationType.Min,
       "max" => Task.AggregationType.Max,
       "avg" => Task.AggregationType.Avg,
+      "sum" => Task.AggregationType.Sum,
       _ => Task.AggregationType.Last
     };
   }

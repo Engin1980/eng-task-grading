@@ -51,7 +51,7 @@ function RouteComponent() {
     );
   });
 
-  const setSetFinalValues = (set: NewGradeSetTaskDto, taskReduceType: "min" | "max" | "avg" | "last"): void => {
+  const setSetFinalValues = (set: NewGradeSetTaskDto, taskReduceType: "min" | "max" | "avg" | "last" | "sum"): void => {
     set.students.forEach(studentData => {
       studentData.finalValue = gradeService.evaluateFinalGrade(taskReduceType, studentData.grades)?.value ?? null;
       studentData.finalPercentage = gradeService.calculateFinalGradePercentage(studentData.finalValue, set.task.minGrade, set.task.maxGrade);

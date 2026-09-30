@@ -73,6 +73,7 @@ public static class EObjectMapper
   public static StudentDto To(Student student) => new(
     student.Id, student.Number, student.Email, student.Name, student.Surname,
     student.UserName, student.StudyProgram, student.StudyForm);
+  public static CourseStudentDto To(CourseStudent courseStudent) => new(To(courseStudent.Student), courseStudent.StudyGroup);
   public static Student From(StudentCreateDto studentDto) => new()
   {
     Number = studentDto.Number,

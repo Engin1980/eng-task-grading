@@ -24,6 +24,35 @@ namespace EngTaskGradingNetBE.Services
         .ToListAsync();
     }
 
+    public async Task<IEnumerable<CourseStudent>> GetAllByCourseWithGroupAsync(int courseId)
+    {
+      return await Db.CourseStudents
+        .Include(q => q.Student)
+        .Where(q => q.CourseId == courseId)
+        .OrderBy(q => q.Student.Surname)
+        .ThenBy(q => q.Student.Name)
+        .ToListAsync();
+    }
+
+    public async Task<CourseStudent> UpdateStudyGroupAsync(int courseId, int studentId, string? studyGroup)
+    {
+      var courseStudent = await Db.CourseStudents
+        .Include(q => q.Student)
+        .FirstOrDefaultAsync(q => q.CourseId == courseId && q.StudentId == studentId);
+
+      if (courseStudent == null)
+      {
+        var student = await GetByIdAsync(studentId);
+        var course = await Db.Courses.FirstOrDefaultAsync(q => q.Id == courseId)
+          ?? throw new Exceptions.BadData.NotFound.EntityNotFoundException<Course>(courseId);
+        throw new Exceptions.BadData.Common.StudentNotInCourseException(student.Number, course.Code);
+      }
+
+      courseStudent.StudyGroup = (studyGroup ?? string.Empty).Trim();
+      await Db.SaveChangesAsync();
+      return courseStudent;
+    }
+
     public async Task<IEnumerable<Student>> GetAllByCourseAsync(Course course)
     {
       if (course == null) return [];

@@ -9,6 +9,11 @@ export interface StudentDto {
   studyForm?: string;
 }
 
+export interface CourseStudentDto {
+  student: StudentDto;
+  studyGroup: string;
+}
+
 export interface StudentCreateDto {
   number: string;
   name: string;

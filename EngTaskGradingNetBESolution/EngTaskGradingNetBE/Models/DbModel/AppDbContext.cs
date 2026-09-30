@@ -17,6 +17,7 @@ namespace EngTaskGradingNetBE.Models.DbModel
     public DbSet<AttendanceDaySelfSign> AttendanceDaySelfSign => Set<AttendanceDaySelfSign>();
     public DbSet<FinalGrade> FinalGrades => Set<FinalGrade>();
     public DbSet<Token> Tokens => Set<Token>();
+    public DbSet<CourseStudent> CourseStudents => Set<CourseStudent>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -24,7 +25,17 @@ namespace EngTaskGradingNetBE.Models.DbModel
       {
         e.HasMany(s => s.Courses)
           .WithMany(k => k.Students)
-          .UsingEntity(j => j.ToTable("StudentCourse"));
+          .UsingEntity<CourseStudent>(
+            j => j.HasOne(cs => cs.Course).WithMany().HasForeignKey(cs => cs.CourseId),
+            j => j.HasOne(cs => cs.Student).WithMany().HasForeignKey(cs => cs.StudentId),
+            j =>
+            {
+              j.ToTable("StudentCourse");
+              j.HasKey(cs => new { cs.CourseId, cs.StudentId });
+              j.Property(cs => cs.CourseId).HasColumnName("CoursesId");
+              j.Property(cs => cs.StudentId).HasColumnName("StudentsId");
+              j.Property(cs => cs.StudyGroup).HasDefaultValue("");
+            });
 
         e.HasIndex(s => s.Number).IsUnique();
         e.HasIndex(s => s.Email).IsUnique();

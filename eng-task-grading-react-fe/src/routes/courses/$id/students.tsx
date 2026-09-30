@@ -1,33 +1,43 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { useLogger } from '../../../hooks/use-logger';
-import { useEffect, useState } from 'react';
-import type { StudentImportAnalysisResultDto, StudentCreateDto, StudentDto } from '../../../model/student-dto';
-import { studentService } from '../../../services/student-service';
-import { ImportStudentsWizardFirstModal, ImportStudentsWizardSecondModal } from '../../../components/courses';
-import { Loading } from '../../../ui/loading';
-import { LoadingError } from '../../../ui/loadingError';
-import { useLoadingState } from '../../../types/loadingState';
-import { CreateStudentModal } from '../../../components/courses/CreateStudentModal';
-import { courseService } from '../../../services/course-service';
+import { createFileRoute } from "@tanstack/react-router";
+import { useLogger } from "../../../hooks/use-logger";
+import { useEffect, useState } from "react";
+import type {
+  StudentImportAnalysisResultDto,
+  StudentCreateDto,
+  CourseStudentDto,
+} from "../../../model/student-dto";
+import { studentService } from "../../../services/student-service";
+import {
+  ImportStudentsWizardFirstModal,
+  ImportStudentsWizardSecondModal,
+  StudentGroupInput,
+} from "../../../components/courses";
+import { Loading } from "../../../ui/loading";
+import { LoadingError } from "../../../ui/loadingError";
+import { useLoadingState } from "../../../types/loadingState";
+import { CreateStudentModal } from "../../../components/courses/CreateStudentModal";
+import { courseService } from "../../../services/course-service";
 
-export const Route = createFileRoute('/courses/$id/students')({
+export const Route = createFileRoute("/courses/$id/students")({
   component: StudentsPage,
-})
+});
 
 function StudentsPage() {
-  const { id } = Route.useParams()
+  const { id } = Route.useParams();
   const courseId = id;
   const logger = useLogger("StudentsTab");
   const [isImportFirstModalOpen, setIsImportFirstModalOpen] = useState(false);
   const [isImportSecondModalOpen, setIsImportSecondModalOpen] = useState(false);
-  const [isCreateStudentModalOpen, setIsCreateStudentModalOpen] = useState(false);
-  const [studentAnalysisResult, setStudentAnalysisResult] = useState<StudentImportAnalysisResultDto>();
-  const [students, setStudents] = useState<StudentDto[]>([]);
+  const [isCreateStudentModalOpen, setIsCreateStudentModalOpen] =
+    useState(false);
+  const [studentAnalysisResult, setStudentAnalysisResult] =
+    useState<StudentImportAnalysisResultDto>();
+  const [students, setStudents] = useState<CourseStudentDto[]>([]);
   const ldgState = useLoadingState();
   const [filterText, setFilterText] = useState<string>("");
 
   // Funkce pro filtrování studentů
-  const filteredStudents = students.filter(student => {
+  const filteredStudents = students.filter(({ student, studyGroup }) => {
     if (!filterText.trim()) return true;
 
     const searchText = filterText.toLowerCase();
@@ -35,19 +45,34 @@ function StudentsPage() {
       student.number.toLowerCase().includes(searchText) ||
       (student.name?.toLowerCase().includes(searchText) ?? false) ||
       (student.surname?.toLowerCase().includes(searchText) ?? false) ||
-      (student.userName?.toLowerCase().includes(searchText) ?? false)
+      (student.userName?.toLowerCase().includes(searchText) ?? false) ||
+      studyGroup.toLowerCase().includes(searchText)
     );
   });
 
+  const handleStudyGroupSave = async (
+    studentId: number,
+    studyGroup: string,
+  ) => {
+    const updated = await studentService.updateStudyGroup(
+      courseId,
+      studentId,
+      studyGroup,
+    );
+    setStudents((prev) =>
+      prev.map((s) => (s.student.id === studentId ? updated : s)),
+    );
+  };
 
   const loadStudents = async () => {
-    logger.info("Loading students")
+    logger.info("Loading students");
     try {
       ldgState.setLoading();
-      const students: StudentDto[] = await studentService.getAllByCourseId(courseId);
+      const students: CourseStudentDto[] =
+        await studentService.getAllByCourseId(courseId);
       setStudents(students);
       ldgState.setDone();
-      logger.info("Students loaded")
+      logger.info("Students loaded");
     } catch (error) {
       ldgState.setError(error);
       logger.error("Error loading students:", error);
@@ -57,13 +82,13 @@ function StudentsPage() {
   const handleImportZero = () => {
     logger.info("Import Request Invoked");
     setIsImportFirstModalOpen(true);
-  }
+  };
 
   const handleStudentCreate = async (student: StudentCreateDto) => {
     const tmp = [student];
     await courseService.importStudentsToCourse(courseId, tmp);
     await loadStudents();
-  }
+  };
 
   const handleAnalyzed = async (data: StudentImportAnalysisResultDto) => {
     setStudentAnalysisResult(data);
@@ -72,16 +97,20 @@ function StudentsPage() {
   };
 
   const handleImported = async () => {
-    logger.info('Importing students from analysis result', { courseId, studentCount: studentAnalysisResult?.students.length || 0 });
+    logger.info("Importing students from analysis result", {
+      courseId,
+      studentCount: studentAnalysisResult?.students.length || 0,
+    });
     await loadStudents();
-  }
+  };
 
   useEffect(() => {
     loadStudents();
   }, [courseId]);
 
   if (ldgState.loading) return <Loading message="Načítám studenty..." />;
-  if (ldgState.error) return <LoadingError message={ldgState.error} onRetry={loadStudents} />;
+  if (ldgState.error)
+    return <LoadingError message={ldgState.error} onRetry={loadStudents} />;
 
   return (
     <div>
@@ -92,12 +121,12 @@ function StudentsPage() {
             <input
               id="student-filter"
               type="text"
-              placeholder="Hledat podle čísla, jména, příjmení nebo uživatelského jména..."
+              placeholder="Hledat podle čísla, jména, příjmení, uživatelského jména nebo skupiny..."
               value={filterText}
               onChange={(e) => setFilterText(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === 'Escape') {
-                  setFilterText('');
+                if (e.key === "Escape") {
+                  setFilterText("");
                 }
               }}
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -142,19 +171,30 @@ function StudentsPage() {
 
       {ldgState.loading && <Loading message="Načítám studenty..." />}
 
-      {ldgState.error && <LoadingError message={ldgState.error} onRetry={loadStudents} />}
+      {ldgState.error && (
+        <LoadingError message={ldgState.error} onRetry={loadStudents} />
+      )}
 
-      {students && students.length === 0 && <div className="text-center py-8">
-        <p className="text-gray-500 mb-4">Zatím nejsou přihlášení žádní studenti.</p>
-      </div>}
-
-      {filteredStudents && filteredStudents.length === 0 && students && students.length > 0 && (
+      {students && students.length === 0 && (
         <div className="text-center py-8">
-          <p className="text-gray-500 mb-4">Žádní studenti neodpovídají zadaným kritériím.</p>
+          <p className="text-gray-500 mb-4">
+            Zatím nejsou přihlášení žádní studenti.
+          </p>
         </div>
       )}
 
-      {filteredStudents && filteredStudents.length > 0 &&
+      {filteredStudents &&
+        filteredStudents.length === 0 &&
+        students &&
+        students.length > 0 && (
+          <div className="text-center py-8">
+            <p className="text-gray-500 mb-4">
+              Žádní studenti neodpovídají zadaným kritériím.
+            </p>
+          </div>
+        )}
+
+      {filteredStudents && filteredStudents.length > 0 && (
         <div className="overflow-x-auto">
           <table className="min-w-full bg-white border border-gray-200 rounded-lg">
             <thead className="bg-gray-50">
@@ -172,6 +212,9 @@ function StudentsPage() {
                   Email
                 </th>
                 <th className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Skupina
+                </th>
+                <th className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Studijní program
                 </th>
                 <th className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -180,7 +223,7 @@ function StudentsPage() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredStudents.map((student) => (
+              {filteredStudents.map(({ student, studyGroup }) => (
                 <tr key={student.number} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <button
@@ -202,6 +245,14 @@ function StudentsPage() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {student.email}
                   </td>
+                  <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500">
+                    <StudentGroupInput
+                      value={studyGroup}
+                      onSave={(value) =>
+                        handleStudyGroupSave(student.id, value)
+                      }
+                    />
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {student.studyProgram}
                   </td>
@@ -213,7 +264,7 @@ function StudentsPage() {
             </tbody>
           </table>
         </div>
-      }
+      )}
     </div>
   );
 }

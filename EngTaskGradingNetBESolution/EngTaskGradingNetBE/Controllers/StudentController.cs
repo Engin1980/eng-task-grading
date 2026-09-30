@@ -13,14 +13,17 @@ namespace EngTaskGradingNetBE.Controllers
   public class StudentController([FromServices] StudentService studentService) : ControllerBase
   {
     [HttpGet("for-course/{courseId}")]
-    public async Task<IEnumerable<StudentDto>> GetStudentsByCourseIdAsync(int courseId)
+    public async Task<IEnumerable<CourseStudentDto>> GetStudentsByCourseIdAsync(int courseId)
     {
-      var students = await studentService.GetAllByCourseAsync(courseId);
-      var result = students
-        .Select(EObjectMapper.To)
-        .OrderBy(q => q.Surname)
-        .ThenBy(q => q.Name).ToList();
-      return result;
+      var students = await studentService.GetAllByCourseWithGroupAsync(courseId);
+      return students.Select(EObjectMapper.To).ToList();
+    }
+
+    [HttpPut("for-course/{courseId}/{studentId}/study-group")]
+    public async Task<CourseStudentDto> UpdateStudyGroupAsync(int courseId, int studentId, [FromBody] StudentStudyGroupUpdateDto dto)
+    {
+      var updated = await studentService.UpdateStudyGroupAsync(courseId, studentId, dto.StudyGroup);
+      return EObjectMapper.To(updated);
     }
 
     [HttpGet("{id}")]

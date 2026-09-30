@@ -15,6 +15,9 @@ namespace EngTaskGradingNetBE.Models.Dtos
     string? StudyForm
   );
 
+  public record CourseStudentDto(StudentDto Student, string StudyGroup);
+  public record StudentStudyGroupUpdateDto(string StudyGroup);
+
   public record StudentCreateDto(string Number, string Name, string Surname, string UserName, string Email, string StudyProgram, string StudyForm);
   public record StudentAnalysisResultDto(List<StudentCreateDto> Students, List<string> Errors);
 }

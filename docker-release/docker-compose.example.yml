@@ -4,17 +4,17 @@ services:
 
   eng-task-grading-fe:
     container_name: eng-task-grading-fe
-    build: 
-      context: ../eng-task-grading-react-fe   
+    build:
+      context: ../eng-task-grading-react-fe
     environment:
-      BACKEND_URL: https://78.128.134.148:8103/api
-      CLOUDFLARE_ENABLED: false 
+      BACKEND_URL: ${BACKEND_URL}
+      CLOUDFLARE_ENABLED: ${CLOUDFLARE_ENABLED:-false}
     ports:
-      - "8100:80"
-      - "8101:443"
+      - "${FE_HTTP_PORT:-8100}:80"
+      - "${FE_HTTPS_PORT:-8101}:443"
     networks:
-      - eng-task-grading-net      
-    
+      - eng-task-grading-net
+
   eng-task-grading-be:
     # image: ${DOCKER_REGISTRY-}engtaskgradingnetbe
     container_name: eng-task-grading-be
@@ -26,14 +26,14 @@ services:
       DOTNET_ENVIRONMENT: Release
       ASPNETCORE_ENVIRONMENT: Release
       ASPNETCORE_HTTP_PORTS: 8080
-      ASPNETCORE_HTTPS_PORTS: 443      
-      AppSettings__Security__AccessTokenJwtSecretKey: TODO
-      AppSettings__Emails__Configs__Osu__SenderEmail: TODO
-      AppSettings__Emails__Configs__Osu__SenderPassword: TODO
-      DB_PASSWORD: TODO_X
+      ASPNETCORE_HTTPS_PORTS: 443
+      AppSettings__Security__AccessTokenJwtSecretKey: ${JWT_SECRET_KEY}
+      AppSettings__Emails__Configs__Osu__SenderEmail: ${OSU_SENDER_EMAIL}
+      AppSettings__Emails__Configs__Osu__SenderPassword: ${OSU_SENDER_PASSWORD}
+      DB_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "8103:8080"
-      - "8104:443"
+      - "${BE_HTTP_PORT:-8103}:8080"
+      - "${BE_HTTPS_PORT:-8104}:443"
     networks:
       - eng-task-grading-net
 
@@ -42,13 +42,13 @@ services:
     image: mcr.microsoft.com/mssql/server:2022-latest
     environment:
       ACCEPT_EULA: Y
-      SA_PASSWORD: TODO_X
+      SA_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "8105:1433"
+      - "${DB_PORT:-8105}:1433"
     networks:
       - eng-task-grading-net
     volumes:
-      - eng-task-grading-db-data:/var/opt/mssql         
+      - eng-task-grading-db-data:/var/opt/mssql
 
 networks:
   eng-task-grading-net:

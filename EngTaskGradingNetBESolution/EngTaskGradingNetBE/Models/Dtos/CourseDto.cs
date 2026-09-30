@@ -5,7 +5,7 @@
   public record CourseDto(int Id, string Code, string? Name, bool IsActive, int StudentsCount, int TasksCount, int AttendancesCount);
   public record CourseOverviewDto(
     CourseDto Course,
-    StudentDto[] Students,
+    CourseStudentDto[] Students,
     TaskDto[] Tasks,
     GradeDto[] Grades,
     AttendanceDto[] Attendances,

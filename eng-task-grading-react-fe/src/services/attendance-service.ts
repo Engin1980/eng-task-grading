@@ -4,7 +4,7 @@ import type {
   AttendanceDto, AttendanceImportAnalysisResultDto, AttendanceRecordDto, AttendanceUpdateDto,
   AttendanceValueDto
 } from "../model/attendance-dto";
-import type { StudentDto } from "../model/student-dto";
+import type { CourseStudentDto, StudentDto } from "../model/student-dto";
 import { apiHttp } from "./api-http";
 
 export const attendanceService = {
@@ -56,7 +56,7 @@ export const attendanceService = {
   },
 
   getStudentsByDayId: async (attendanceDayId: number) => {
-    const { data } = await apiHttp.get<StudentDto[]>(`/v1/attendance/days/${attendanceDayId}/students`);
+    const { data } = await apiHttp.get<CourseStudentDto[]>(`/v1/attendance/days/${attendanceDayId}/students`);
     return data;
   },
 

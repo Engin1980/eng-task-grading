@@ -57,6 +57,7 @@ interface AttendanceHeader {
 
 interface CourseStudentRow {
   student: StudentDto;
+  studyGroup: string;
   attendanceSuccessCount: number;
   taskSuccessCount: number;
 }
@@ -305,7 +306,7 @@ function GradesPage() {
     const studentRows: CourseStudentRow[] = [];
     const finalGradeCells: FinalGradeCell[] = [];
 
-    data.students.forEach((studentDto) => {
+    data.students.forEach(({ student: studentDto, studyGroup }) => {
       const taskTmp = data.tasks
         .map((task) => {
           const taskDto: TaskDto = data.tasks.find((q) => q.id == task.id)!;
@@ -369,7 +370,8 @@ function GradesPage() {
         finalGradeCells.push(finGradeCell);
       }
       const row: CourseStudentRow = {
-        student: data.students.find((s) => s.id == studentDto.id)!,
+        student: studentDto,
+        studyGroup: studyGroup,
         attendanceSuccessCount: attendanceCells.filter((a) => a.isSuccessful)
           .length,
         taskSuccessCount: taskCells.filter((t) => t.isSuccessful).length,
@@ -427,7 +429,9 @@ function GradesPage() {
       isNameMatch =
         student.student.number.toLowerCase().includes(searchText) ||
         (student.student.name?.toLowerCase().includes(searchText) ?? false) ||
-        (student.student.surname?.toLowerCase().includes(searchText) ?? false);
+        (student.student.surname?.toLowerCase().includes(searchText) ?? false) ||
+        (student.studyGroup !== "" &&
+          student.studyGroup.toLowerCase().includes(searchText));
     }
 
     let isFinalCellMatch;
@@ -494,7 +498,7 @@ function GradesPage() {
             <input
               id="student-filter"
               type="text"
-              placeholder="Hledat podle jména, příjmení nebo čísla..."
+              placeholder="Hledat podle jména, příjmení, čísla nebo skupiny..."
               value={studentFilter}
               onChange={(e) => setStudentFilter(e.target.value)}
               onKeyDown={(e) => {
@@ -661,6 +665,7 @@ function GradesPage() {
                       </div>
                       <div className="text-xs text-gray-500">
                         {student.student.number}
+                        {student.studyGroup !== "" && ` - ${student.studyGroup}`}
                       </div>
                     </div>
                   </td>

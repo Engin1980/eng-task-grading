@@ -31,6 +31,7 @@ namespace EngTaskGradingNetBE.Controllers
     public async Task<List<NewGradeSetTaskDto>> GetCourseGradeSetNewAsync([FromRoute] int courseId)
     {
       var tmp = await gradeService.GetGradesByCourseAsync(courseId);
+      var studyGroups = await gradeService.GetStudyGroupsAsync(courseId);
       List<NewGradeSetTaskDto> ret = [];
 
       foreach (var tmpTask in tmp.Tasks)
@@ -44,7 +45,7 @@ namespace EngTaskGradingNetBE.Controllers
           StudentDto studentDto = EObjectMapper.To(tmpStudent);
           List<Grade> grades = tmp.Grades.Where(q => q.StudentId == tmpStudent.Id && q.TaskId == tmpTask.Id).OrderByDescending(q => q.Date).ToList();
           List<GradeDto> gradeDtos = grades.Select(EObjectMapper.To).ToList();
-          NewGradeSetStudentDto studentSetDto = new(studentDto, gradeDtos);
+          NewGradeSetStudentDto studentSetDto = new(studentDto, studyGroups.GetValueOrDefault(tmpStudent.Id, string.Empty), gradeDtos);
           students.Add(studentSetDto);
         }
         NewGradeSetTaskDto it = new(taskDto, students.OrderBy(q => q.Student.Surname).ThenBy(q => q.Student.Name).ToList());
@@ -71,6 +72,7 @@ namespace EngTaskGradingNetBE.Controllers
       var tmp = await gradeService.GetGradesByTaskAsync(taskId);
 
       NewGradeSetTaskDto ret;
+      var studyGroups = await gradeService.GetStudyGroupsAsync(tmp.Task.CourseId);
 
       TaskDto taskDto = EObjectMapper.To(tmp.Task);
       List<NewGradeSetStudentDto> students = [];
@@ -80,7 +82,7 @@ namespace EngTaskGradingNetBE.Controllers
         StudentDto studentDto = EObjectMapper.To(tmpStudent);
         List<Grade> grades = tmp.Grades.Where(q => q.StudentId == tmpStudent.Id).OrderByDescending(q => q.Date).ToList();
         List<GradeDto> gradeDtos = grades.Select(EObjectMapper.To).ToList();
-        NewGradeSetStudentDto studentSetDto = new(studentDto, gradeDtos);
+        NewGradeSetStudentDto studentSetDto = new(studentDto, studyGroups.GetValueOrDefault(tmpStudent.Id, string.Empty), gradeDtos);
         students.Add(studentSetDto);
       }
       ret = new(taskDto, students.OrderBy(q => q.Student.Surname).ThenBy(q => q.Student.Name).ToList());

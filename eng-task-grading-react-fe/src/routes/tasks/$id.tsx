@@ -47,7 +47,8 @@ function RouteComponent() {
     return (
       student.number.toLowerCase().includes(searchText) ||
       (student.name?.toLowerCase().includes(searchText) ?? false) ||
-      (student.surname?.toLowerCase().includes(searchText) ?? false)
+      (student.surname?.toLowerCase().includes(searchText) ?? false) ||
+      (studentData.studyGroup !== '' && studentData.studyGroup.toLowerCase().includes(searchText))
     );
   });
 
@@ -267,7 +268,7 @@ function RouteComponent() {
             <div className="max-w-sm">
               <input
                 type="text"
-                placeholder="Hledat podle čísla, jména nebo příjmení..."
+                placeholder="Hledat podle čísla, jména, příjmení nebo skupiny..."
                 value={filterText}
                 onChange={(e) => setFilterText(e.target.value)}
                 onKeyDown={(e) => {

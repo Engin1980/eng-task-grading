@@ -135,6 +135,13 @@ namespace EngTaskGradingNetBE.Services
       return ret;
     }
 
+    internal async Task<Dictionary<int, string>> GetStudyGroupsAsync(int courseId)
+    {
+      return await Db.CourseStudents
+        .Where(q => q.CourseId == courseId)
+        .ToDictionaryAsync(q => q.StudentId, q => q.StudyGroup);
+    }
+
     internal async Task<FinalGrade> SetFinalGradeAsRecordedAsync(int finalGradeId)
     {
       FinalGrade finalGrade = await Db.FinalGrades.FirstOrDefaultAsync(q => q.Id == finalGradeId)

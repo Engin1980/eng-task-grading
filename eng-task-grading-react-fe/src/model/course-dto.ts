@@ -1,6 +1,6 @@
 import type { AttendanceDto } from "./attendance-dto";
 import type { GradeDto } from "./grade-dto";
-import type { StudentDto } from "./student-dto";
+import type { CourseStudentDto } from "./student-dto";
 import type { TaskDto } from "./task-dto";
 
 export interface CourseCreateDto {
@@ -46,7 +46,7 @@ export interface AttendanceResultDto {
 
 export interface CourseOverviewDto {
   course: CourseDto;
-  students: StudentDto[];
+  students: CourseStudentDto[];
   tasks: TaskDto[];
   grades: GradeDto[];
   attendances: AttendanceDto[];

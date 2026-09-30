@@ -130,7 +130,7 @@ namespace EngTaskGradingNetBE.Services
       return await Db.AttendanceValues.ToListAsync();
     }
 
-    internal async Task<IEnumerable<Student>> GetStudentsForDayAsync(int attendanceDayId)
+    internal async Task<IEnumerable<(Student Student, string StudyGroup)>> GetStudentsForDayAsync(int attendanceDayId)
     {
       var attDay = await Db.AttendanceDays
         .Include(q => q.Attendance).ThenInclude(q => q.Course).ThenInclude(q => q.Students)
@@ -139,7 +139,10 @@ namespace EngTaskGradingNetBE.Services
         .FirstOrDefaultAsync()
         ?? throw new Exceptions.BadData.NotFound.EntityNotFoundException<AttendanceDay>(attendanceDayId);
       var students = attDay.Attendance.Course.Students.Union(attDay.Records.Select(q => q.Student)).Distinct().ToList();
-      return students;
+      var studyGroups = await Db.CourseStudents
+        .Where(q => q.CourseId == attDay.Attendance.CourseId)
+        .ToDictionaryAsync(q => q.StudentId, q => q.StudyGroup);
+      return students.Select(q => (q, studyGroups.GetValueOrDefault(q.Id, string.Empty))).ToList();
     }
 
     internal async Task<IEnumerable<AttendanceRecord>> GetRecordsForDayAsync(int attendanceDayId)

@@ -34,6 +34,13 @@ namespace EngTaskGradingNetBE.Services
       return ret;
     }
 
+    internal async Task<Dictionary<int, string>> GetStudyGroupsAsync(int courseId)
+    {
+      return await Db.CourseStudents
+        .Where(q => q.CourseId == courseId)
+        .ToDictionaryAsync(q => q.StudentId, q => q.StudyGroup);
+    }
+
     internal async Task<Grade> InsertGradeAsync(int taskId, int studentId, int teacherId, int value, string? comment)
     {
       Grade grade = new()

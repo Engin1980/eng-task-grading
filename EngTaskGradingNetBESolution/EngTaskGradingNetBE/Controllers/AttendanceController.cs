@@ -105,10 +105,10 @@ namespace EngTaskGradingNetBE.Controllers
     }
 
     [HttpGet("days/{dayId}/students")]
-    public async Task<List<StudentDto>> GetStudentsForDayAsync([FromRoute] int dayId)
+    public async Task<List<CourseStudentDto>> GetStudentsForDayAsync([FromRoute] int dayId)
     {
       var tmp = await attendanceService.GetStudentsForDayAsync(dayId);
-      var ret = tmp.Select(EObjectMapper.To).ToList();
+      var ret = tmp.Select(q => new CourseStudentDto(EObjectMapper.To(q.Student), q.StudyGroup)).ToList();
       return ret;
     }
 

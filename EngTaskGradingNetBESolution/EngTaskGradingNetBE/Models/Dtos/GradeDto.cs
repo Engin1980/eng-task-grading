@@ -7,6 +7,6 @@
 
 
   public record NewGradeSetDto(List<NewGradeSetTaskDto> Tasks);
-  public record NewGradeSetStudentDto(StudentDto Student, List<GradeDto> Grades);
+  public record NewGradeSetStudentDto(StudentDto Student, string StudyGroup, List<GradeDto> Grades);
   public record NewGradeSetTaskDto(TaskDto Task, List<NewGradeSetStudentDto> Students);
 }

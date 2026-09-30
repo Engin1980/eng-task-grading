@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { attendanceService } from '../../services/attendance-service';
-import type { StudentDto } from '../../model/student-dto';
+import type { CourseStudentDto } from '../../model/student-dto';
 import type { AttendanceValueDto, AttendanceRecordDto } from '../../model/attendance-dto';
 import { AttendanceValueLabelBlock } from '../../ui/attendanceValueLabelBlock';
 import { AttendanceValueLabel } from '../../ui/attendanceValueLabel';
@@ -13,7 +13,8 @@ interface AttendanceRecordsTabProps {
 }
 
 export function AttendanceRecordsTab({ attendanceDayId }: AttendanceRecordsTabProps) {
-  const [students, setStudents] = useState<StudentDto[]>([]);
+  const [students, setStudents] = useState<CourseStudentDto[]>([]);
+  const [groupFilter, setGroupFilter] = useState<string>('');
   const [values, setValues] = useState<AttendanceValueDto[]>([]);
   const [records, setRecords] = useState<AttendanceRecordDto[]>([]);
   const [loading, setLoading] = useState(true);
@@ -28,7 +29,9 @@ export function AttendanceRecordsTab({ attendanceDayId }: AttendanceRecordsTabPr
 
       const tmpA = await attendanceService.getStudentsByDayId(+attendanceDayId);
       // Seřaď studenty podle příjmení; pokud je příjmení prázdné, použij `number`
-      setStudents((tmpA || []).sort((a, b) => {
+      setStudents((tmpA || []).sort((x, y) => {
+        const a = x.student;
+        const b = y.student;
         const sa = a.surname?.trim();
         const sb = b.surname?.trim();
         if (sa && sb) return sa.localeCompare(sb);
@@ -96,6 +99,11 @@ export function AttendanceRecordsTab({ attendanceDayId }: AttendanceRecordsTabPr
     }
   };
 
+  const filteredStudents = students.filter(({ studyGroup }) => {
+    if (!groupFilter.trim()) return true;
+    return studyGroup !== '' && studyGroup.toLowerCase().includes(groupFilter.trim().toLowerCase());
+  });
+
   if (loading) {
     return (
       <div className="animate-pulse">
@@ -107,13 +115,29 @@ export function AttendanceRecordsTab({ attendanceDayId }: AttendanceRecordsTabPr
 
   return (
     <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-      <div className="px-4 py-5 sm:px-6">
-        <h3 className="text-lg leading-6 font-medium text-gray-900">
-          Záznamy docházky studentů
-        </h3>
-        <p className="mt-1 max-w-2xl text-sm text-gray-500">
-          Přehled docházky všech studentů pro tento den
-        </p>
+      <div className="px-4 py-5 sm:px-6 flex justify-between items-center gap-4">
+        <div>
+          <h3 className="text-lg leading-6 font-medium text-gray-900">
+            Záznamy docházky studentů
+          </h3>
+          <p className="mt-1 max-w-2xl text-sm text-gray-500">
+            Přehled docházky všech studentů pro tento den
+          </p>
+        </div>
+        <div className="max-w-sm">
+          <input
+            type="text"
+            placeholder="Hledat podle skupiny..."
+            value={groupFilter}
+            onChange={(e) => setGroupFilter(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') {
+                setGroupFilter('');
+              }
+            }}
+            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          />
+        </div>
       </div>
 
       <div className="border-t border-gray-200">
@@ -130,7 +154,7 @@ export function AttendanceRecordsTab({ attendanceDayId }: AttendanceRecordsTabPr
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {students.map((student) => {
+              {filteredStudents.map(({ student }) => {
                 // Najdi attendance record pro tohoto studenta
                 const studentRecord = records.find(record =>
                   record.studentId === student.id
@@ -169,6 +193,12 @@ export function AttendanceRecordsTab({ attendanceDayId }: AttendanceRecordsTabPr
             </tbody>
           </table>
         </div>
+
+        {students.length > 0 && filteredStudents.length === 0 && (
+          <div className="px-6 py-4 text-center text-gray-500">
+            Žádní studenti neodpovídají zadaným kritériím.
+          </div>
+        )}
 
         {students.length === 0 && (
           <div className="px-6 py-4 text-center text-gray-500">

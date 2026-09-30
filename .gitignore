@@ -11,3 +11,4 @@ EngTaskGradingNetBESolution/EngTaskGradingNetBE/appsettings.Production.json
 EngTaskGradingNetBESolution/docker-compose.release.yml
 EngTaskGradingNetBESolution/docker-compose-release-build.bat
 docker-release/docker-compose.yml
+.env

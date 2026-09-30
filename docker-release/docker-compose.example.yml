@@ -1,14 +1,17 @@
+name: eng-task-grading
+
 services:
+
   eng-task-grading-fe:
     container_name: eng-task-grading-fe
     build: 
       context: ../eng-task-grading-react-fe   
     environment:
-      BACKEND_URL: https://78.128.134.148:55556/api
+      BACKEND_URL: https://78.128.134.148:8103/api
       CLOUDFLARE_ENABLED: false 
     ports:
-      - "5001:80"
-      - "5000:443"
+      - "8100:80"
+      - "8101:443"
     networks:
       - eng-task-grading-net      
     
@@ -29,8 +32,8 @@ services:
       AppSettings__Emails__Configs__Osu__SenderPassword: TODO
       DB_PASSWORD: TODO_X
     ports:
-      - "55555:8080"
-      - "55556:443"
+      - "8103:8080"
+      - "8104:443"
     networks:
       - eng-task-grading-net
 
@@ -41,7 +44,7 @@ services:
       ACCEPT_EULA: Y
       SA_PASSWORD: TODO_X
     ports:
-      - "1433:1433"
+      - "8105:1433"
     networks:
       - eng-task-grading-net
     volumes:

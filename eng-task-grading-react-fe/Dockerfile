@@ -2,6 +2,12 @@
 FROM node:20-alpine AS build
 
 WORKDIR /app
+
+# Build-time config passed from docker-compose (build.args); process env overrides .env.production in Vite.
+# Args that are not passed stay unset, so the values from .env.production are used.
+ARG VITE_BACKEND_URL
+ARG VITE_CLOUDFLARE_ENABLED
+
 COPY package*.json ./
 RUN npm ci
 

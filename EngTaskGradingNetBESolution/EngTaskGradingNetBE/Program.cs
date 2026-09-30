@@ -89,8 +89,13 @@ static string GetConnectionString(WebApplicationBuilder builder)
   string DB_ENV_KEY = "DB_PASSWORD";
   string DB_ENV_KEY_REF = "{" + DB_ENV_KEY + "}";
   string cs = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new ApplicationException("Default connection not found in app properties.");
-  string pass = Environment.GetEnvironmentVariable(DB_ENV_KEY) ?? throw new ApplicationException("DB_PASSWORD not found in environmental variables.");
-  string ret = cs.Replace(DB_ENV_KEY_REF, pass);
+  string ret = cs;
+  // password is required only when the connection string references it (it may be supplied inline via ConnectionStrings__DefaultConnection)
+  if (cs.Contains(DB_ENV_KEY_REF))
+  {
+    string pass = Environment.GetEnvironmentVariable(DB_ENV_KEY) ?? throw new ApplicationException("DB_PASSWORD not found in environmental variables.");
+    ret = cs.Replace(DB_ENV_KEY_REF, pass);
+  }
 
   // log CS securely
   var csBuilder = new SqlConnectionStringBuilder(cs)
@@ -163,7 +168,8 @@ static void BuildDb(WebApplicationBuilder builder)
     Log.Fatal("No connection string found");
     throw new InvalidOperationException("No connection string found");
   }
-  Log.Debug("Using connection string: {connectionString}", connectionString);
+  var csb = new SqlConnectionStringBuilder(connectionString);
+  Log.Debug("Using database. DataSource (server,port): {dataSource}, Database: {database}", csb.DataSource, csb.InitialCatalog);
   builder.Services.AddDbContext<AppDbContext>(options =>
       options.UseSqlServer(connectionString,
       o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)));

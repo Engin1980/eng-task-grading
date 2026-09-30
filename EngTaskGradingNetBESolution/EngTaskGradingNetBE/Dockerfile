@@ -7,8 +7,6 @@ WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
 
-ENV DB_PASSWORD=Bublinka#1
-
 COPY ../certs/aspnetapp.pfx /https/aspnetapp.pfx
 ENV DOTNET_RUNNING_IN_CONTAINER=true
 

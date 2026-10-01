@@ -1,0 +1,69 @@
+name: eng-task-grading
+
+# Production stack (FE + BE + DB). Values come from ./.env (copy .env.example and fill in the TODOs).
+# docker-compose.override.yml is picked up automatically and switches the BE to Development with local user secrets;
+# for a real release run:  docker compose -f docker-compose.yml up -d --build
+
+services:
+
+  eng-task-grading-fe:
+    container_name: eng-task-grading-fe
+    build:
+      context: ../eng-task-grading-react-fe
+      args:
+        VITE_BACKEND_URL: ${BACKEND_URL}
+        VITE_CLOUDFLARE_ENABLED: ${CLOUDFLARE_ENABLED:-false}
+    ports:
+      - "${FE_HTTP_PORT:-8100}:80"
+      - "${FE_HTTPS_PORT:-8101}:443"
+    networks:
+      - eng-task-grading-net
+
+  eng-task-grading-be:
+    container_name: eng-task-grading-be
+    build:
+      context: ../EngTaskGradingNetBESolution
+      dockerfile: EngTaskGradingNetBE/Dockerfile
+    environment:
+      DOTNET_ENVIRONMENT: Release
+      ASPNETCORE_ENVIRONMENT: Release
+      # Kestrel endpoints (certificate is baked into the image at /https/aspnetapp.pfx)
+      Kestrel__Endpoints__Http__Url: http://+:8080
+      Kestrel__Endpoints__Https__Url: https://+:443
+      Kestrel__Endpoints__Https__Certificate__Path: /https/aspnetapp.pfx
+      Kestrel__Endpoints__Https__Certificate__Password: ${CERT_PASSWORD}
+      AppSettings__FrontEndUrl: ${FRONTEND_URL}
+      AppSettings__CloudFlare__Enabled: ${CLOUDFLARE_ENABLED:-false}
+      AppSettings__Security__AccessTokenJwtSecretKey: ${JWT_SECRET_KEY}
+      AppSettings__Email__ActiveConfigName: osu
+      AppSettings__Emails__Configs__Osu__SenderEmail: ${OSU_SENDER_EMAIL}
+      AppSettings__Emails__Configs__Osu__SenderPassword: ${OSU_SENDER_PASSWORD}
+      ConnectionStrings__DefaultConnection: ${DB_CONNECTION_STRING}
+      DB_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "${BE_HTTP_PORT:-8102}:8080"
+      - "${BE_HTTPS_PORT:-8103}:443"
+    depends_on:
+      - eng-task-grading-db
+    networks:
+      - eng-task-grading-net
+
+  eng-task-grading-db:
+    container_name: eng-task-grading-db
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: Y
+      SA_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "${DB_PORT:-8104}:1433"
+    volumes:
+      - eng-task-grading-db-data:/var/opt/mssql
+    networks:
+      - eng-task-grading-net
+
+networks:
+  eng-task-grading-net:
+    driver: bridge
+
+volumes:
+  eng-task-grading-db-data:

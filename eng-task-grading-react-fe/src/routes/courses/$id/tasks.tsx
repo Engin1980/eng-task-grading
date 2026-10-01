@@ -12,6 +12,14 @@ export const Route = createFileRoute('/courses/$id/tasks')({
   component: TasksPage,
 })
 
+const AGGREGATION_LABELS: Record<TaskDto['aggregation'], string> = {
+  min: 'Minimum',
+  max: 'Maximum',
+  avg: 'Průměr',
+  last: 'Poslední',
+  sum: 'Součet',
+};
+
 function TasksPage() {
   const { id } = Route.useParams();
   const courseId = id;
@@ -130,6 +138,9 @@ function TasksPage() {
                     {task.maxGrade !== null && task.maxGrade !== undefined ? task.maxGrade : '-'}
                     /
                     {task.minGrade !== null && task.minGrade !== undefined ? task.minGrade : '-'}
+                    <div className="text-xs text-gray-400 mt-1">
+                      Agregace: {AGGREGATION_LABELS[task.aggregation] ?? '-'}
+                    </div>
                   </td>
                 </tr>
               ))}

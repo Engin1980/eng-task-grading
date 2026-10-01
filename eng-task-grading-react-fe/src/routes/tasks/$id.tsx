@@ -52,7 +52,21 @@ function RouteComponent() {
     );
   });
 
-  const setSetFinalValues = (set: NewGradeSetTaskDto, taskReduceType: "min" | "max" | "avg" | "last" | "sum"): void => {
+  const renderStudentCell = ({ student, studyGroup }: NewGradeSetTaskDto['students'][number]) => (
+    <div>
+      <div className="font-semibold">
+        {student.surname || '-'}, {student.name || '-'}
+      </div>
+      <div className="text-xs text-gray-500 mt-1">
+        {student.number}
+        {studyGroup !== '' && (
+          <span className="border rounded border-gray-300 px-1 ml-1">{studyGroup}</span>
+        )}
+      </div>
+    </div>
+  );
+
+  const setSetFinalValues =(set: NewGradeSetTaskDto, taskReduceType: "min" | "max" | "avg" | "last" | "sum"): void => {
     set.students.forEach(studentData => {
       studentData.finalValue = gradeService.evaluateFinalGrade(taskReduceType, studentData.grades)?.value ?? null;
       studentData.finalPercentage = gradeService.calculateFinalGradePercentage(studentData.finalValue, set.task.minGrade, set.task.maxGrade);
@@ -291,13 +305,7 @@ function RouteComponent() {
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Číslo
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Příjmení
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Jméno
+                      Student
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Výsledek
@@ -323,14 +331,8 @@ function RouteComponent() {
                   {(filteredStudentData || []).map((studentData) => (
                     studentData.grades.length === 0 ? (
                       <tr key={`student-${studentData.student.id}`} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {studentData.student.number}
-                        </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                          {studentData.student.surname || '-'}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                          {studentData.student.name || '-'}
+                          {renderStudentCell(studentData)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                           ---
@@ -354,18 +356,8 @@ function RouteComponent() {
                       studentData.grades.map((grade, gradeIndex) => (
                         <tr key={`student-${studentData.student.id}-grade-${grade.id}`} className="hover:bg-gray-50">
                           {gradeIndex === 0 && (
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900" rowSpan={studentData.grades.length}>
-                              {studentData.student.number}
-                            </td>
-                          )}
-                          {gradeIndex === 0 && (
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900" rowSpan={studentData.grades.length}>
-                              {studentData.student.surname || '-'}
-                            </td>
-                          )}
-                          {gradeIndex === 0 && (
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900" rowSpan={studentData.grades.length}>
-                              {studentData.student.name || '-'}
+                              {renderStudentCell(studentData)}
                             </td>
                           )}
                           {gradeIndex === 0 && (

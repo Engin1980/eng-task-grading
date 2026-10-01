@@ -154,7 +154,7 @@ export function AttendanceRecordsTab({ attendanceDayId }: AttendanceRecordsTabPr
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredStudents.map(({ student }) => {
+              {filteredStudents.map(({ student, studyGroup }) => {
                 // Najdi attendance record pro tohoto studenta
                 const studentRecord = records.find(record =>
                   record.studentId === student.id
@@ -168,11 +168,14 @@ export function AttendanceRecordsTab({ attendanceDayId }: AttendanceRecordsTabPr
                 return (
                   <tr key={student.id}>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
-                        {student.name} {student.surname}
+                      <div className="text-sm font-semibold text-gray-900">
+                        {student.surname}, {student.name}
                       </div>
-                      <div className="text-sm text-gray-500">
-                        {student.email}
+                      <div className="text-xs text-gray-500 mt-1">
+                        {student.number}
+                        {studyGroup !== '' && (
+                          <span className="border rounded border-gray-300 px-1 ml-1">{studyGroup}</span>
+                        )}
                       </div>
                     </td>
                     <td className="px-6 py-4">

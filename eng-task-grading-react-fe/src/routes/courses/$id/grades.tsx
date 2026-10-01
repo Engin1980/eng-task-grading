@@ -663,9 +663,11 @@ function GradesPage() {
                       <div className="font-semibold">
                         {student.student.surname}, {student.student.name}
                       </div>
-                      <div className="text-xs text-gray-500">
+                      <div className="text-xs text-gray-500 mt-1">
                         {student.student.number}
-                        {student.studyGroup !== "" && ` - ${student.studyGroup}`}
+                        {student.studyGroup !== "" && (
+                          <span className="border rounded border-gray-300 px-1 ml-1">{student.studyGroup}</span>
+                        )}
                       </div>
                     </div>
                   </td>

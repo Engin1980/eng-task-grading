@@ -17,12 +17,14 @@ import { DeleteIcon } from '../../ui/icons/deleteIcon'
 import { DeleteModal } from '../../components/global/DeleteModal'
 import { EditAttendanceModal } from '../../components/attendances/EditAttendanceModal'
 import { useToast } from '../../hooks/use-toast'
+import { useTranslation } from 'react-i18next';
 
 export const Route = createFileRoute('/attendances/$id')({
   component: AttendanceDetailPageWrapper,
 })
 
 function AttendanceDetailPage() {
+  const { t } = useTranslation('attendances')
   const { id } = Route.useParams() // attendanceId
   const { attendance, setAttendance } = useAttendanceContext();
   const [editModalVisible, setEditModalVisible] = useState(false);
@@ -40,7 +42,7 @@ const tst = useToast();
       navCtx.setAttendance({ id: attendanceData.id, title: attendanceData.title });
       ldgState.setDone();
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Chyba při načítání docházky'
+      const errorMessage = err instanceof Error ? err.message : t('detail.loadError')
       ldgState.setError(errorMessage)
     }
   }
@@ -71,7 +73,7 @@ const tst = useToast();
     loadAttendance()
   }, [id])
 
-  if (ldgState.loading) { return (<Loading message="Načítám docházku..." />) }
+  if (ldgState.loading) { return (<Loading message={t('detail.loading')} />) }
   if (ldgState.error) { return (<LoadingError message={ldgState.error} onRetry={loadAttendance} />) }
 
   return (
@@ -80,7 +82,7 @@ const tst = useToast();
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-4">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            {attendance?.title || `Docházka ${id}`}
+            {attendance?.title || t('detail.fallbackTitle', { id })}
           </h1>
           <button
             className="pl-3"
@@ -102,8 +104,8 @@ const tst = useToast();
             <DeleteIcon />
           </button>
           <DeleteModal
-            title="Opravdu smazat docházku?"
-            question="Bude nevratně smazána docházka i všechna případná související ohodnocení!"
+            title={t('detail.deleteTitle')}
+            question={t('detail.deleteQuestion')}
             verification={attendance?.title ?? "???"}
             onDelete={handleAttendanceDelete}
             isOpen={deleteModalVisible}
@@ -111,12 +113,12 @@ const tst = useToast();
           />
         </div>
 
-        <p className="text-gray-600">ID docházky: {id}</p>
+        <p className="text-gray-600">{t('detail.id', { id })}</p>
         {attendance && (
           <div className="text-sm text-gray-500 mt-2">
-            <span>Zaznamenaných dnů: {attendance.days?.length || 0}</span>
+            <span>{t('detail.daysCount', { n: attendance.days?.length || 0 })}</span>
             <span className="mx-2">•</span>
-            <span>Minimální váha: {attendance.minWeight || "Nezadáno"}</span>
+            <span>{t('detail.minWeight', { value: attendance.minWeight || t('detail.notSet') })}</span>
           </div>
         )}
       </div>
@@ -125,11 +127,11 @@ const tst = useToast();
       <TabLabelBlock selectedTabKey='days'>
         <TabLabelLink to={`/attendances/${id}/days`} tabKey='days'>
           <AttendanceIcon />
-          Zaznamenané dny
+          {t('detail.tabs.days')}
         </TabLabelLink>
         <TabLabelLink to={`/attendances/${id}/overview`} tabKey='overview'>
           <AttendanceOverviewIcon />
-          Celkový přehled
+          {t('detail.tabs.overview')}
         </TabLabelLink>
       </TabLabelBlock>
 

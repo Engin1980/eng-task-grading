@@ -4,6 +4,7 @@ import type { AttendanceDayEditorData } from "../../ui/editors/AttendanceDayEdit
 import { AppDialog } from "../../ui/AppDialog";
 import { EditAttendanceDayEditor } from "./EditAttendanceDayEditor";
 import { useToast } from "../../hooks/use-toast";
+import { useTranslation } from "react-i18next";
 
 interface EditAttendanceDayModalProps {
   isOpen: boolean;
@@ -18,6 +19,7 @@ export function EditAttendanceDayModal(props: EditAttendanceDayModalProps) {
     title: ""
   });
   const tst = useToast();
+  const { t } = useTranslation("attendances");
 
   const handleSubmit = async () => {
 
@@ -48,9 +50,9 @@ export function EditAttendanceDayModal(props: EditAttendanceDayModalProps) {
     <AppDialog
       isOpen={props.isOpen}
       onClose={handleClose}
-      title="Úprava dne docházky"
+      title={t("dayEdit.title")}
       confirmButtonEnabled={() => !!attendanceDayEditorData.title.trim() && !isSubmitting}
-      confirmButtonText='Upravit den docházky'
+      confirmButtonText={t("dayEdit.submit")}
       onSubmit={handleSubmit}
     >
 

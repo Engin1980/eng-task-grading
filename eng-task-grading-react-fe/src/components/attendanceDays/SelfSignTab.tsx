@@ -11,6 +11,8 @@ import { useLoadingState } from '../../types/loadingState';
 import { Loading } from '../../ui/loading';
 import { LoadingError } from '../../ui/loadingError';
 import { useToast } from '../../hooks/use-toast';
+import { useTranslation } from 'react-i18next';
+import { useFormatters } from '../../i18n/format';
 
 interface SelfSignTabProps {
   attendanceDayId: number;
@@ -29,6 +31,8 @@ export function SelfSignTab({ attendanceDayId }: SelfSignTabProps) {
   const [isImportSecondModalOpen, setIsImportSecondModalOpen] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<AttendanceImportAnalysisResultWithAttendanceValueDto>();
   const tst = useToast();
+  const { t } = useTranslation('attendances');
+  const { formatDateTime } = useFormatters();
 
   const loadDataAsync = async () => {
     try {
@@ -146,7 +150,7 @@ export function SelfSignTab({ attendanceDayId }: SelfSignTabProps) {
     await loadDataAsync();
   }
 
-  if (ldgState.loading) { return (<Loading message="Načítám data..." />); }
+  if (ldgState.loading) { return (<Loading message={t('selfSign.loading')} />); }
   if (ldgState.error) { return (<LoadingError message={ldgState.error} onRetry={loadDataAsync} />); }
 
   return (
@@ -169,13 +173,13 @@ export function SelfSignTab({ attendanceDayId }: SelfSignTabProps) {
       <div className="bg-white shadow overflow-hidden sm:rounded-lg">
         <div className="px-4 py-5 sm:px-6">
           <h3 className="text-lg leading-6 font-medium text-gray-900">
-            Hromadný zápis podle osobních čísel
+            {t('selfSign.bulkTitle')}
           </h3>
           <p className="mt-1 max-w-2xl text-sm text-gray-500">
             <button
               onClick={handleBulkSign}
               className="mt-4 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50">
-              Hromadně zapsat
+              {t('selfSign.bulkButton')}
             </button>
           </p>
         </div>
@@ -184,23 +188,23 @@ export function SelfSignTab({ attendanceDayId }: SelfSignTabProps) {
       <div className="bg-white shadow overflow-hidden sm:rounded-lg">
         <div className="px-4 py-5 sm:px-6">
           <h3 className="text-lg leading-6 font-medium text-gray-900">
-            Samo-zápis studentů
+            {t('selfSign.title')}
           </h3>
           <p className="mt-1 max-w-2xl text-sm text-gray-500">
-            Správa samo-zápisu pro tento den docházky
+            {t('selfSign.subtitle')}
           </p>
         </div>
 
         <div className="border-t border-gray-200 px-4 py-5 sm:px-6">
           {/* Správa klíče samo-zápisu */}
           <div className="mb-8">
-            <h4 className="text-md font-medium text-gray-900 mb-4">Klíč pro samo-zápis</h4>
+            <h4 className="text-md font-medium text-gray-900 mb-4">{t('selfSign.keyTitle')}</h4>
 
             {currentKey ? (
               <div className="bg-green-50 border border-green-200 rounded-md p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-green-800">Aktuální klíč:</p>
+                    <p className="text-sm font-medium text-green-800">{t('selfSign.currentKey')}</p>
                     <p className="text-lg font-mono text-green-900 mt-1">{currentKey}</p>
                   </div>
                   <div className="flex gap-2">
@@ -209,28 +213,28 @@ export function SelfSignTab({ attendanceDayId }: SelfSignTabProps) {
                       disabled={loadingKey}
                       className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
                     >
-                      Ukaž QR
+                      {t('selfSign.showQr')}
                     </button>
                     <button
                       onClick={handleDeleteKey}
                       disabled={loadingKey}
                       className="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-50"
                     >
-                      {loadingKey ? 'Maže se...' : 'Smazat klíč'}
+                      {loadingKey ? t('selfSign.deleting') : t('selfSign.deleteKey')}
                     </button>
                   </div>
                 </div>
               </div>
             ) : (
               <div className="bg-gray-50 border border-gray-200 rounded-md p-4">
-                <p className="text-sm text-gray-600 mb-4">Žádný klíč není nastaven. Studenti se nemohou sami zapisovat.</p>
+                <p className="text-sm text-gray-600 mb-4">{t('selfSign.noKey')}</p>
 
                 <div className="flex gap-2">
                   <input
                     type="text"
                     value={key}
                     onChange={(e) => setKey(e.target.value)}
-                    placeholder="Zadejte klíč pro samo-zápis"
+                    placeholder={t('selfSign.keyPlaceholder')}
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     disabled={loadingKey}
                   />
@@ -239,7 +243,7 @@ export function SelfSignTab({ attendanceDayId }: SelfSignTabProps) {
                     disabled={loadingKey || !key.trim()}
                     className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
                   >
-                    {loadingKey ? 'Nastavuje se...' : 'Nastavit klíč'}
+                    {loadingKey ? t('selfSign.setting') : t('selfSign.setKey')}
                   </button>
                 </div>
               </div>
@@ -248,29 +252,29 @@ export function SelfSignTab({ attendanceDayId }: SelfSignTabProps) {
 
           {/* Seznam studentů a jejich samo-zápisů */}
           <div className="border-t border-gray-200 pt-8">
-            <h4 className="text-md font-medium text-gray-900 mb-4">Seznam samo-zápisů</h4>
+            <h4 className="text-md font-medium text-gray-900 mb-4">{t('selfSign.listTitle')}</h4>
 
             {set && set.selfSigns && set.selfSigns.length > 0 ? (
               <div className="overflow-x-auto">
                 <div className="mb-3 text-sm text-gray-600">
-                  Počet studentů zapsaných/verifikovaných: {set.selfSigns.length}/{set.selfSigns.filter(s => s.verificationDateTime).length}
+                  {t('selfSign.count', { signed: set.selfSigns.length, verified: set.selfSigns.filter(s => s.verificationDateTime).length })}
                 </div>
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Studijní číslo
+                        {t('selfSign.columns.studyNumber')}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Čas zápisu<br />
-                        IP adresa
+                        {t('selfSign.columns.signTime')}<br />
+                        {t('selfSign.columns.ip')}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Čas potvrzení<br />
-                        IP adresa
+                        {t('selfSign.columns.verifyTime')}<br />
+                        {t('selfSign.columns.ip')}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Attendance Record
+                        {t('selfSign.columns.record')}
                       </th>
                     </tr>
                   </thead>
@@ -292,7 +296,7 @@ export function SelfSignTab({ attendanceDayId }: SelfSignTabProps) {
                             )}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {new Date(selfSign.creationDateTime).toLocaleString('cs-CZ')}
+                            {formatDateTime(selfSign.creationDateTime)}
                             <br />
                             {selfSign.ip}
                           </td>
@@ -300,7 +304,7 @@ export function SelfSignTab({ attendanceDayId }: SelfSignTabProps) {
                             {
                               selfSign.verificationDateTime && (
                                 <>
-                                  {new Date(selfSign.creationDateTime).toLocaleString('cs-CZ')}
+                                  {formatDateTime(selfSign.creationDateTime)}
                                   < br />
                                   {selfSign.ip})
                                 </>)
@@ -330,8 +334,8 @@ export function SelfSignTab({ attendanceDayId }: SelfSignTabProps) {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                   </svg>
                 </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-1">Žádné samo-zápisy</h3>
-                <p className="text-gray-500">Zatím se nezapisoval žádný student pomocí klíče.</p>
+                <h3 className="text-lg font-medium text-gray-900 mb-1">{t('selfSign.emptyTitle')}</h3>
+                <p className="text-gray-500">{t('selfSign.emptyText')}</p>
               </div>
             )}
           </div>

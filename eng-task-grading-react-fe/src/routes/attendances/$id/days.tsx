@@ -7,12 +7,14 @@ import { useLoadingState } from '../../../types/loadingState';
 import { Loading } from '../../../ui/loading';
 import { LoadingError } from '../../../ui/loadingError';
 import { useLogger } from '../../../hooks/use-logger';
+import { useTranslation } from 'react-i18next';
 
 export const Route = createFileRoute('/attendances/$id/days')({
   component: RouteComponent,
 })
 
 function RouteComponent() {
+  const { t } = useTranslation('attendances');
   const { id } = Route.useParams(); // attendanceId
   const attendanceId = +id;
   const [attendance, setAttendance] = useState<AttendanceDto | null>(null);
@@ -28,7 +30,7 @@ function RouteComponent() {
       ldgState.setDone();
     } catch (err) {
       logger.error('Error loading attendance:', err);
-      ldgState.setError('Chyba při načítání docházky');
+      ldgState.setError(t('days.loadError'));
     }
   };
 
@@ -50,29 +52,29 @@ function RouteComponent() {
     }
   };
 
-  if (ldgState.loading) { return (<Loading message="Načítám zaznamenané dny..." />); }
+  if (ldgState.loading) { return (<Loading message={t('days.loading')} />); }
   if (ldgState.error) { return (<LoadingError message={ldgState.error} onRetry={loadAttendance} />); }
 
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold text-gray-900">Zaznamenané dny</h2>
+        <h2 className="text-2xl font-bold text-gray-900">{t('days.title')}</h2>
         <button
           onClick={() => setIsCreateModalOpen(true)}
           className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
         >
-          Přidat den
+          {t('days.add')}
         </button>
       </div>
 
       {!attendance?.days || attendance.days.length === 0 ? (
         <div className="text-center py-8">
-          <p className="text-gray-500">Nejsou k dispozici žádné zaznamenané dny.</p>
+          <p className="text-gray-500">{t('days.empty')}</p>
           <button
             onClick={() => setIsCreateModalOpen(true)}
             className="mt-4 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
           >
-            Vytvořit první den
+            {t('days.createFirst')}
           </button>
         </div>
       ) : (
@@ -81,10 +83,10 @@ function RouteComponent() {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Název dne
+                  {t('days.columns.name')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Akce
+                  {t('days.columns.actions')}
                 </th>
               </tr>
             </thead>

@@ -7,12 +7,14 @@ import { useLoadingState } from '../../../types/loadingState';
 import { Loading } from '../../../ui/loading';
 import { LoadingError } from '../../../ui/loadingError';
 import { useLogger } from '../../../hooks/use-logger';
+import { useTranslation } from 'react-i18next';
 
 export const Route = createFileRoute('/attendances/$id/overview')({
   component: RouteComponent,
 })
 
 function RouteComponent() {
+  const { t } = useTranslation('attendances');
   const { id: attendanceId } = Route.useParams(); // attendanceId
   const { attendance } = useAttendanceContext();
   const [data, setData] = useState<AttendanceDaySetDto | null>(null);
@@ -86,7 +88,7 @@ function RouteComponent() {
   };
 
   if (ldgState.loading) {
-    return <Loading message="Načítám data o docházce..." />;
+    return <Loading message={t('overview.loading')} />;
   }
 
   if (ldgState.error) {
@@ -96,7 +98,7 @@ function RouteComponent() {
   if (!data || data.students.length === 0) {
     return (
       <div className="text-center py-8">
-        <p className="text-gray-500">Nejsou k dispozici žádná data pro zobrazení přehledu.</p>
+        <p className="text-gray-500">{t('overview.empty')}</p>
       </div>
     );
   }
@@ -104,12 +106,12 @@ function RouteComponent() {
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold text-gray-900">Celkový přehled</h2>
+        <h2 className="text-2xl font-bold text-gray-900">{t('overview.title')}</h2>
         <input
           type="text"
           value={studentFilter}
           onChange={(e) => setStudentFilter(e.target.value)}
-          placeholder="Vyhledat studenta ..."
+          placeholder={t('overview.searchPlaceholder')}
           className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-80"
         />
       </div>
@@ -119,16 +121,16 @@ function RouteComponent() {
           <thead className="bg-gray-50">
             <tr>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200 sticky left-0 bg-gray-50 z-10">
-                Student
+                {t('student')}
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200 sticky left-0 bg-gray-50 z-10">
-                Total
+                {t('overview.total')}
               </th>
               {data.attendanceDays.map((day) => (
                 <th
                   key={day.id}
                   className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200 min-w-32"
-                  title={`Attendance Day: ${day.title}`}
+                  title={t('overview.dayTooltip', { title: day.title })}
                 >
                   <button
                     onClick={() => navigate({ to: `/attendanceDays/${day.id}` })}
@@ -212,8 +214,8 @@ function RouteComponent() {
         <div className="text-center py-8">
           <p className="text-gray-500">
             {studentFilter.trim()
-              ? "Žádní studenti nevyhovují zadaným kritériím vyhledávání."
-              : "Žádní studenti nejsou zaregistrováni."
+              ? t('overview.noMatch')
+              : t('overview.noStudents')
             }
           </p>
         </div>

@@ -6,6 +6,7 @@ import type { AttendanceImportAnalysisResultDto, AttendanceImportAnalysisResultW
 import { AttendanceValueLabelBlock } from '../../ui/attendanceValueLabelBlock';
 import { AttendanceValueLabel } from '../../ui/attendanceValueLabel';
 import { useToast } from '../../hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 
 interface ImportAttendanceWizardFirstModalProps {
   isOpen: boolean;
@@ -21,6 +22,7 @@ export function ImportAttendanceWizardFirstModal({ isOpen, onClose, onAnalyzed, 
   const [selectedAttendanceValueId, setSelectedAttendanceValueId] = useState<number | null>(null);
   const logger = useLogger("ImportAttendanceWizardFirstModal");
   const tst = useToast();
+  const { t } = useTranslation(['attendances', 'common']);
 
   const loadData = async () => {
     const vals = await attendanceService.getAttendanceValues();
@@ -70,23 +72,23 @@ export function ImportAttendanceWizardFirstModal({ isOpen, onClose, onAnalyzed, 
         <Dialog.Overlay className="fixed inset-0 bg-white/20 backdrop-blur-sm" />
         <Dialog.Content className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-lg p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto">
           <Dialog.Title className="text-lg font-semibold text-gray-900 mb-4">
-            Import docházky podle osobních studentských čísel
+            {t('import.title')}
           </Dialog.Title>
 
           <Dialog.Description className="text-sm text-gray-600 mb-6">
-            Vložte text seznamem osobních studentských čísel. Mohou a nemusí mít znakový prefix. Odděljte mezerou, čárkou, středníkem.
+            {t('import.description')}
           </Dialog.Description>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label htmlFor="importText" className="block text-sm font-medium text-gray-700 mb-2">
-                Text pro import
+                {t('import.textLabel')}
               </label>
               <textarea
                 id="importText"
                 value={importText}
                 onChange={(e) => setImportText(e.target.value)}
-                placeholder="Zde vložte osobní čísla oddělená mezerou, čárkou nebo středníkem..."
+                placeholder={t('import.textPlaceholder')}
                 className="w-full h-32 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 resize-vertical whitespace-nowrap overflow-x-auto"
                 disabled={isLoading}
               />
@@ -108,7 +110,7 @@ export function ImportAttendanceWizardFirstModal({ isOpen, onClose, onAnalyzed, 
                   })}
                 </AttendanceValueLabelBlock>
               ) : (
-                <p className="mt-2 text-sm text-gray-500">Žádné hodnoty pro docházku nebyly nalezeny.</p>
+                <p className="mt-2 text-sm text-gray-500">{t('import.noValues')}</p>
               )}
             </div>
 
@@ -119,14 +121,14 @@ export function ImportAttendanceWizardFirstModal({ isOpen, onClose, onAnalyzed, 
                 disabled={isLoading}
                 className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 border border-gray-300 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Zrušit
+                {t('common:cancel')}
               </button>
               <button
                 type="submit"
                 disabled={isLoading || !importText.trim()}
                 className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isLoading ? 'Importuji...' : 'Importovat'}
+                {isLoading ? t('import.importing') : t('import.submit')}
               </button>
             </div>
           </form>
@@ -134,7 +136,7 @@ export function ImportAttendanceWizardFirstModal({ isOpen, onClose, onAnalyzed, 
           <Dialog.Close asChild>
             <button
               className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
-              aria-label="Zavřít"
+              aria-label={t('common:close')}
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

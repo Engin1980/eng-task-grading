@@ -7,12 +7,14 @@ import { CreateAttendanceModal } from '../../../components/attendances';
 import { Loading } from '../../../ui/loading';
 import { LoadingError } from '../../../ui/loadingError';
 import { useLoadingState } from '../../../types/loadingState';
+import { useTranslation } from 'react-i18next';
 
 export const Route = createFileRoute('/courses/$id/attendances')({
   component: AttendancesPage,
 })
 
 function AttendancesPage() {
+  const { t } = useTranslation('attendances');
   const { id } = Route.useParams()
   const courseId:number = +id;
   const logger = useLogger("AttendancesPage");
@@ -44,7 +46,7 @@ function AttendancesPage() {
 
   if (ldgState.loading) {
     return (
-      <Loading message="Načítám docházky..." />
+      <Loading message={t('list.loading')} />
     );
   }
 
@@ -57,12 +59,12 @@ function AttendancesPage() {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">Docházky</h2>
+        <h2 className="text-2xl font-bold text-gray-900">{t('list.title')}</h2>
         <button
           onClick={() => setIsCreateModalOpen(true)}
           className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
         >
-          Přidat docházku
+          {t('list.add')}
         </button>
         <CreateAttendanceModal
           isOpen={isCreateModalOpen}
@@ -74,7 +76,7 @@ function AttendancesPage() {
 
       {attendances.length === 0 ? (
         <div className="text-center py-8">
-          <p className="text-gray-500">Nejsou k dispozici žádné docházky.</p>
+          <p className="text-gray-500">{t('list.empty')}</p>
         </div>
       ) : (
         <div className="bg-white shadow overflow-hidden sm:rounded-md">
@@ -82,13 +84,13 @@ function AttendancesPage() {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Název
+                  {t('list.columns.title')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Minimální váha
+                  {t('list.columns.minWeight')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Počet zaznamenaných dnů
+                  {t('list.columns.daysCount')}
                 </th>
               </tr>
             </thead>

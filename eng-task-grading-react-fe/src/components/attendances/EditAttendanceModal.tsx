@@ -4,6 +4,7 @@ import { AppDialog } from '../../ui/AppDialog';
 import { AttendanceEditor, type AttendanceEditorData } from '../../ui/editors/AttendanceEditor';
 import { useToast } from '../../hooks/use-toast';
 import { useLogger } from '../../hooks/use-logger';
+import { useTranslation } from 'react-i18next';
 
 interface EditAttendanceModalProps {
   isOpen: boolean;
@@ -17,6 +18,7 @@ export function EditAttendanceModal(props: EditAttendanceModalProps) {
   const [attendanceEditorData, setAttendanceEditorData] = useState<AttendanceEditorData>(cleanData);
   const [submitting, setSubmitting] = useState(false);
   const tst = useToast();
+  const { t } = useTranslation('attendances');
   const logger = useLogger("EditAttendanceModal");
 
   const handleSubmit = async () => {
@@ -53,8 +55,8 @@ export function EditAttendanceModal(props: EditAttendanceModalProps) {
     <AppDialog
       isOpen={props.isOpen}
       confirmButtonEnabled={() => !submitting && !!attendanceEditorData.title.trim()}
-      confirmButtonText='Upravit'
-      title='Úprava docházky'
+      confirmButtonText={t('edit.submit')}
+      title={t('edit.title')}
       onClose={handleClose}
       onSubmit={handleSubmit}
     >

@@ -12,12 +12,14 @@ import { Loading } from '../../ui/loading';
 import { LoadingError } from '../../ui/loadingError';
 import { EditAttendanceDayModal } from '../../components/attendanceDays/EditAttendanceDayModal';
 import { useToast } from '../../hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 
 export const Route = createFileRoute('/attendanceDays/$id')({
   component: AttendanceDayDetailPage,
 })
 
 function AttendanceDayDetailPage() {
+  const { t } = useTranslation('attendances');
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const { id: ids } = Route.useParams()
@@ -39,8 +41,8 @@ function AttendanceDayDetailPage() {
   }
 
   const tabs = [
-    { key: 'records', label: 'Záznamy docházky' },
-    { key: 'self-sign', label: 'Pokročilé možnosti' }
+    { key: 'records', label: t('dayDetail.tabs.records') },
+    { key: 'self-sign', label: t('dayDetail.tabs.selfSign') }
   ];
 
   const handleAttendanceDelete = () => {
@@ -61,8 +63,8 @@ function AttendanceDayDetailPage() {
 
   useEffect(() => { loadData(); }, [id]);
 
-  if (ldgState.loading) { return (<Loading message='Načítám den docházky...' />) }
-  if (ldgState.error) { return (<LoadingError message={`Chyba při načítání dne docházky: ${ldgState.error}`} />) }
+  if (ldgState.loading) { return (<Loading message={t('dayDetail.loading')} />) }
+  if (ldgState.error) { return (<LoadingError message={t('dayDetail.loadError', { error: ldgState.error })} />) }
 
   return (
     <div className="container mx-auto p-4">
@@ -89,16 +91,16 @@ function AttendanceDayDetailPage() {
             <DeleteIcon />
           </button>
           <DeleteModal
-            title="Opravdu smazat docházku?"
-            question="Bude nevratně smazána docházka i všechna případná související ohodnocení!"
+            title={t('dayDetail.deleteTitle')}
+            question={t('dayDetail.deleteQuestion')}
             verification={attendanceDay?.title}
             onDelete={handleAttendanceDelete}
             isOpen={deleteModalVisible}
             onClose={() => setDeleteModalVisible(false)}
           />
         </div>
-        <p className="text-gray-600">Detail dne docházky</p>
-        <p className="text-gray-600">ID dne: {id}</p>
+        <p className="text-gray-600">{t('dayDetail.subtitle')}</p>
+        <p className="text-gray-600">{t('dayDetail.id', { id })}</p>
       </div>
 
       {/* Tab Navigation */}

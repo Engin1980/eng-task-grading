@@ -1,9 +1,12 @@
+import { useTranslation } from "react-i18next";
+
 interface AttendanceValueUnsetLabelProps {
   isSelected: boolean;
   onClick?: () => void;
 }
 
 export const AttendanceValueUnsetLabel: React.FC<AttendanceValueUnsetLabelProps> = ({ isSelected, onClick }) => {
+  const { t } = useTranslation("attendances");
   return (
     <button
       onClick={onClick}
@@ -14,7 +17,7 @@ export const AttendanceValueUnsetLabel: React.FC<AttendanceValueUnsetLabelProps>
         border: isSelected ? `3px solid gray` : `none`
       }}
     >
-      Neuvedeno
+      {t("records.unset")}
     </button>
   );
 };

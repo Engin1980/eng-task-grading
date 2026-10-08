@@ -1,3 +1,4 @@
+import { attendances } from "./attendances";
 import { auth } from "./auth";
 import { common } from "./common";
 import { courses } from "./courses";
@@ -7,4 +8,4 @@ import { home } from "./home";
 import { tasks } from "./tasks";
 import { toast } from "./toast";
 
-export const cs = { auth, common, courses, errors, grades, home, tasks, toast };
+export const cs = { attendances, auth, common, courses, errors, grades, home, tasks, toast };

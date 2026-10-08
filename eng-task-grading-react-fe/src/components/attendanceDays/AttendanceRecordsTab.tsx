@@ -7,6 +7,7 @@ import { AttendanceValueLabel } from '../../ui/attendanceValueLabel';
 import { AttendanceValueUnsetLabel } from '../../ui/attendanceValueUnsetLabel';
 import { useToast } from '../../hooks/use-toast';
 import { useLogger } from '../../hooks/use-logger';
+import { useTranslation } from 'react-i18next';
 
 interface AttendanceRecordsTabProps {
   attendanceDayId: number;
@@ -19,6 +20,7 @@ export function AttendanceRecordsTab({ attendanceDayId }: AttendanceRecordsTabPr
   const [records, setRecords] = useState<AttendanceRecordDto[]>([]);
   const [loading, setLoading] = useState(true);
   const tst = useToast();
+  const { t } = useTranslation('attendances');
   const logger = useLogger("AttendanceRecordsTab");
 
   const loadDataAsync = async () => {
@@ -118,16 +120,16 @@ export function AttendanceRecordsTab({ attendanceDayId }: AttendanceRecordsTabPr
       <div className="px-4 py-5 sm:px-6 flex justify-between items-center gap-4">
         <div>
           <h3 className="text-lg leading-6 font-medium text-gray-900">
-            Záznamy docházky studentů
+            {t('records.title')}
           </h3>
           <p className="mt-1 max-w-2xl text-sm text-gray-500">
-            Přehled docházky všech studentů pro tento den
+            {t('records.subtitle')}
           </p>
         </div>
         <div className="max-w-sm">
           <input
             type="text"
-            placeholder="Hledat podle skupiny..."
+            placeholder={t('records.groupPlaceholder')}
             value={groupFilter}
             onChange={(e) => setGroupFilter(e.target.value)}
             onKeyDown={(e) => {
@@ -146,10 +148,10 @@ export function AttendanceRecordsTab({ attendanceDayId }: AttendanceRecordsTabPr
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Student
+                  {t('student')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Attendance Record
+                  {t('records.record')}
                 </th>
               </tr>
             </thead>
@@ -199,13 +201,13 @@ export function AttendanceRecordsTab({ attendanceDayId }: AttendanceRecordsTabPr
 
         {students.length > 0 && filteredStudents.length === 0 && (
           <div className="px-6 py-4 text-center text-gray-500">
-            Žádní studenti neodpovídají zadaným kritériím.
+            {t('records.noMatch')}
           </div>
         )}
 
         {students.length === 0 && (
           <div className="px-6 py-4 text-center text-gray-500">
-            No students found for this attendance day.
+            {t('records.noStudents')}
           </div>
         )}
       </div>

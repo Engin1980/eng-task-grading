@@ -2,12 +2,14 @@ import { createFileRoute } from '@tanstack/react-router'
 import { senderRulesHandler, LogLevels } from '../../services/log-service';
 import type { LogLevel } from '../../services/log-service';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export const Route = createFileRoute('/admin/client-logs')({
   component: RouteComponent,
 })
 
 function RouteComponent() {
+  const { t } = useTranslation('admin');
   const [rules, setRules] = useState(senderRulesHandler.getRules());
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editPattern, setEditPattern] = useState('');
@@ -27,7 +29,7 @@ function RouteComponent() {
 
   const handleSave = () => {
     senderRulesHandler.saveToStorage();
-    alert('Uloženo');
+    alert(t('clientLogs.saved'));
   };
 
   const handleDelete = () => {

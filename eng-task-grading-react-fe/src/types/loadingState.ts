@@ -1,3 +1,4 @@
+import i18n from '../i18n';
 import { useState } from "react";
 
 export function useLoadingState() {
@@ -26,7 +27,7 @@ export function useLoadingState() {
         messageText = message;
     }
     else
-      messageText = 'Neznámá chyba';
+      messageText = i18n.t('common:unknownError');
 
     setLoadingInternal(false);
     setErrorInternal(messageText);

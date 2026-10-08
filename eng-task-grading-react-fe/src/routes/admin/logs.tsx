@@ -8,12 +8,16 @@ import { useLoadingState } from '../../types/loadingState'
 import { AppLogDetailModal } from '../../components/appLog/AppLogDetailModal'
 import { useLogger } from '../../hooks/use-logger'
 import { useToast } from '../../hooks/use-toast'
+import { useTranslation } from 'react-i18next'
+import { useFormatters } from '../../i18n/format'
 
 export const Route = createFileRoute('/admin/logs')({
   component: RouteComponent,
 })
 
 function RouteComponent() {
+  const { t } = useTranslation('admin')
+  const { formatDateTime } = useFormatters()
   const [logs, setLogs] = useState<AppLogDto[]>([])
   const ldgState = useLoadingState();
   const [filter, setFilter] = useState('')
@@ -29,7 +33,7 @@ function RouteComponent() {
       setLogs(data)
       ldgState.setDone();
     } catch (err) {
-      ldgState.setError('Chyba při načítání logů')
+      ldgState.setError(t('logs.loadError'))
       logger.error('Error loading logs:', err)
     }
   }
@@ -79,7 +83,7 @@ function RouteComponent() {
   }
 
   const handleDeleteAll = async () => {
-    if (!window.confirm('Opravdu chcete smazat všechny logy? Tuto akci nelze vrátit.')) return;
+    if (!window.confirm(t('logs.confirmDeleteAll'))) return;
 
     try {
       await appLogService.deleteAll();
@@ -93,7 +97,7 @@ function RouteComponent() {
   };
 
   const handleDeleteOld = async () => {
-    if (!window.confirm('Opravdu chcete smazat staré logy? Tuto akci nelze vrátit.')) return;
+    if (!window.confirm(t('logs.confirmDeleteOld'))) return;
 
     try {
       await appLogService.deleteOld();
@@ -115,26 +119,26 @@ function RouteComponent() {
     }
   };
 
-  if (ldgState.loading) return (<Loading message="Načítám logy, to může chvilku trvat..." />)
+  if (ldgState.loading) return (<Loading message={t('logs.loading')} />)
   if (ldgState.error) { return (<LoadingError message={ldgState.error} onRetry={loadLogs} />) }
 
   return (
     <div className="container mx-auto p-4">
       {/* ...existing code... */}
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">Aplikační logy</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-4">{t('logs.title')}</h1>
 
         {/* Filtry */}
         <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm mb-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
             <div>
               <label htmlFor="text-filter" className="block text-sm font-medium text-gray-700 mb-2">
-                Vyhledat v logu
+                {t('logs.search')}
               </label>
               <input
                 id="text-filter"
                 type="text"
-                placeholder="Hledat ve zprávě, šabloně, vlastnostech..."
+                placeholder={t('logs.searchPlaceholder')}
                 value={filter}
                 onChange={(e) => setFilter(e.target.value)}
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -143,7 +147,7 @@ function RouteComponent() {
 
             <div>
               <label htmlFor="level-filter" className="block text-sm font-medium text-gray-700 mb-2">
-                Úroveň logu
+                {t('logs.level')}
               </label>
               <select
                 id="level-filter"
@@ -151,7 +155,7 @@ function RouteComponent() {
                 onChange={(e) => setLevelFilter(e.target.value)}
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
-                <option value="">Všechny úrovně</option>
+                <option value="">{t('logs.allLevels')}</option>
                 {uniqueLevels.map(level => (
                   <option key={level} value={level}>{level}</option>
                 ))}
@@ -162,15 +166,15 @@ function RouteComponent() {
               <button
                 className="inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                 onClick={handleReloadLogs}
-              >Obnovit</button>
+              >{t('logs.reload')}</button>
               <button
                 className="inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-red-700 hover:bg-red-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                 onClick={handleDeleteOld}
-              >Vymazat staré</button>
+              >{t('logs.deleteOld')}</button>
               <button
                 className="inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-red-100 text-base font-medium text-red-700 hover:bg-red-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                 onClick={handleDeleteAll}
-              >Vymazat vše</button>
+              >{t('logs.deleteAll')}</button>
             </div>
           </div>
 
@@ -181,7 +185,7 @@ function RouteComponent() {
                   onClick={() => setFilter('')}
                   className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full hover:bg-blue-200"
                 >
-                  Text: "{filter}"
+                  {t('logs.textChip', { filter })}
                   <span className="ml-1 cursor-pointer">×</span>
                 </button>
               )}
@@ -190,7 +194,7 @@ function RouteComponent() {
                   onClick={() => setLevelFilter('')}
                   className="inline-flex items-center px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full hover:bg-green-200"
                 >
-                  Úroveň: {levelFilter}
+                  {t('logs.levelChip', { level: levelFilter })}
                   <span className="ml-1 cursor-pointer">×</span>
                 </button>
               )}
@@ -203,23 +207,23 @@ function RouteComponent() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
             <div>
               <div className="text-2xl font-bold text-gray-900">{filteredLogs.length}</div>
-              <div className="text-sm text-gray-500">Zobrazených záznamů</div>
+              <div className="text-sm text-gray-500">{t('logs.shown')}</div>
             </div>
             <div>
               <div className="text-2xl font-bold text-gray-900">{logs.length}</div>
-              <div className="text-sm text-gray-500">Celkem záznamů</div>
+              <div className="text-sm text-gray-500">{t('logs.total')}</div>
             </div>
             <div>
               <div className="text-2xl font-bold text-red-600">
                 {logs.filter(log => log.level?.toLowerCase() === 'error').length}
               </div>
-              <div className="text-sm text-gray-500">Chyby</div>
+              <div className="text-sm text-gray-500">{t('logs.errors')}</div>
             </div>
             <div>
               <div className="text-2xl font-bold text-yellow-600">
                 {logs.filter(log => log.level?.toLowerCase() === 'warning').length}
               </div>
-              <div className="text-sm text-gray-500">Varování</div>
+              <div className="text-sm text-gray-500">{t('logs.warnings')}</div>
             </div>
           </div>
         </div>
@@ -230,7 +234,7 @@ function RouteComponent() {
         filteredLogs.length === 0 ? (
           <div className="text-center py-8">
             <p className="text-gray-500">
-              {filter || levelFilter ? 'Žádné logy neodpovídají filtru.' : 'Nejsou k dispozici žádné logy.'}
+              {filter || levelFilter ? t('logs.noMatch') : t('logs.empty')}
             </p>
           </div>
         ) : (
@@ -241,20 +245,20 @@ function RouteComponent() {
                   <tr>
                     {/* První sloupec: stáhneme na minimum, zakážeme zalomení */}
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-px whitespace-nowrap">
-                      Čas
+                      {t('logs.columns.time')}
                     </th>
                     {/* Druhý sloupec: stejně jako první */}
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-px whitespace-nowrap">
-                      Úroveň
+                      {t('logs.columns.level')}
                     </th>
                     {/* Třetí sloupec: Source/Context */}
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-px whitespace-nowrap">
-                      Zdroj
+                      {t('logs.columns.source')}
                     </th>
 
                     {/* Čtvrtý sloupec: sebere zbytek místa */}
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Zpráva
+                      {t('logs.columns.message')}
                     </th>
                   </tr>
                 </thead>
@@ -266,7 +270,7 @@ function RouteComponent() {
                       className="hover:bg-gray-50 cursor-pointer"
                     >
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {log.timeStamp ? new Date(log.timeStamp).toLocaleString('cs-CZ') : '-'}
+                        {log.timeStamp ? formatDateTime(log.timeStamp) : '-'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full border ${getLogLevelColor(log.level || '')}`}>

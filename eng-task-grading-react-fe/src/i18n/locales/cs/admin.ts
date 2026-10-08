@@ -1,0 +1,33 @@
+export const admin = {
+  logs: {
+    loadError: "Chyba při načítání logů",
+    loading: "Načítám logy, to může chvilku trvat...",
+    title: "Aplikační logy",
+    confirmDeleteAll: "Opravdu chcete smazat všechny logy? Tuto akci nelze vrátit.",
+    confirmDeleteOld: "Opravdu chcete smazat staré logy? Tuto akci nelze vrátit.",
+    search: "Vyhledat v logu",
+    searchPlaceholder: "Hledat ve zprávě, šabloně, vlastnostech...",
+    level: "Úroveň logu",
+    allLevels: "Všechny úrovně",
+    reload: "Obnovit",
+    deleteOld: "Vymazat staré",
+    deleteAll: "Vymazat vše",
+    textChip: "Text: \"{{filter}}\"",
+    levelChip: "Úroveň: {{level}}",
+    shown: "Zobrazených záznamů",
+    total: "Celkem záznamů",
+    errors: "Chyby",
+    warnings: "Varování",
+    noMatch: "Žádné logy neodpovídají filtru.",
+    empty: "Nejsou k dispozici žádné logy.",
+    columns: { time: "Čas", level: "Úroveň", source: "Zdroj", message: "Zpráva" },
+  },
+  logDetail: {
+    first: "Na začátek",
+    back: "Zpět",
+    next: "Vpřed",
+  },
+  clientLogs: {
+    saved: "Uloženo",
+  },
+};

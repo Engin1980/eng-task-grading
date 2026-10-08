@@ -1,3 +1,4 @@
+import i18n from '../i18n';
 import { useState } from "react";
 
 export function useRequestState() {
@@ -36,7 +37,7 @@ export function useRequestState() {
         messageText = message;
     }
     else
-      messageText = 'Neznámá chyba';
+      messageText = i18n.t('common:unknownError');
 
     setReadyInternal(false);
     setBusyInternal(false);

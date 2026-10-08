@@ -2,6 +2,8 @@ import { useState } from "react";
 import type { AppLogDto } from "../../model/applog-dto";
 import * as Dialog from '@radix-ui/react-dialog';
 import { LogPropertiesViewer } from "../../ui/logPropertiesViewer";
+import { useTranslation } from "react-i18next";
+import { useFormatters } from "../../i18n/format";
 
 interface AppLogDetailModalProps {
   isOpen: boolean;
@@ -11,6 +13,8 @@ interface AppLogDetailModalProps {
 }
 
 export function AppLogDetailModal(props: AppLogDetailModalProps) {
+  const { t } = useTranslation(['admin', 'common']);
+  const { formatDateTime } = useFormatters();
   const [currentIndex, setCurrentIndex] = useState(props.index);
 
   const currentLog = props.logs[currentIndex];
@@ -69,7 +73,7 @@ export function AppLogDetailModal(props: AppLogDetailModalProps) {
               <div>
                 <strong className="block text-sm font-semibold mb-1">Timestamp:</strong>
                 <div className="text-sm">
-                  {currentLog.timeStamp ? new Date(currentLog.timeStamp).toLocaleString() : "N/A"}
+                  {currentLog.timeStamp ? formatDateTime(currentLog.timeStamp) : "N/A"}
                 </div>
               </div>
 
@@ -109,30 +113,30 @@ export function AppLogDetailModal(props: AppLogDetailModalProps) {
               disabled={isFirst}
               className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
             >
-              Na začátek
+              {t('logDetail.first')}
             </button>
             <button
               onClick={handlePrevious}
               disabled={isFirst}
               className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
             >
-              Zpět
+              {t('logDetail.back')}
             </button>
             <button
               onClick={handleNext}
               disabled={isLast}
               className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
             >
-              Vpřed
+              {t('logDetail.next')}
             </button>
           </div>
 
           <Dialog.Close asChild>
             <button
               className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-              aria-label="Zavřít"
+              aria-label={t('common:close')}
             >
-              <span className="sr-only">Zavřít</span>
+              <span className="sr-only">{t('common:close')}</span>
               ✕
             </button>
           </Dialog.Close>

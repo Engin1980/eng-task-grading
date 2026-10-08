@@ -7,6 +7,8 @@ export const common = {
   loading: "Načítání...",
   loadingError: "Chyba při načítání dat",
   retry: "Zkusit znovu",
+  unknownError: "Neznámá chyba",
+  parseError: "Chyba při parsování dat.",
   deletePermanently: "Nevratně smazat",
   deleteVerifyPrompt: "Pro smazání zadejte <code>`{{verification}}`</code> a potvrďte formulář:",
   deleteVerifyPlaceholder: "Doplňte pro potvrzení...",

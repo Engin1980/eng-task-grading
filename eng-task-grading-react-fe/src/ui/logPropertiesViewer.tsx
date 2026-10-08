@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 const parseXmlProperties = (xmlString: string): Record<string, any> => {
   const parser = new DOMParser();
@@ -31,14 +32,15 @@ const parseXmlProperties = (xmlString: string): Record<string, any> => {
 };
 
 export const LogPropertiesViewer = ({ xmlData }: { xmlData: string }) => {
+  const { t } = useTranslation();
   const formattedJson = React.useMemo(() => {
     try {
       const obj = parseXmlProperties(xmlData);
       return JSON.stringify(obj, null, 2);
     } catch (err) {
-      return "Chyba při parsování dat.";
+      return t("parseError");
     }
-  }, [xmlData]);
+  }, [xmlData, t]);
 
   return (
     <div className="font-mono text-sm shadow-lg">

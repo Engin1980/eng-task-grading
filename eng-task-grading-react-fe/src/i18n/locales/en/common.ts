@@ -9,6 +9,8 @@ export const common: typeof cs = {
   loading: "Loading...",
   loadingError: "Error while loading data",
   retry: "Try again",
+  unknownError: "Unknown error",
+  parseError: "Error while parsing the data.",
   deletePermanently: "Delete permanently",
   deleteVerifyPrompt: "To delete, enter <code>`{{verification}}`</code> and confirm the form:",
   deleteVerifyPlaceholder: "Fill in to confirm...",

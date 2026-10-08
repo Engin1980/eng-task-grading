@@ -1,4 +1,5 @@
 import { type ChangeEvent } from "react";
+import { useTranslation } from "react-i18next";
 
 export interface TaskEditorData {
   title: string;
@@ -15,6 +16,7 @@ interface TaskEditorProps {
 }
 
 export function TaskEditor({ taskData, onChange }: TaskEditorProps) {
+  const { t } = useTranslation("tasks");
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
@@ -35,7 +37,7 @@ export function TaskEditor({ taskData, onChange }: TaskEditorProps) {
           htmlFor="title"
           className="block text-sm font-medium text-gray-700 mb-2"
         >
-          Název úkolu<span className="text-red-500">*</span>
+          {t("editor.title")}<span className="text-red-500">*</span>
         </label>
         <input
           id="title"
@@ -44,7 +46,7 @@ export function TaskEditor({ taskData, onChange }: TaskEditorProps) {
           value={taskData.title}
           onChange={handleChange}
           className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          placeholder="Zadejte název úkolu..."
+          placeholder={t("editor.titlePlaceholder")}
           required
           autoFocus
         />
@@ -56,7 +58,7 @@ export function TaskEditor({ taskData, onChange }: TaskEditorProps) {
           htmlFor="description"
           className="block text-sm font-medium text-gray-700 mb-2"
         >
-          Popis
+          {t("editor.description")}
         </label>
         <textarea
           id="description"
@@ -65,7 +67,7 @@ export function TaskEditor({ taskData, onChange }: TaskEditorProps) {
           value={taskData.description}
           onChange={handleChange}
           className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          placeholder="Zadejte popis úkolu..."
+          placeholder={t("editor.descriptionPlaceholder")}
         />
       </div>
 
@@ -75,7 +77,7 @@ export function TaskEditor({ taskData, onChange }: TaskEditorProps) {
           htmlFor="keywords"
           className="block text-sm font-medium text-gray-700 mb-2"
         >
-          Klíčová slova
+          {t("editor.keywords")}
         </label>
         <input
           id="keywords"
@@ -83,7 +85,7 @@ export function TaskEditor({ taskData, onChange }: TaskEditorProps) {
           value={taskData.keywords}
           onChange={handleChange}
           className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          placeholder="Zadejte klíčová slova úkolu..."
+          placeholder={t("editor.keywordsPlaceholder")}
         />
       </div>
 
@@ -93,7 +95,7 @@ export function TaskEditor({ taskData, onChange }: TaskEditorProps) {
           htmlFor="maxGrade"
           className="block text-sm font-medium text-gray-700 mb-2"
         >
-          Maximální známka (0-1000)
+          {t("editor.maxGrade")}
         </label>
         <input
           id="maxGrade"
@@ -109,7 +111,7 @@ export function TaskEditor({ taskData, onChange }: TaskEditorProps) {
             })
           }
           className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          placeholder="Zadejte maximální známku..."
+          placeholder={t("editor.maxGradePlaceholder")}
         />
       </div>
 
@@ -119,7 +121,7 @@ export function TaskEditor({ taskData, onChange }: TaskEditorProps) {
           htmlFor="minGrade"
           className="block text-sm font-medium text-gray-700 mb-2"
         >
-          Minimální úspěšná známka (0-1000)
+          {t("editor.minGrade")}
         </label>
         <input
           id="minGrade"
@@ -135,7 +137,7 @@ export function TaskEditor({ taskData, onChange }: TaskEditorProps) {
             })
           }
           className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          placeholder="Zadejte minimální známku pro úspěch..."
+          placeholder={t("editor.minGradePlaceholder")}
         />
       </div>
 
@@ -145,7 +147,7 @@ export function TaskEditor({ taskData, onChange }: TaskEditorProps) {
           htmlFor="aggregation"
           className="block text-sm font-medium text-gray-700 mb-2"
         >
-          Agregace známky
+          {t("editor.aggregation")}
         </label>
         <select
           id="aggregation"
@@ -159,11 +161,11 @@ export function TaskEditor({ taskData, onChange }: TaskEditorProps) {
           }
           className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         >
-          <option value="min">Minimum</option>
-          <option value="max">Maximum</option>
-          <option value="avg">Průměr</option>
-          <option value="last">Poslední</option>
-          <option value="sum">Součet</option>
+          <option value="min">{t("aggregation.min")}</option>
+          <option value="max">{t("aggregation.max")}</option>
+          <option value="avg">{t("aggregation.avg")}</option>
+          <option value="last">{t("aggregation.last")}</option>
+          <option value="sum">{t("aggregation.sum")}</option>
         </select>
       </div>
     </div>

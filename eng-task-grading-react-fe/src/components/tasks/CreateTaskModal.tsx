@@ -3,6 +3,7 @@ import type { TaskCreateDto } from '../../model/task-dto';
 import { TaskEditor, type TaskEditorData } from '../../ui/editors/TaskEditor';
 import { AppDialog } from '../../ui/AppDialog';
 import { useToast } from '../../hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 
 interface CreateTaskModalProps {
   isOpen: boolean;
@@ -22,6 +23,7 @@ export function CreateTaskModal(props: CreateTaskModalProps) {
     aggregation: 'avg'
   });
   const tst = useToast();
+  const { t } = useTranslation('tasks');
 
   const validateTask = () => {
     if (!taskEditorData.title.trim()) {
@@ -77,8 +79,8 @@ export function CreateTaskModal(props: CreateTaskModalProps) {
     <div>
       <AppDialog
         isOpen={props.isOpen}
-        confirmButtonText='Vytvořit úkol'
-        title="Vytvořit nový úkol"
+        confirmButtonText={t('create.submit')}
+        title={t('create.title')}
         confirmButtonEnabled={() => taskEditorData.title.trim().length > 0 && !isSubmitting}
         onSubmit={handleSubmit}
         onClose={handleClose}

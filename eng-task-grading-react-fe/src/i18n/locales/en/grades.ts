@@ -1,0 +1,31 @@
+import type { grades as cs } from "../cs/grades";
+
+export const grades: typeof cs = {
+  loading: "Loading grades...",
+  confirmDeleteFinal: "Do you really want to delete the final grade? This action cannot be undone.",
+  confirmUnmarkRecorded: "Do you really want to cancel marking the grade as recorded?",
+  studentFilter: "Student filter",
+  studentFilterPlaceholder: "Search by name, surname, number or group...",
+  taskFilter: "Task filter",
+  taskFilterPlaceholder: "Search by task title...",
+  showAttendances: "Show attendance",
+  showTasks: "Show tasks",
+  showClosedStudents: "Show closed students",
+  studentChip: "Students: \"{{filter}}\"",
+  taskChip: "Tasks: \"{{filter}}\"",
+  columns: {
+    student: "Student",
+    successRate1: "Attendance /",
+    successRate2: "task success",
+    final: "Final",
+  },
+  attendanceTooltip: "Attendance: {{title}}",
+  min: "Min: {{value}}",
+  addGrade: "Add grade",
+  editGrade: "Edit grade",
+  deleteGrade: "Delete grade",
+  unmarkRecorded: "Unmark as recorded",
+  markRecorded: "Confirm the grade as recorded in the system",
+  addFinalGrade: "Add final grade",
+  noMatch: "No students match the filter \"{{filter}}\".",
+};

@@ -19,6 +19,8 @@ import { AddCourseFinalGradeModal } from "../../../components/courses/AddCourseF
 import { EditCourseFinalGradeModal } from "../../../components/courses/EditCourseFinalGrade";
 import { AddGradeModal } from "../../../components/tasks/AddGradeModal";
 import { useToast } from "../../../hooks/use-toast";
+import { useTranslation } from "react-i18next";
+import { useFormatters } from "../../../i18n/format";
 
 export const Route = createFileRoute("/courses/$id/grades")({
   component: GradesPage,
@@ -83,6 +85,8 @@ interface CourseTable {
 }
 
 function GradesPage() {
+  const { t } = useTranslation("grades");
+  const { formatDate, formatNumber } = useFormatters();
   const { id } = Route.useParams();
   const courseId = id;
 
@@ -205,7 +209,7 @@ function GradesPage() {
 
   const deleteFinalGradeAsync = (finalGradeId: number) => async () => {
     const confirmed = window.confirm(
-      "Opravdu chceš smazat finální známku? Tuto akci nelze vrátit zpět.",
+      t("confirmDeleteFinal"),
     );
     if (!confirmed) return;
     try {
@@ -249,7 +253,7 @@ function GradesPage() {
   };
   const unmarkAsRecordedAsync = (finalGradeId: number) => async () => {
     const confirmed = window.confirm(
-      "Opravdu chceš zrušit označení známky jako zapsané?",
+      t("confirmUnmarkRecorded"),
     );
     if (!confirmed) return;
 
@@ -475,7 +479,7 @@ function GradesPage() {
   logger.debug(`Rendering grades tab for course ${courseId}`);
 
   if (ldgState.loading) {
-    return <Loading message="Načítám známky..." />;
+    return <Loading message={t("loading")} />;
   }
   if (ldgState.error) {
     return <LoadingError message={ldgState.error} onRetry={loadGradeSet} />;
@@ -493,12 +497,12 @@ function GradesPage() {
               htmlFor="student-filter"
               className="block text-sm font-medium text-gray-700 mb-2"
             >
-              Filtr studentů
+              {t("studentFilter")}
             </label>
             <input
               id="student-filter"
               type="text"
-              placeholder="Hledat podle jména, příjmení, čísla nebo skupiny..."
+              placeholder={t("studentFilterPlaceholder")}
               value={studentFilter}
               onChange={(e) => setStudentFilter(e.target.value)}
               onKeyDown={(e) => {
@@ -515,12 +519,12 @@ function GradesPage() {
               htmlFor="task-filter"
               className="block text-sm font-medium text-gray-700 mb-2"
             >
-              Filtr úkolů
+              {t("taskFilter")}
             </label>
             <input
               id="task-filter"
               type="text"
-              placeholder="Hledat podle názvu úkolu..."
+              placeholder={t("taskFilterPlaceholder")}
               value={taskFilter}
               onChange={(e) => setTaskFilter(e.target.value)}
               onKeyDown={(e) => {
@@ -541,7 +545,7 @@ function GradesPage() {
               className="form-checkbox h-4 w-4 text-blue-600"
             />
             <span className="ml-2 text-sm text-gray-700">
-              Zobrazit docházku
+              {t("showAttendances")}
             </span>
           </label>
           <label className="inline-flex items-center">
@@ -551,7 +555,7 @@ function GradesPage() {
               onChange={(e) => setShowTasks(e.target.checked)}
               className="form-checkbox h-4 w-4 text-blue-600"
             />
-            <span className="ml-2 text-sm text-gray-700">Zobrazit úkoly</span>
+            <span className="ml-2 text-sm text-gray-700">{t("showTasks")}</span>
           </label>
           <label className="inline-flex items-center">
             <input
@@ -561,7 +565,7 @@ function GradesPage() {
               className="form-checkbox h-4 w-4 text-blue-600"
             />
             <span className="ml-2 text-sm text-gray-700">
-              Zobrazit uzavřené studenty
+              {t("showClosedStudents")}
             </span>
           </label>
         </div>
@@ -573,7 +577,7 @@ function GradesPage() {
                 onClick={() => setStudentFilter("")}
                 className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full hover:bg-blue-200"
               >
-                Studenti: "{studentFilter}"
+                {t("studentChip", { filter: studentFilter })}
                 <span className="ml-1 cursor-pointer">×</span>
               </button>
             )}
@@ -582,7 +586,7 @@ function GradesPage() {
                 onClick={() => setTaskFilter("")}
                 className="inline-flex items-center px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full hover:bg-green-200"
               >
-                Úkoly: "{taskFilter}"
+                {t("taskChip", { filter: taskFilter })}
                 <span className="ml-1 cursor-pointer">×</span>
               </button>
             )}
@@ -596,13 +600,13 @@ function GradesPage() {
           <thead className="bg-gray-50">
             <tr>
               <th className="px-4 py-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky left-0 bg-gray-50 z-10 w-48">
-                Student
+                {t("columns.student")}
               </th>
               <th
                 className="px-3 py-3 border-b border-gray-200 text-center text-xs font-medium text-gray-500 uppercase tracking-wider sticky left-0 bg-gray-50 z-10 w-24"
                 style={{ left: "192px" }}
               >
-                Úspěšnost doch. <br /> úkolů
+                {t("columns.successRate1")} <br /> {t("columns.successRate2")}
               </th>
               {/* Sloupce pro attendances */}
               {showAttendances &&
@@ -610,7 +614,7 @@ function GradesPage() {
                   <th
                     key={`attendance-${attendance.id}`}
                     className="min-w-24 max-w-48 px-2 py-3 border-b border-gray-200 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
-                    title={`Attendance: ${attendance.title}`}
+                    title={t("attendanceTooltip", { title: attendance.title })}
                   >
                     <button
                       onClick={() =>
@@ -621,7 +625,7 @@ function GradesPage() {
                       {attendance.title}
                     </button>
                     <div className="text-xs text-gray-400 font-normal">
-                      Min: {attendance.minWeight ?? "-"}
+                      {t("min", { value: attendance.minWeight ?? "-" })}
                     </div>
                   </th>
                 ))}
@@ -640,12 +644,12 @@ function GradesPage() {
                       {task.title}
                     </button>
                     <div className="text-xs text-gray-400 font-normal">
-                      Min: {task.minGrade ?? "-"}
+                      {t("min", { value: task.minGrade ?? "-" })}
                     </div>
                   </th>
                 ))}
               <th className="px-4 py-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky left-0 bg-gray-50 z-10 w-48">
-                Final
+                {t("columns.final")}
               </th>
             </tr>
           </thead>
@@ -724,9 +728,9 @@ function GradesPage() {
                           {cell ? (
                             <div className="space-y-1">
                               <span className="inline-flex px-2 text-xs font-semibold rounded-full">
-                                {cell.value?.toLocaleString("cs-CZ", {
-                                  maximumFractionDigits: 2,
-                                }) ?? "-"}{" "}
+                                {cell.value != null
+                                  ? formatNumber(cell.value, { maximumFractionDigits: 2 })
+                                  : "-"}{" "}
                                 {cell.percentage !== null &&
                                   `/ ${cell.percentage} %`}
                               </span>
@@ -738,9 +742,7 @@ function GradesPage() {
                               <div className="text-xs opacity-75">
                                 {cell && (
                                   <div>
-                                    {new Date(cell.date).toLocaleDateString(
-                                      "cs-CZ",
-                                    )}
+                                    {formatDate(cell.date)}
                                   </div>
                                 )}
                               </div>
@@ -752,7 +754,7 @@ function GradesPage() {
                                 onClick={() =>
                                   handleAddGrade(student.student, task)
                                 }
-                                title="Přidat známku"
+                                title={t("addGrade")}
                               >
                                 +
                               </button>
@@ -784,7 +786,7 @@ function GradesPage() {
                           </span>
                           <button
                             className="inline-flex items-center justify-center w-6 h-6 text-sm font-medium text-white bg-blue-500 rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                            title="Upravit známku"
+                            title={t("editGrade")}
                             onClick={editCourseFinalGradeAsync(
                               student.student,
                               finalGradeCell.id,
@@ -795,7 +797,7 @@ function GradesPage() {
                           {finalGradeCell.isRecorded && (
                             <button
                               className="inline-flex items-center justify-center w-6 h-6 ml-1 p-3 text-sm font-medium text-red-300 bg-white border border-red-300 rounded-full hover:bg-red-700 hover:text-white"
-                              title="Odznačit jako zapsáno"
+                              title={t("unmarkRecorded")}
                               onClick={unmarkAsRecordedAsync(finalGradeCell.id)}
                             >
                               ☐
@@ -804,7 +806,7 @@ function GradesPage() {
                           {!finalGradeCell.isRecorded && (
                             <button
                               className="inline-flex items-center justify-center ml-1 w-6 h-6 text-sm font-medium text-white bg-green-600 rounded-full hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                              title="Potvrdit známku jako zapsanou v systému"
+                              title={t("markRecorded")}
                               onClick={markAsRecordedAsync(finalGradeCell.id)}
                             >
                               🗸
@@ -812,7 +814,7 @@ function GradesPage() {
                           )}
                           <button
                             className="inline-flex items-center justify-center w-6 h-6 ml-1 p-3 text-sm font-medium text-white bg-red-700 border border-red rounded-full hover:bg-red-700 hover:text-white"
-                            title="Smazat známku"
+                            title={t("deleteGrade")}
                             onClick={deleteFinalGradeAsync(finalGradeCell.id)}
                           >
                             ⨯
@@ -825,9 +827,7 @@ function GradesPage() {
                         )}
                         {finalGradeCell.isRecorded && finalGradeCell.date && (
                           <div className="text-xs pt-1 text-gray-500">
-                            {new Date(finalGradeCell.date).toLocaleDateString(
-                              "cs-CZ",
-                            )}
+                            {formatDate(finalGradeCell.date)}
                           </div>
                         )}
                       </div>
@@ -835,7 +835,7 @@ function GradesPage() {
                       <div>
                         <button
                           className="inline-flex items-center justify-center w-6 h-6 text-sm font-medium text-white bg-green-600 rounded-full hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                          title="Přidat finální známku"
+                          title={t("addFinalGrade")}
                           onClick={addCourseFinalGradeAsync(student.student)}
                         >
                           +
@@ -853,7 +853,7 @@ function GradesPage() {
         {filteredStudents?.length === 0 && studentFilter && (
           <div className="text-center py-8">
             <p className="text-gray-500">
-              Žádní studenti neodpovídají filtru "{studentFilter}".
+              {t("noMatch", { filter: studentFilter })}
             </p>
           </div>
         )}

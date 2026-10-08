@@ -4,6 +4,7 @@ import type { GradeCreateDto, GradeDto } from '../../model/grade-dto';
 import { gradeService } from '../../services/grade-service';
 import { useLogger } from '../../hooks/use-logger';
 import { useToast } from '../../hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 
 interface AddGradeModalProps {
   isOpen: boolean;
@@ -29,6 +30,7 @@ export function AddGradeModal({ isOpen, onClose, student, taskId, taskMinGrade, 
   );
   const logger = useLogger("AddGradeModal");
   const tst = useToast();
+  const { t } = useTranslation(['tasks', 'common']);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,7 +39,7 @@ export function AddGradeModal({ isOpen, onClose, student, taskId, taskMinGrade, 
 
     const gradeValue = parseInt(value);
     if (isNaN(gradeValue)) {
-      alert('Známka musí být platné celé číslo.');
+      alert(t('grade.invalidIntegerAdd'));
       return;
     }
 
@@ -85,12 +87,12 @@ export function AddGradeModal({ isOpen, onClose, student, taskId, taskMinGrade, 
         <form onSubmit={handleSubmit}>
           <div className="px-6 py-4">
             <h3 className="text-lg font-medium text-gray-900 mb-4">
-              Přidat známku
+              {t('grade.addTitle')}
             </h3>
 
             {/* Student info */}
             <div className="mb-4 p-3 bg-gray-50 rounded-lg">
-              <div className="text-sm text-gray-600">Student</div>
+              <div className="text-sm text-gray-600">{t('grade.student')}</div>
               <div className="font-medium text-gray-900">
                 {student.name && student.surname
                   ? `${student.surname} ${student.name}`
@@ -102,7 +104,7 @@ export function AddGradeModal({ isOpen, onClose, student, taskId, taskMinGrade, 
             {/* Grade value */}
             <div className="mb-4">
               <label htmlFor="grade-value" className="block text-sm font-medium text-gray-700 mb-2">
-                Známka (0-{taskMaxGrade ?? "?"}, min {taskMinGrade ?? "?"}) <span className="text-red-500">*</span>
+                {t('grade.valueLabel', { max: taskMaxGrade ?? '?', min: taskMinGrade ?? '?' })} <span className="text-red-500">*</span>
               </label>
               <input
                 id="grade-value"
@@ -112,7 +114,7 @@ export function AddGradeModal({ isOpen, onClose, student, taskId, taskMinGrade, 
                 value={value}
                 onChange={(e) => setValue(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Zadejte známku..."
+                placeholder={t('grade.valuePlaceholder')}
                 required
                 autoFocus
               />
@@ -144,7 +146,7 @@ export function AddGradeModal({ isOpen, onClose, student, taskId, taskMinGrade, 
             {/* Comment */}
             <div className="mb-6">
               <label htmlFor="grade-comment" className="block text-sm font-medium text-gray-700 mb-2">
-                Komentář
+                {t('grade.comment')}
               </label>
               <textarea
                 id="grade-comment"
@@ -152,7 +154,7 @@ export function AddGradeModal({ isOpen, onClose, student, taskId, taskMinGrade, 
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Volitelný komentář k známce..."
+                placeholder={t('grade.commentPlaceholder')}
               />
             </div>
           </div>
@@ -164,7 +166,7 @@ export function AddGradeModal({ isOpen, onClose, student, taskId, taskMinGrade, 
               disabled={isSubmitting || !value.trim()}
               className="inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSubmitting ? 'Přidávám...' : 'Přidat známku'}
+              {isSubmitting ? t('grade.adding') : t('grade.add')}
             </button>
             <button
               type="button"
@@ -172,7 +174,7 @@ export function AddGradeModal({ isOpen, onClose, student, taskId, taskMinGrade, 
               disabled={isSubmitting}
               className="inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Zrušit
+              {t('common:cancel')}
             </button>
           </div>
         </form>

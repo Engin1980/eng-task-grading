@@ -16,12 +16,16 @@ import { DeleteModal } from '../../components/global/DeleteModal';
 import { taskService } from '../../services/task-service';
 import { useToast } from '../../hooks/use-toast';
 import { useLogger } from '../../hooks/use-logger';
+import { useTranslation } from 'react-i18next';
+import { useFormatters } from '../../i18n/format';
 
 export const Route = createFileRoute('/tasks/$id')({
   component: RouteComponent,
 })
 
 function RouteComponent() {
+  const { t } = useTranslation('tasks');
+  const { formatNumber, formatDateTime } = useFormatters();
   const { id } = Route.useParams()
   const [set, setSet] = useState<NewGradeSetTaskDto | null>(null);
   const [task, setTask] = useState<TaskDto>(null!);
@@ -161,7 +165,7 @@ function RouteComponent() {
   };
 
   const handleDeleteGrade = async (gradeId: number) => {
-    if (window.confirm('Opravdu chcete smazat tuto známku? Tato akce je nevratná.')) {
+    if (window.confirm(t('detail.deleteGradeConfirm'))) {
       try {
         await gradeService.deleteGrade(gradeId.toString());
         tst.success(tst.SUC.ITEM_DELETED);
@@ -207,7 +211,7 @@ function RouteComponent() {
   }, [id]);
 
 
-  if (ldgState.loading) { return (<Loading message="Načítám úkol..." />) }
+  if (ldgState.loading) { return (<Loading message={t('detail.loading')} />) }
   if (ldgState.error) { return (<LoadingError message={ldgState.error} onRetry={loadData} />) }
 
   if (!task) throw new Error("Task is null, unexpectingly.");
@@ -238,8 +242,8 @@ function RouteComponent() {
             <DeleteIcon />
           </button>
           <DeleteModal
-            title="Opravdu smazat úkol?"
-            question="Bude nevratně smazán úkol i všechna případná související ohodnocení!"
+            title={t('detail.deleteTitle')}
+            question={t('detail.deleteQuestion')}
             verification={task.title}
             isOpen={deleteModalVisible}
             onDelete={handleTaskDelete}
@@ -249,40 +253,40 @@ function RouteComponent() {
 
         {task.description && (
           <div className="mb-4">
-            <h2 className="text-lg font-semibold text-gray-700 mb-2">Popis</h2>
+            <h2 className="text-lg font-semibold text-gray-700 mb-2">{t('detail.description')}</h2>
             <p className="text-gray-600">{task.description}</p>
           </div>
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
           <div>
-            <strong className="text-gray-700">Klíčová slova:</strong>
+            <strong className="text-gray-700">{t('detail.keywords')}</strong>
             <span className="ml-2 text-gray-600">{task.keywords || '-'}</span>
           </div>
 
           <div>
-            <strong className="text-gray-700">Maximální/Minimální hodnota:</strong>
+            <strong className="text-gray-700">{t('detail.minMax')}</strong>
             <span className="ml-2 text-gray-600">{task.maxGrade || '-'} / {task.minGrade || '-'}</span>
           </div>
 
           <div>
-            <strong className="text-gray-700">Agregace:</strong>
-            <span className="ml-2 text-gray-600">{task.aggregation || '-'}</span>
+            <strong className="text-gray-700">{t('detail.aggregation')}</strong>
+            <span className="ml-2 text-gray-600">{task.aggregation ? t(`aggregation.${task.aggregation}`) : '-'}</span>
           </div>
         </div>
       </div>
 
       {/* Tabulka se studenty a známkami */}
       {!set ? (
-        <div className="text-center">Načítám známky...</div>
+        <div className="text-center">{t('detail.loadingGrades')}</div>
       ) : (
         <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-            <h2 className="text-xl font-semibold text-gray-900">Známky studentů</h2>
+            <h2 className="text-xl font-semibold text-gray-900">{t('detail.studentGrades')}</h2>
             <div className="max-w-sm">
               <input
                 type="text"
-                placeholder="Hledat podle čísla, jména, příjmení nebo skupiny..."
+                placeholder={t('detail.filterPlaceholder')}
                 value={filterText}
                 onChange={(e) => setFilterText(e.target.value)}
                 onKeyDown={(e) => {
@@ -298,17 +302,17 @@ function RouteComponent() {
           <div className="overflow-x-auto">
             {filteredStudentData && filteredStudentData.length === 0 && filterText.trim() ? (
               <div className="text-center py-8">
-                <p className="text-gray-500">Žádní studenti neodpovídají zadaným kritériím.</p>
+                <p className="text-gray-500">{t('detail.noMatch')}</p>
               </div>
             ) : (
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Student
+                      {t('detail.columns.student')}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Výsledek
+                      {t('detail.columns.result')}
                     </th>
                     <th className="px-3 py-3 text-center">
                       {/* Prázdný sloupec pro tlačítko + */}
@@ -317,13 +321,13 @@ function RouteComponent() {
                       {/* Prázdný sloupec pro akce */}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Datum
+                      {t('detail.columns.date')}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Známka
+                      {t('detail.columns.grade')}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Komentář
+                      {t('detail.columns.comment')}
                     </th>
                   </tr>
                 </thead>
@@ -349,7 +353,7 @@ function RouteComponent() {
                           {/* Prázdné pro akce */}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500" colSpan={3}>
-                          Bez známky
+                          {t('detail.noGrade')}
                         </td>
                       </tr>
                     ) : (
@@ -366,7 +370,7 @@ function RouteComponent() {
                                 ? 'bg-green-100 text-green-800'
                                 : 'bg-red-100 text-red-800'
                                 }`}>
-                                {studentData.finalValue?.toLocaleString("cs-CZ", {maximumFractionDigits: 2})} {studentData.finalPercentage ? `/ ${studentData.finalPercentage}%` : ''}
+                                {studentData.finalValue != null ? formatNumber(studentData.finalValue, { maximumFractionDigits: 2 }) : undefined} {studentData.finalPercentage ? `/ ${studentData.finalPercentage}%` : ''}
                               </span>
                             </td>
                           )}
@@ -385,21 +389,21 @@ function RouteComponent() {
                               <button
                                 onClick={() => handleEditGrade(studentData.student, grade)}
                                 className="inline-flex items-center justify-center w-6 h-6 text-sm font-medium text-white bg-blue-500 rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                                title="Upravit známku"
+                                title={t('detail.editGrade')}
                               >
                                 🖉
                               </button>
                               <button
                                 onClick={() => handleDeleteGrade(grade.id)}
                                 className="inline-flex items-center justify-center w-6 h-6 text-sm font-medium text-white bg-red-500 rounded-full hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                                title="Smazat známku"
+                                title={t('detail.deleteGrade')}
                               >
                                 ⨯
                               </button>
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {new Date(grade.date).toLocaleString('cs-CZ')}
+                            {formatDateTime(grade.date)}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${grade.value >= (task?.minGrade || 0)

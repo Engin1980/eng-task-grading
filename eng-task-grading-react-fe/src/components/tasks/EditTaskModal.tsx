@@ -5,6 +5,7 @@ import { TaskEditor, type TaskEditorData } from '../../ui/editors/TaskEditor';
 import { AppDialog } from '../../ui/AppDialog';
 import { useToast } from '../../hooks/use-toast';
 import { useLogger } from '../../hooks/use-logger';
+import { useTranslation } from 'react-i18next';
 
 export interface EditTaskModalProps {
   isOpen: boolean;
@@ -23,6 +24,7 @@ export function EditTaskModal({ isOpen, task, onClose }: EditTaskModalProps) {
     aggregation: task?.aggregation ?? 'last'
   });
   const tst = useToast();
+  const { t } = useTranslation('tasks');
   const logger = useLogger("EditTaskModal");
 
   const handleSubmit = async () => {
@@ -74,8 +76,8 @@ export function EditTaskModal({ isOpen, task, onClose }: EditTaskModalProps) {
   return (
     <AppDialog
       isOpen={isOpen}
-      title="Upravit úkol"
-      confirmButtonText='Aktualizovat úkol'
+      title={t('edit.title')}
+      confirmButtonText={t('edit.submit')}
       confirmButtonEnabled={() => !!taskEditorData.title.trim()}
       onSubmit={handleSubmit}
       onClose={handleClose} >

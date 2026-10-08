@@ -1,5 +1,6 @@
 import toast from 'react-hot-toast';
 import { createLogger } from '../services/log-service';
+import i18n from '../i18n';
 
 type ErrorKey =
   | "INVALID_CREDENTIALS"
@@ -22,33 +23,30 @@ type ErrorKey =
   | "STUDENT_NOT_IN_COURSE"
   | "CLOUDFLARE_TURNISTILLE_VERIFICATION_ERROR";
 
-export const ErrorKeyMessages: Record<ErrorKey, string> = {
-  INVALID_CREDENTIALS: "Neplatné přihlašovací údaje nebo přihlášení vypršelo.",
-  INTERNAL_SERVER_ERROR: "Došlo k vnitřní chybě serveru. Zkuste to prosím později.",
-  COURSE_DUPLICATE_CODE: "Kurz s tímto kódem již existuje (%%).",
-  INVALID_TOKEN: "Platnost tokenu nebo relace vypršela. Přihlaste se znovu.",
-  INVALID_STUDENT_SELF_SIGN_KEY: "Neplatný klíč pro samopřihlášení studenta.",
-  DUPLICATE_FINAL_GRADE: "Student již má zapsanou finální známku k danému předmětu.",
-  TEACHER_EMAIL_ALREADY_EXISTS: "Učitel s tímto e-mailem je již zaregistrován (%%).",
-  DUPLICATE_ATTENDANCE_DAY_SELF_SIGN: "Den docházky již obsahuje záznam o samopřihlášení pro tohoto studenta.",
-  ATTENDANCE_SELF_SIGN_ALREADY_VERIFIED: "Záznam o samopřihlášení již byl ověřen a nelze jej znovu ověřit.",
-  STUDENT_NOT_IN_COURSE: "Student není přihlášen k danému kurzu (%%).",
-
-  NOT_FOUND_COURSE: "Kurz nebyl nalezen (%%). Zkuste obnovit stránku?",
-  NOT_FOUND_STUDENT: "Student nebyl nalezen (%%). Zkuste obnovit stránku?",
-  NOT_FOUND_TEACHER: "Učitel nebyl nalezen (%%). Zkuste obnovit stránku?",
-  NOT_FOUND_TASK: "Úkol nebyl nalezen (%%). Zkuste obnovit stránku?",
-  NOT_FOUND_ATTENDANCE: "Záznam o docházce nebyl nalezen (%%). Zkuste obnovit stránku?",
-  NOT_FOUND_ATTENDANCE_DAY: "Den docházky nebyl nalezen (%%). Zkuste obnovit stránku?",
-  NOT_FOUND_UNKNOWN: "Požadovaná položka neznámého typu nebyla nalezena (%%). Zkuste obnovit stránku?",
-
-  PASSWORD_REQUIREMENTS_NOT_FULFILLED: "Zadané heslo je příliš slabé.",
-
-  CLOUDFLARE_TURNISTILLE_VERIFICATION_ERROR: "Ověření proti botům selhalo. Zkuste to znovu.",
-};
+const ERROR_KEYS: readonly ErrorKey[] = [
+  "INVALID_CREDENTIALS",
+  "INTERNAL_SERVER_ERROR",
+  "COURSE_DUPLICATE_CODE",
+  "INVALID_TOKEN",
+  "INVALID_STUDENT_SELF_SIGN_KEY",
+  "DUPLICATE_FINAL_GRADE",
+  "TEACHER_EMAIL_ALREADY_EXISTS",
+  "NOT_FOUND_COURSE",
+  "NOT_FOUND_STUDENT",
+  "NOT_FOUND_TEACHER",
+  "NOT_FOUND_TASK",
+  "NOT_FOUND_ATTENDANCE",
+  "NOT_FOUND_ATTENDANCE_DAY",
+  "NOT_FOUND_UNKNOWN",
+  "PASSWORD_REQUIREMENTS_NOT_FULFILLED",
+  "DUPLICATE_ATTENDANCE_DAY_SELF_SIGN",
+  "ATTENDANCE_SELF_SIGN_ALREADY_VERIFIED",
+  "STUDENT_NOT_IN_COURSE",
+  "CLOUDFLARE_TURNISTILLE_VERIFICATION_ERROR",
+];
 
 function isErrorCode(code: string): code is ErrorKey {
-  return code in ErrorKeyMessages;
+  return (ERROR_KEYS as readonly string[]).includes(code);
 }
 
 function toErrorCode(code: string | null | undefined): ErrorKey | undefined {
@@ -110,125 +108,26 @@ export type ToastErrorMessageId = typeof TOAST_ERROR_MESSAGES[keyof typeof TOAST
 export function useToast() {
   const logger = createLogger("useToast");
 
-  const convertToastWarnMessageIdToMessage = (messageId: ToastWarnMessageId): string => {
-    var ret;
-    switch (messageId) {
-      case TOAST_WARN_MESSAGES.CAPTCHA_COMPLETION_NEEDED:
-        ret = "Prosím dokončete ověření captcha";
-        break;
-      case TOAST_WARN_MESSAGES.TASK_TITLE_REQUIRED:
-        ret = "Název úkolu je povinný.";
-        break;
-      case TOAST_WARN_MESSAGES.PASSWORDS_DO_NOT_MATCH:
-        ret = "Zadaná hesla se neshodují.";
-        break;
-      case TOAST_WARN_MESSAGES.COURSE_FINAL_GRADE_VALUE_INVALID:
-        ret = "Hodnota finální známky musí být číslo mezi 0 a 100.";
-        break;
-      default:
-        ret = "Neznámá toast zpráva";
-        break;
-    }
-    return ret;
-  };
+  const keyOf = <T extends Record<string, number>>(map: T, id: number): keyof T | undefined =>
+    (Object.keys(map) as (keyof T)[]).find((k) => map[k] === id);
 
-  const convertToastSuccessMessageIdToMessage = (messageId: ToastSuccessMessageId): string => {
-    var ret;
-    switch (messageId) {
-      case TOAST_SUCCESS_MESSAGES.LOGIN_SUCCESSFUL:
-        ret = "Přihlášení proběhlo úspěšně.";
-        break;
-      case TOAST_SUCCESS_MESSAGES.LOGOUT_SUCCESSFUL:
-        ret = "Odhlášení proběhlo úspěšně.";
-        break;
-      case TOAST_SUCCESS_MESSAGES.ITEM_CREATED:
-        ret = "Položka byla úspěšně vytvořena.";
-        break;
-      case TOAST_SUCCESS_MESSAGES.ITEM_DELETED:
-        ret = "Položka byla úspěšně smazána.";
-        break;
-      case TOAST_SUCCESS_MESSAGES.ITEM_UPDATED:
-        ret = "Položka byla úspěšně upravena.";
-        break;
-      case TOAST_SUCCESS_MESSAGES.STUDENTS_IMPORTED:
-        ret = "Studenti byli úspěšně importováni.";
-        break;
-      case TOAST_SUCCESS_MESSAGES.SELFSIGN_KEY_SET:
-        ret = "Klíč pro samo-zápis byl úspěšně nastaven.";
-        break;
-      case TOAST_SUCCESS_MESSAGES.SELFSIGN_KEY_DELETED:
-        ret = "Klíč pro samo-zápis byl úspěšně smazán.";
-        break;
-      case TOAST_SUCCESS_MESSAGES.SELFSIGN_KEY_RESOLVED:
-        ret = "Samo-zápis byl úspěšně vyřízen.";
-        break;
-      case TOAST_SUCCESS_MESSAGES.REGISTRATION_SUCCESS:
-        ret = "Registrace byla úspěšná. Nyní se můžete přihlásit.";
-        break;
-      case TOAST_SUCCESS_MESSAGES.ALL_LOGINS_REVOKED:
-        ret = "Všechna přihlášení byla úspěšně zrušena.";
-        break;
-      case TOAST_SUCCESS_MESSAGES.PASSWORD_RESET_SUCCESS:
-        ret = "Heslo bylo úspěšně resetováno.";
-        break;
-      default:
-        ret = "Neznámá operace byla dokončena úspěšně.";
-        break;
-    }
-    return ret;
-  };
+  const convertToastWarnMessageIdToMessage = (messageId: ToastWarnMessageId): string =>
+    i18n.t(`toast:warn.${keyOf(TOAST_WARN_MESSAGES, messageId) ?? "unknown"}`);
 
-  const convertToastErrorMessageIdToMessage = (messageId: ToastErrorMessageId): string => {
-    var ret;
-    switch (messageId) {
-      case TOAST_ERROR_MESSAGES.STUDENTS_IMPORT_FAILED:
-        ret = "Chyba při importu studentů.";
-        break;
-      case TOAST_ERROR_MESSAGES.STUDENTS_IMPORT_ANALYSIS_FAILED:
-        ret = "Chyba při analýze textu pro import studentů.";
-        break;
-      case TOAST_ERROR_MESSAGES.SELFSIGN_KEY_EMPTY:
-        ret = "Klíč nesmí být prázdný.";
-        break;
-      case TOAST_ERROR_MESSAGES.EMAIL_MUST_END_WITH_OSU_CZ:
-        ret = "Email musí končit na @osu.cz.";
-        break;
-      case TOAST_ERROR_MESSAGES.PASSWORD_MIN_LENGTH:
-        ret = "Heslo musí mít alespoň 8 znaků.";
-        break;
-      case TOAST_ERROR_MESSAGES.LOGIN_EXPIRED:
-        ret = "Přihlášení vypršelo. Prosím přihlaste se znovu.";
-        break;
-      case TOAST_ERROR_MESSAGES.REQUEST_TIMEOUT:
-        ret = "Vypršel časový limit požadavku. Zkuste to prosím znovu později; případně nahlašte chybu vyučujícímu.";
-        break;
-      case TOAST_ERROR_MESSAGES.NETWORK_ERROR:
-        ret = "Došlo k síťové chybě. Zkontrolujte své připojení k internetu a zkuste to znovu; případně nahlašte chybu vyučujícímu.";
-        break;
-      default:
-        ret = "Došlo k neznámé chybě.";
-        break;
-    }
-    return ret;
-  };
+  const convertToastSuccessMessageIdToMessage = (messageId: ToastSuccessMessageId): string =>
+    i18n.t(`toast:success.${keyOf(TOAST_SUCCESS_MESSAGES, messageId) ?? "unknown"}`);
+
+  const convertToastErrorMessageIdToMessage = (messageId: ToastErrorMessageId): string =>
+    i18n.t(`toast:error.${keyOf(TOAST_ERROR_MESSAGES, messageId) ?? "unknown"}`);
 
   const convertErrorMessageToMessage = (errorKeyString: string | undefined, errorParam: string | undefined): string => {
-    let ret;
     const errorKey: ErrorKey | undefined =
       !errorKeyString ? undefined : toErrorCode(errorKeyString);
 
     if (!errorKey) {
-      ret = `Došlo k neznámé chybě (${errorKeyString})`;
+      return i18n.t("toast:unknownErrorWithKey", { key: errorKeyString });
     }
-    else {
-      const msg: string = ErrorKeyMessages[errorKey];
-      if (errorParam) {
-        ret = msg.replace("%%", errorParam);
-      } else {
-        ret = msg.replace("%%", "???");
-      }
-    }
-    return ret;
+    return i18n.t(`errors:${errorKey}`, { param: errorParam || "???" });
   }
 
   const warning = (messageId: ToastWarnMessageId) => {

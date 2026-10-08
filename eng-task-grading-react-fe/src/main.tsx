@@ -3,6 +3,7 @@ import './index.css'
 import { RouterProvider } from '@tanstack/react-router'
 import { AuthProvider } from './contexts/AuthContext'
 import { NavigationProvider } from './contexts/NavigationContext'
+import './i18n'
 import { router} from './services/router'
 
 // Register things for typesafety

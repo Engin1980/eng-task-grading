@@ -3,6 +3,7 @@ import { useLogger } from '../../hooks/use-logger';
 import type { StudentCreateDto, StudentImportAnalysisResultDto } from '../../model/student-dto';
 import { courseService } from '../../services/course-service';
 import { useToast } from '../../hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 
 interface ImportStudentsWizardSecondModalProps {
   isOpen: boolean;
@@ -21,6 +22,7 @@ export function ImportStudentsWizardSecondModal({
 }: ImportStudentsWizardSecondModalProps) {
   const logger = useLogger("ImportStudentsWizardSecondModal");
   const tst = useToast();
+  const { t } = useTranslation(['courses', 'common']);
 
   const handleDoImport = async () => {
     logger.info("Zahajuji import do kurzu");
@@ -51,18 +53,18 @@ export function ImportStudentsWizardSecondModal({
         <Dialog.Overlay className="fixed inset-0 bg-white/20 backdrop-blur-sm" />
         <Dialog.Content className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-lg p-6 w-full max-w-4xl max-h-[80vh] overflow-y-auto">
           <Dialog.Title className="text-lg font-semibold text-gray-900 mb-4">
-            Výsledek analýzy importu studentů
+            {t('import.resultTitle')}
           </Dialog.Title>
 
           <Dialog.Description className="text-sm text-gray-600 mb-6">
-            Zkontrolujte výsledky analýzy před pokračováním v importu.
+            {t('import.resultDescription')}
           </Dialog.Description>
 
           <div className="space-y-6">
             {/* Students section */}
             <div>
               <h3 className="text-md font-semibold text-gray-900 mb-3">
-                Studenti k importu ({analysisResult.students.length})
+                {t('import.studentsToImport', { n: analysisResult.students.length })}
               </h3>
               {analysisResult.students.length > 0 ? (
                 <div className="max-h-64 overflow-y-auto border border-gray-200 rounded-md">
@@ -70,22 +72,22 @@ export function ImportStudentsWizardSecondModal({
                     <thead className="bg-gray-50 sticky top-0">
                       <tr>
                         <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Číslo
+                          {t('import.columns.number')}
                         </th>
                         <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Jméno
+                          {t('import.columns.name')}
                         </th>
                         <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Příjmení
+                          {t('import.columns.surname')}
                         </th>
                         <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Email
+                          {t('import.columns.email')}
                         </th>
                         <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Program
+                          {t('import.columns.program')}
                         </th>
                         <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Forma
+                          {t('import.columns.form')}
                         </th>
                       </tr>
                     </thead>
@@ -117,7 +119,7 @@ export function ImportStudentsWizardSecondModal({
                 </div>
               ) : (
                 <div className="text-center py-4 text-gray-500 border border-gray-200 rounded-md">
-                  Žádní studenti k importu
+                  {t('import.noStudents')}
                 </div>
               )}
             </div>
@@ -125,7 +127,7 @@ export function ImportStudentsWizardSecondModal({
             {/* Errors section */}
             <div>
               <h3 className="text-md font-semibold text-gray-900 mb-3">
-                Chyby při analýze ({analysisResult.errors.length})
+                {t('import.errorsTitle', { n: analysisResult.errors.length })}
               </h3>
               {analysisResult.errors.length > 0 ? (
                 <div className="max-h-32 overflow-y-auto border border-red-200 rounded-md bg-red-50">
@@ -148,7 +150,7 @@ export function ImportStudentsWizardSecondModal({
                     <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                     </svg>
-                    Žádné chyby při analýze
+                    {t('import.noErrors')}
                   </span>
                 </div>
               )}
@@ -161,21 +163,21 @@ export function ImportStudentsWizardSecondModal({
               onClick={handleCancel}
               className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 border border-gray-300 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
             >
-              Zrušit
+              {t('common:cancel')}
             </button>
             <button
               type="button"
               onClick={handleDoImport}
               className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
-              Importovat do vybraného kurzu
+              {t('import.importToCourse')}
             </button>
           </div>
 
           <Dialog.Close asChild>
             <button
               className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
-              aria-label="Zavřít"
+              aria-label={t('common:close')}
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

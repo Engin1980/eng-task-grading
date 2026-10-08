@@ -7,12 +7,14 @@ import type { CourseDto } from '../../model/course-dto'
 import { Loading } from '../../ui/loading'
 import { LoadingError } from '../../ui/loadingError'
 import { useLoadingState } from '../../types/loadingState'
+import { useTranslation } from 'react-i18next'
 
 export const Route = createFileRoute('/courses/')({
   component: CoursesPage,
 })
 
 function CoursesPage() {
+  const { t } = useTranslation('courses')
   const [courses, setCourses] = useState<CourseDto[]>([])
   const ldgState = useLoadingState();
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -44,13 +46,13 @@ function CoursesPage() {
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Všechny kurzy</h1>
+        <h1 className="text-3xl font-bold">{t('list.title')}</h1>
 
         <button
           onClick={() => setIsModalOpen(true)}
           className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors"
         >
-          + Přidat kurz
+          {t('list.add')}
         </button>
       </div>
 
@@ -60,13 +62,13 @@ function CoursesPage() {
         onCourseCreated={handleCourseCreated}
       />
 
-      {ldgState.loading && (<Loading message="Načítám kurzy..." />)}
+      {ldgState.loading && (<Loading message={t('list.loading')} />)}
 
       {ldgState.error && (<LoadingError message={ldgState.error} onRetry={_loadCourses} />)}
 
       {ldgState.done && courses.length === 0 && (
         <div className="text-center text-gray-600">
-          Žádné kurzy nebyly nalezeny.
+          {t('list.empty')}
         </div>
       )}
 
@@ -80,18 +82,18 @@ function CoursesPage() {
               <h2 className="text-xl font-semibold mb-2">
                 {course.name || course.code}
               </h2>
-              <p className="text-sm text-gray-500 mb-2">Kód: {course.code}</p>
+              <p className="text-sm text-gray-500 mb-2">{t('list.code', { code: course.code })}</p>
               <div className="text-gray-600 mb-4">
-                <p>Studenti: {course.studentsCount}</p>
-                <p>Úkoly: {course.tasksCount}</p>
-                <p>Účasti: {course.attendancesCount}</p>
+                <p>{t('stats.students', { n: course.studentsCount })}</p>
+                <p>{t('stats.tasks', { n: course.tasksCount })}</p>
+                <p>{t('stats.attendances', { n: course.attendancesCount })}</p>
               </div>
               <Link
                 to="/courses/$id/grades"
                 params={{ id: course.id.toString() }}
                 className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 inline-block"
               >
-                Zobrazit kurz
+                {t('list.view')}
               </Link>
             </div>
           ))}

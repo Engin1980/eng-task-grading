@@ -3,6 +3,7 @@ import type { StudentCreateDto } from "../../model/student-dto";
 import { AppDialog } from "../../ui/AppDialog";
 import { StudentEditor, type StudentEditorData } from "../../ui/editors/StudentEditor";
 import { isStudentNumberValid } from "../../types/validations";
+import { useTranslation } from "react-i18next";
 
 interface CreateStudentModalProps {
   isOpen: boolean;
@@ -12,6 +13,7 @@ interface CreateStudentModalProps {
 }
 
 export function CreateStudentModal(props: CreateStudentModalProps) {
+  const { t } = useTranslation("courses");
   const [studentEditorData, setStudentEditorData] = useState<StudentEditorData>({
     number: '',
     name: '',
@@ -30,8 +32,8 @@ export function CreateStudentModal(props: CreateStudentModalProps) {
     <AppDialog
       isOpen={props.isOpen}
       onClose={props.onClose}
-      title="Přidat studenta"
-      confirmButtonText="Vytvořit"
+      title={t("studentEditor.addTitle")}
+      confirmButtonText={t("studentEditor.create")}
       confirmButtonEnabled={() => isStudentNumberValid(studentEditorData.number)}
       onSubmit={handleSubmit}
     >

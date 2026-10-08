@@ -17,12 +17,14 @@ import { LoadingError } from "../../../ui/loadingError";
 import { useLoadingState } from "../../../types/loadingState";
 import { CreateStudentModal } from "../../../components/courses/CreateStudentModal";
 import { courseService } from "../../../services/course-service";
+import { useTranslation } from "react-i18next";
 
 export const Route = createFileRoute("/courses/$id/students")({
   component: StudentsPage,
 });
 
 function StudentsPage() {
+  const { t } = useTranslation("courses");
   const { id } = Route.useParams();
   const courseId = id;
   const logger = useLogger("StudentsTab");
@@ -108,7 +110,7 @@ function StudentsPage() {
     loadStudents();
   }, [courseId]);
 
-  if (ldgState.loading) return <Loading message="Načítám studenty..." />;
+  if (ldgState.loading) return <Loading message={t("students.loading")} />;
   if (ldgState.error)
     return <LoadingError message={ldgState.error} onRetry={loadStudents} />;
 
@@ -121,7 +123,7 @@ function StudentsPage() {
             <input
               id="student-filter"
               type="text"
-              placeholder="Hledat podle čísla, jména, příjmení, uživatelského jména nebo skupiny..."
+              placeholder={t("students.filterPlaceholder")}
               value={filterText}
               onChange={(e) => setFilterText(e.target.value)}
               onKeyDown={(e) => {
@@ -138,13 +140,13 @@ function StudentsPage() {
             onClick={() => setIsCreateStudentModalOpen(true)}
             className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 whitespace-nowrap"
           >
-            Vytvořit studenta
+            {t("students.create")}
           </button>
           <button
             onClick={handleImportZero}
             className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 whitespace-nowrap"
           >
-            Importovat studenty
+            {t("students.import")}
           </button>
         </div>
       </div>
@@ -169,7 +171,7 @@ function StudentsPage() {
         onImported={handleImported}
       />
 
-      {ldgState.loading && <Loading message="Načítám studenty..." />}
+      {ldgState.loading && <Loading message={t("students.loading")} />}
 
       {ldgState.error && (
         <LoadingError message={ldgState.error} onRetry={loadStudents} />
@@ -178,7 +180,7 @@ function StudentsPage() {
       {students && students.length === 0 && (
         <div className="text-center py-8">
           <p className="text-gray-500 mb-4">
-            Zatím nejsou přihlášení žádní studenti.
+            {t("students.empty")}
           </p>
         </div>
       )}
@@ -189,7 +191,7 @@ function StudentsPage() {
         students.length > 0 && (
           <div className="text-center py-8">
             <p className="text-gray-500 mb-4">
-              Žádní studenti neodpovídají zadaným kritériím.
+              {t("students.noMatch")}
             </p>
           </div>
         )}
@@ -200,25 +202,25 @@ function StudentsPage() {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Číslo
+                  {t("students.columns.number")}
                 </th>
                 <th className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Jméno
+                  {t("students.columns.name")}
                 </th>
                 <th className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Příjmení
+                  {t("students.columns.surname")}
                 </th>
                 <th className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Email
+                  {t("students.columns.email")}
                 </th>
                 <th className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Skupina
+                  {t("students.columns.group")}
                 </th>
                 <th className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Studijní program
+                  {t("students.columns.program")}
                 </th>
                 <th className="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Forma studia
+                  {t("students.columns.form")}
                 </th>
               </tr>
             </thead>

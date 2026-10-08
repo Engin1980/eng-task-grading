@@ -4,6 +4,7 @@ import { AppDialog } from '../../ui/AppDialog'
 import { CourseEditor, type CourseEditorData } from '../../ui/editors/CourseEditor'
 import { toast } from 'react-hot-toast'
 import { isCourseCodeValid } from '../../types/validations'
+import { useTranslation } from 'react-i18next'
 
 interface EditCourseModalProps {
   isOpen: boolean
@@ -14,6 +15,7 @@ interface EditCourseModalProps {
 
 
 export function EditCourseModal(props: EditCourseModalProps) {
+  const { t } = useTranslation('courses');
   const [courseEditorData, setCourseEditorData] = useState<CourseEditorData>({
     code: props.course.code ?? '',
     name: props.course.name ?? '',
@@ -29,11 +31,11 @@ export function EditCourseModal(props: EditCourseModalProps) {
 
     try {
       props.onSubmit(courseData);
-      toast.success(`Kurz ${courseData.code} byl úspěšně upraven.`);
+      toast.success(t('edit.success', { code: courseData.code }));
       // setCourseEditorData({ code: '', name: '', isActive: true });
       props.onClose();
     } catch (err) {
-      toast.error(`Chyba při úpravě kurzu.`);
+      toast.error(t('edit.error'));
     }
   }
 
@@ -45,8 +47,8 @@ export function EditCourseModal(props: EditCourseModalProps) {
   return (
     <AppDialog
       isOpen={props.isOpen}
-      title="Upravit kurz"
-      confirmButtonText='Upravit kurz'
+      title={t('edit.title')}
+      confirmButtonText={t('edit.submit')}
       onSubmit={handleEditCourse}
       confirmButtonEnabled={() => isCourseCodeValid(courseEditorData.code)}
       onClose={handleClose}

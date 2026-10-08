@@ -4,6 +4,7 @@ import type { FinalGradeDto } from '../../model/course-dto';
 import type { StudentDto } from '../../model/student-dto';
 import { useToast } from '../../hooks/use-toast';
 import { useLogger } from '../../hooks/use-logger';
+import { useTranslation } from 'react-i18next';
 
 interface AddCourseFinalGradeModalProps {
   isOpen: boolean;
@@ -19,6 +20,7 @@ export function AddCourseFinalGradeModal({ isOpen, onClose, student, courseId, o
   const [isSubmitting, setIsSubmitting] = useState(false);
   const quickSelectValues: number[] = [0, 5, 25, 35, 45, 55, 60, 65, 70, 75, 80, 85, 90, 95, 98, 100];
   const tst = useToast();
+  const { t } = useTranslation(['courses', 'common']);
 const logger = useLogger("AddCourseFinalGradeModal");
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -28,7 +30,7 @@ const logger = useLogger("AddCourseFinalGradeModal");
 
     const gradeValue = parseInt(value);
     if (isNaN(gradeValue) || gradeValue < 0 || gradeValue > 100) {
-      alert('Finální známka kurzu musí být číslo mezi 0 a 100');
+      alert(t('finalGrade.invalidValueAlert'));
       return;
     }
 
@@ -69,12 +71,12 @@ const logger = useLogger("AddCourseFinalGradeModal");
         <form onSubmit={handleSubmit}>
           <div className="px-6 py-4">
             <h3 className="text-lg font-medium text-gray-900 mb-4">
-              Přidat známku
+              {t('finalGrade.addTitle')}
             </h3>
 
             {/* Student info */}
             <div className="mb-4 p-3 bg-gray-50 rounded-lg">
-              <div className="text-sm text-gray-600">Student</div>
+              <div className="text-sm text-gray-600">{t('finalGrade.student')}</div>
               <div className="font-medium text-gray-900">
                 {student.name && student.surname
                   ? `${student.surname} ${student.name}`
@@ -86,7 +88,7 @@ const logger = useLogger("AddCourseFinalGradeModal");
             {/* Grade value */}
             <div className="mb-4">
               <label htmlFor="grade-value" className="block text-sm font-medium text-gray-700 mb-2">
-                Známka (0-100, min 50) <span className="text-red-500">*</span>
+                {t('finalGrade.valueLabel')} <span className="text-red-500">*</span>
               </label>
               <input
                 id="grade-value"
@@ -96,7 +98,7 @@ const logger = useLogger("AddCourseFinalGradeModal");
                 value={value}
                 onChange={(e) => setValue(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Zadejte známku..."
+                placeholder={t('finalGrade.valuePlaceholder')}
                 required
                 autoFocus
               />
@@ -128,7 +130,7 @@ const logger = useLogger("AddCourseFinalGradeModal");
             {/* Comment */}
             <div className="mb-6">
               <label htmlFor="grade-comment" className="block text-sm font-medium text-gray-700 mb-2">
-                Komentář
+                {t('finalGrade.comment')}
               </label>
               <textarea
                 id="grade-comment"
@@ -136,7 +138,7 @@ const logger = useLogger("AddCourseFinalGradeModal");
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Volitelný komentář k známce..."
+                placeholder={t('finalGrade.commentPlaceholder')}
               />
             </div>
           </div>
@@ -148,7 +150,7 @@ const logger = useLogger("AddCourseFinalGradeModal");
               disabled={isSubmitting || !value.trim()}
               className="inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSubmitting ? 'Přidávám...' : 'Přidat známku'}
+              {isSubmitting ? t('finalGrade.adding') : t('finalGrade.add')}
             </button>
             <button
               type="button"
@@ -156,7 +158,7 @@ const logger = useLogger("AddCourseFinalGradeModal");
               disabled={isSubmitting}
               className="inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Zrušit
+              {t('common:cancel')}
             </button>
           </div>
         </form>

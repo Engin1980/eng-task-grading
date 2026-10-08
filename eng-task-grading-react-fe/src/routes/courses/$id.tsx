@@ -18,12 +18,14 @@ import { DeleteIcon } from '../../ui/icons/deleteIcon'
 import { DeleteModal } from '../../components/global/DeleteModal'
 import { EditCourseModal } from '../../components/courses/EditCourseModal'
 import { useToast } from '../../hooks/use-toast'
+import { useTranslation } from 'react-i18next'
 
 export const Route = createFileRoute('/courses/$id')({
   component: CourseDetailPage,
 })
 
 function CourseDetailPage() {
+  const { t } = useTranslation('courses')
   const { id } = Route.useParams()
   const logger = useLogger("CourseDetailPage")
   const [course, setCourse] = useState<CourseDto>(null!)
@@ -50,7 +52,7 @@ function CourseDetailPage() {
   }
 
   const handleCourseDelete = async () => {
-    tst.error("Funkce mazání kurzů ještě není implementována");
+    tst.error(t('detail.deleteNotImplemented'));
   }
 
   const handleCourseEdit = async (courseData: CourseEditDto) => {
@@ -62,7 +64,7 @@ function CourseDetailPage() {
     loadCourse();
   }, [id, navigate])
 
-  if (ldgState.loading) { return (<Loading message="Načítám kurz..." />) }
+  if (ldgState.loading) { return (<Loading message={t('detail.loading')} />) }
   if (ldgState.error) { return (<LoadingError message={ldgState.error} onRetry={loadCourse} />) }
 
   return (
@@ -71,7 +73,7 @@ function CourseDetailPage() {
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-4">
           <h1 className={`text-3xl font-bold text-gray-${course.isActive ? '900' : '500'} mb-2`}>
-            {course?.name || course?.code || `Kurz ${id}`}
+            {course?.name || course?.code || t('detail.fallbackTitle', { id })}
             {!course.isActive && <span className='ml-4'>
               &lt;inactive&gt;
             </span>}
@@ -96,8 +98,8 @@ function CourseDetailPage() {
             <DeleteIcon />
           </button>
           <DeleteModal
-            title="Opravdu smazat kurz?"
-            question="Bude nevratně smazán kurz i všechna případná související hodnocení a docházky!"
+            title={t('detail.deleteTitle')}
+            question={t('detail.deleteQuestion')}
             verification={course?.name || course?.code || ''}
             isOpen={deleteModalVisible}
             onDelete={handleCourseDelete}
@@ -105,15 +107,15 @@ function CourseDetailPage() {
           />
         </div>
         {course?.name && course?.code && (
-          <p className="text-gray-600">Kód kurzu: {course.code}</p>
+          <p className="text-gray-600">{t('detail.code', { code: course.code })}</p>
         )}
         {course && (
           <div className="text-sm text-gray-500 mt-2">
-            <span>Studenti: {course.studentsCount || 0}</span>
+            <span>{t('stats.students', { n: course.studentsCount || 0 })}</span>
             <span className="mx-2">•</span>
-            <span>Úkoly: {course.tasksCount || 0}</span>
+            <span>{t('stats.tasks', { n: course.tasksCount || 0 })}</span>
             <span className="mx-2">•</span>
-            <span>Účasti: {course.attendancesCount || 0}</span>
+            <span>{t('stats.attendances', { n: course.attendancesCount || 0 })}</span>
           </div>
         )}
       </div>
@@ -122,19 +124,19 @@ function CourseDetailPage() {
       <TabLabelBlock selectedTabKey='grades'>
         <TabLabelLink to={`/courses/${id}/grades`} tabKey='grades'>
           <GradeIcon />
-          Známky
+          {t('detail.tabs.grades')}
         </TabLabelLink>
         <TabLabelLink to={`/courses/${id}/tasks`} tabKey='tasks'>
           <TaskIcon />
-          Úkoly
+          {t('detail.tabs.tasks')}
         </TabLabelLink>
         <TabLabelLink to={`/courses/${id}/attendances`} tabKey='attendances'>
           <AttendanceIcon />
-          Účast
+          {t('detail.tabs.attendances')}
         </TabLabelLink>
         <TabLabelLink to={`/courses/${id}/students`} tabKey='students'>
           <StudentIcon />
-          Studenti
+          {t('detail.tabs.students')}
         </TabLabelLink>
       </TabLabelBlock>
 

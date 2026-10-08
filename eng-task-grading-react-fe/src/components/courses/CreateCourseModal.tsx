@@ -5,6 +5,7 @@ import { CourseEditor, type CourseEditorData } from '../../ui/editors/CourseEdit
 import { isCourseCodeValid } from '../../types/validations'
 import { courseService } from '../../services/course-service'
 import { useToast } from '../../hooks/use-toast'
+import { useTranslation } from 'react-i18next'
 
 interface CreateCourseModalProps {
   isOpen: boolean
@@ -16,6 +17,7 @@ interface CreateCourseModalProps {
 export function CreateCourseModal(props: CreateCourseModalProps) {
   const [courseEditorData, setCourseEditorData] = useState<CourseEditorData>({ code: '', name: '', isActive: true })
   const tst = useToast();
+  const { t } = useTranslation('courses');
 
   const handleCreateCourse = async () => {
     const courseData: CourseCreateDto = {
@@ -42,8 +44,8 @@ export function CreateCourseModal(props: CreateCourseModalProps) {
   return (
     <AppDialog
       isOpen={props.isOpen}
-      title="Přidat nový kurz"
-      confirmButtonText='Vytvořit kurz'
+      title={t('create.title')}
+      confirmButtonText={t('create.submit')}
       onSubmit={handleCreateCourse}
       confirmButtonEnabled={() => isCourseCodeValid(courseEditorData.code)}
       onClose={handleClose}

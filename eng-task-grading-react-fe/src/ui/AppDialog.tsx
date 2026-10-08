@@ -1,5 +1,6 @@
 import * as Dialog from '@radix-ui/react-dialog';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface AppDialogProps {
   title: string;
@@ -14,6 +15,7 @@ interface AppDialogProps {
 }
 
 export function AppDialog(props: AppDialogProps) {
+  const { t } = useTranslation();
 
   if (!props.titleColor)
     props = { ...props, titleColor: "gray" };
@@ -64,7 +66,7 @@ export function AppDialog(props: AppDialogProps) {
                 onClick={handleClose}
                 className="inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Zrušit
+                {t("cancel")}
               </button>
             </div>
           </form>
@@ -72,9 +74,9 @@ export function AppDialog(props: AppDialogProps) {
           <Dialog.Close asChild>
             <button
               className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-              aria-label="Zavřít"
+              aria-label={t("close")}
             >
-              <span className="sr-only">Zavřít</span>
+              <span className="sr-only">{t("close")}</span>
               ✕
             </button>
           </Dialog.Close>

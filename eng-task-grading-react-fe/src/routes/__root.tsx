@@ -2,9 +2,11 @@
 import { Outlet } from "@tanstack/react-router";
 import { createRootRoute } from "@tanstack/react-router";
 import { Toaster } from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 import TopMenu from "../components/global/top-menu";
 
 function ErrorFallback({ error }: { error: Error }) {
+  const { t } = useTranslation();
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
       <div className="max-w-md w-full bg-white rounded-lg shadow-sm p-6">
@@ -25,16 +27,16 @@ function ErrorFallback({ error }: { error: Error }) {
             </svg>
           </div>
           <h3 className="text-lg font-medium text-gray-900 mb-2">
-            Něco se pokazilo
+            {t("rootError.title")}
           </h3>
           <p className="text-gray-500 mb-4">
-            Došlo k neočekávané chybě. Prosím zkuste to znovu.
+            {t("rootError.description")}
           </p>
 
           {process.env.NODE_ENV === "development" && (
             <details className="text-left mt-4 p-3 bg-gray-100 rounded-md">
               <summary className="text-sm font-medium text-gray-700 cursor-pointer">
-                Technické detaily
+                {t("rootError.details")}
               </summary>
               <pre className="text-xs text-red-600 mt-2 whitespace-pre-wrap">
                 {error.message}
@@ -48,13 +50,13 @@ function ErrorFallback({ error }: { error: Error }) {
               onClick={() => window.location.reload()}
               className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              Obnovit stránku
+              {t("rootError.reload")}
             </button>
             <button
               onClick={() => window.history.back()}
               className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500"
             >
-              Zpět
+              {t("rootError.back")}
             </button>
           </div>
         </div>

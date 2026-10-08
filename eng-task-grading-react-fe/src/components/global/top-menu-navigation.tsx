@@ -1,16 +1,18 @@
 import { Link } from "@tanstack/react-router";
 import { useContext } from "react";
+import { useTranslation } from "react-i18next";
 import { NavigationContext } from "../../contexts/NavigationContext";
 import { TaskIcon } from "../../ui/icons/taskIcon";
 import { AttendanceIcon } from "../../ui/icons/attendanceIcon";
 import { CourseIcon } from "../../ui/icons/courseIcon";
 
 export function TopMenuNavigation() {
+  const { t } = useTranslation();
   const navCtx = useContext(NavigationContext);
   const separator = "▸";
 
   return (<>
-    <Link to="/courses" className="mr-1 text-blue-600">Kurzy</Link>
+    <Link to="/courses" className="mr-1 text-blue-600">{t("nav.courses")}</Link>
     {navCtx?.course && <>
       <span className="text-gray-600">{separator}</span>
       <span className="translate-y-0.5">

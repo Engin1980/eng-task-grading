@@ -1,4 +1,5 @@
 import React from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { AppDialog } from '../../ui/AppDialog';
 
 interface DeleteModalProps {
@@ -11,6 +12,7 @@ interface DeleteModalProps {
 }
 
 export function DeleteModal(props: DeleteModalProps) {
+  const { t } = useTranslation();
   const [enteredVerification, setEnteredVerification] = React.useState<string>('');
 
   if (!props.isOpen || !props.verification) return null;
@@ -20,7 +22,7 @@ export function DeleteModal(props: DeleteModalProps) {
       title={props.title}
       titleColor='red'
       isOpen={props.isOpen}
-      confirmButtonText="Nevratně smazat"
+      confirmButtonText={t("deletePermanently")}
       confirmButtonColor='red'
       confirmButtonEnabled={() => enteredVerification === props.verification}
       onSubmit={() => props.onDelete(true)}
@@ -34,7 +36,7 @@ export function DeleteModal(props: DeleteModalProps) {
 
         <div className="mb-4">
           <label htmlFor="enteredVerification" className="block text-sm font-medium text-gray-700 mb-2">
-            Pro smazání zadejte <code>`{props.verification}`</code> a potvrďte formulář:
+            <Trans i18nKey="deleteVerifyPrompt" values={{ verification: props.verification }} components={{ code: <code /> }} />
           </label>
           <input
             id="enteredVerification"
@@ -43,7 +45,7 @@ export function DeleteModal(props: DeleteModalProps) {
             value={enteredVerification}
             onChange={(e) => setEnteredVerification(e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            placeholder="Doplňte pro potvrzení..."
+            placeholder={t("deleteVerifyPlaceholder")}
             required
             autoFocus
           />

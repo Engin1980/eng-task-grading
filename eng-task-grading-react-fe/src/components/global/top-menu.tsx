@@ -3,8 +3,11 @@ import { useAuthContext } from "../../contexts/AuthContext";
 import { TopMenuNavigation } from "./top-menu-navigation";
 import { useToast } from "../../hooks/use-toast";
 import { useLogger } from "../../hooks/use-logger";
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "./LanguageSwitcher";
 
 const TopMenu: React.FC = () => {
+  const { t } = useTranslation();
   const tst = useToast();
   const { loggedUser, logout } = useAuthContext();
   const navigate = useNavigate();
@@ -31,10 +34,10 @@ const TopMenu: React.FC = () => {
               {!loggedUser && (
                 <>
                   <Link to="/login" className="mr-4 text-blue-600">
-                    Přihlášení učitele
+                    {t("nav.teacherLogin")}
                   </Link>
                   <Link to="/studentView/login" className="mr-4 text-blue-600">
-                    Přihlášení studenta
+                    {t("nav.studentLogin")}
                   </Link>
                 </>
               )}
@@ -55,13 +58,13 @@ const TopMenu: React.FC = () => {
                     to="/studentView/courses"
                     className="mr-4 text-blue-600"
                   >
-                    Kurzy
+                    {t("nav.courses")}
                   </Link>
                   <Link
                     to="/studentView/login-management"
                     className="mr-4 text-blue-600"
                   >
-                    Správa přihlášení
+                    {t("nav.loginManagement")}
                   </Link>
                 </>
               )}
@@ -69,6 +72,7 @@ const TopMenu: React.FC = () => {
           </div>
           <div className="flex items-center justify-end sm:ml-auto">
             <div className="px-4 py-2 flex items-center min-w-[180px] justify-end gap-2">
+              <LanguageSwitcher />
               {loggedUser && (
                 <>
                   <span className="text-sm text-gray-700 font-semibold">
@@ -76,6 +80,7 @@ const TopMenu: React.FC = () => {
                   </span>
                   <button
                     onClick={handleLogout}
+                    title={t("nav.logout")}
                     className="ml-2 px-2 py-1 text-white rounded hover:bg-gray-300 text-xs cursor-pointer"
                   >
                     🚪

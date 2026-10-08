@@ -1,0 +1,48 @@
+import type { auth as cs } from "../cs/auth";
+
+export const auth: typeof cs = {
+  login: {
+    title: "Teacher login",
+    email: "Work email",
+    emailPlaceholder: "email@osu.com",
+    password: "Password",
+    rememberMe: "Remember me",
+    siteKeyMissing: "Error: VITE_CLOUDFLARE_SITE_KEY is not set in .env.local",
+    submit: "Log in",
+    noAccount: "Don't have an account?00a0<a>Sign up</a>.",
+    forgotPassword: "Forgot your password?00a0<a>Reset it</a>.",
+    isStudent: "Are you a student? Log in <a>here</a>.",
+  },
+  register: {
+    title: "Teacher registration",
+    email: "Email",
+    emailPlaceholder: "teacher@osu.cz",
+    emailHint: "Both the new (xxx##@osu.cz) and the old (firstname.lastname@osu.cz) form can be used.",
+    password: "Password",
+    passwordPlaceholder: "Enter password",
+    submit: "Register",
+    haveAccount: "Or you can <a>log in</a>.",
+  },
+  resetRequest: {
+    title: "Password reset",
+    prompt: "Enter your e-mail to reset the password",
+    email: "E-mail",
+    emailPlaceholder: "E-mail address",
+    sending: "Sending...",
+    submit: "Send request",
+    sent: "If the e-mail exists in our system, a password reset link has been sent.",
+    checkMailbox: "Check your mailbox.",
+  },
+  setNewPassword: {
+    title: "Set a new password",
+    prompt: "Enter your new password",
+    email: "E-mail",
+    emailPlaceholder: "E-mail address",
+    newPassword: "New password",
+    confirmPassword: "Confirm password",
+    setting: "Setting...",
+    submit: "Set new password",
+    done: "The password was changed successfully.",
+    canLogin: "You can now log in.",
+  },
+};

@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useRequestState } from '../../types/requestState'
 import { useAuthContext } from '../../contexts/AuthContext'
 import { useToast } from '../../hooks/use-toast'
+import { useTranslation } from 'react-i18next'
 
 interface ResetPasswordForm {
   email: string
@@ -15,6 +16,7 @@ export const Route = createFileRoute('/teacherPasswordReset/set-new-password/$to
 })
 
 function RouteComponent() {
+  const { t } = useTranslation('auth')
   const { token } = Route.useParams()
   const navigate = useNavigate()
   const reqSubmit = useRequestState();
@@ -59,10 +61,10 @@ function RouteComponent() {
       <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow-md">
         <div>
           <h2 className="text-3xl font-bold text-center text-gray-900">
-            Nastavení nového hesla
+            {t('setNewPassword.title')}
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Zadejte své nové heslo
+            {t('setNewPassword.prompt')}
           </p>
         </div>
 
@@ -71,7 +73,7 @@ function RouteComponent() {
             <div className="space-y-4">
               <div>
                 <label htmlFor="email" className="sr-only">
-                  E-mail
+                  {t('setNewPassword.email')}
                 </label>
                 <input
                   id="email"
@@ -81,13 +83,13 @@ function RouteComponent() {
                   value={formData.email}
                   onChange={handleChange('email')}
                   className="appearance-none rounded relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                  placeholder="E-mailová adresa"
+                  placeholder={t('setNewPassword.emailPlaceholder')}
                 />
               </div>
 
               <div>
                 <label htmlFor="password" className="sr-only">
-                  Nové heslo
+                  {t('setNewPassword.newPassword')}
                 </label>
                 <input
                   id="password"
@@ -97,14 +99,14 @@ function RouteComponent() {
                   value={formData.password}
                   onChange={handleChange('password')}
                   className="appearance-none rounded relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                  placeholder="Nové heslo"
+                  placeholder={t('setNewPassword.newPassword')}
                   minLength={8}
                 />
               </div>
 
               <div>
                 <label htmlFor="confirmPassword" className="sr-only">
-                  Potvrzení hesla
+                  {t('setNewPassword.confirmPassword')}
                 </label>
                 <input
                   id="confirmPassword"
@@ -114,7 +116,7 @@ function RouteComponent() {
                   value={formData.confirmPassword}
                   onChange={handleChange('confirmPassword')}
                   className="appearance-none rounded relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                  placeholder="Potvrzení hesla"
+                  placeholder={t('setNewPassword.confirmPassword')}
                   minLength={8}
                 />
               </div>
@@ -126,7 +128,7 @@ function RouteComponent() {
                 disabled={reqSubmit.busy}
                 className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
               >
-                {reqSubmit.busy ? 'Nastavuji...' : 'Nastavit nové heslo'}
+                {reqSubmit.busy ? t('setNewPassword.setting') : t('setNewPassword.submit')}
               </button>
             </div>
           </form>
@@ -135,10 +137,10 @@ function RouteComponent() {
         {reqSubmit.done && (
           <div className="mt-8 p-4 bg-green-50 border border-green-200 rounded">
             <p className="text-green-800 text-center">
-              Heslo bylo úspěšně změněno.
+              {t('setNewPassword.done')}
             </p>
             <p className="text-green-800 text-sm text-center mt-2">
-              Nyní se můžete přihlásit.
+              {t('setNewPassword.canLogin')}
             </p>
           </div>
         )}

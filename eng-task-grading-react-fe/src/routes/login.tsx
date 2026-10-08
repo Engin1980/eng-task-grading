@@ -7,12 +7,14 @@ import { useCallback, useEffect, useState } from "react";
 import { useAuthContext } from "../contexts/AuthContext";
 import type { TeacherLoginDto } from "../model/teacher-dto";
 import { useToast } from "../hooks/use-toast";
+import { Trans, useTranslation } from "react-i18next";
 
 export const Route = createFileRoute("/login")({
   component: Login,
 });
 
 function Login() {
+  const { t } = useTranslation("auth");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
@@ -86,7 +88,7 @@ function Login() {
   return (
     <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md">
       <h1 className="text-2xl font-bold mb-6 text-center text-blue-700">
-        Přihlášení učitele
+        {t("login.title")}
       </h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
@@ -94,7 +96,7 @@ function Login() {
             className="block text-sm font-medium text-gray-700 mb-2"
             htmlFor="email"
           >
-            Zaměstnanecký email
+            {t("login.email")}
           </label>
           <input
             id="email"
@@ -102,7 +104,7 @@ function Login() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="email@osu.com"
+            placeholder={t("login.emailPlaceholder")}
             required
           />
         </div>
@@ -111,7 +113,7 @@ function Login() {
             className="block text-sm font-medium text-gray-700 mb-2"
             htmlFor="password"
           >
-            Heslo
+            {t("login.password")}
           </label>
           <input
             id="password"
@@ -135,7 +137,7 @@ function Login() {
             className="text-sm font-medium text-gray-700"
             htmlFor="remember"
           >
-            Zapamatovat si přihlášení
+            {t("login.rememberMe")}
           </label>
         </div>
 
@@ -149,7 +151,7 @@ function Login() {
               />
             ) : (
               <div className="text-red-600 text-sm text-center py-4">
-                Chyba: VITE_CLOUDFLARE_SITE_KEY není nastaven v .env.local
+                {t("login.siteKeyMissing")}
               </div>
             )}
           </div>
@@ -159,32 +161,29 @@ function Login() {
           type="submit"
           className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          Log In
+          {t("login.submit")}
         </button>
       </form>
       <p className="text-center text-gray-500 text-sm mt-4">
-        Nemáte účet?&nbsp;
-        <a href="/register" className="text-blue-500 hover:underline">
-          Zaregistrujte se
-        </a>
-        .
+        <Trans
+          t={t}
+          i18nKey="login.noAccount"
+          components={{ a: <a href="/register" className="text-blue-500 hover:underline" /> }}
+        />
       </p>
       <p className="text-center text-gray-500 text-sm mt-1">
-        Zapomněli jste heslo?&nbsp;
-        <a
-          href="/teacherPasswordReset/request"
-          className="text-blue-500 hover:underline"
-        >
-          Obnovte si jej
-        </a>
-        .
+        <Trans
+          t={t}
+          i18nKey="login.forgotPassword"
+          components={{ a: <a href="/teacherPasswordReset/request" className="text-blue-500 hover:underline" /> }}
+        />
       </p>
       <p className="text-center text-gray-500 text-sm mt-1">
-        Jste student? Přihlašte se{" "}
-        <a href="/studentView/login" className="text-blue-500 hover:underline">
-          zde
-        </a>
-        .
+        <Trans
+          t={t}
+          i18nKey="login.isStudent"
+          components={{ a: <a href="/studentView/login" className="text-blue-500 hover:underline" /> }}
+        />
       </p>
     </div>
   );

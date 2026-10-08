@@ -12,6 +12,8 @@ import { LoadingError } from "../../../ui/loadingError";
 import { useLoadingState } from "../../../types/loadingState";
 import { useToast } from "../../../hooks/use-toast";
 import { useLogger } from "../../../hooks/use-logger";
+import { useTranslation } from "react-i18next";
+import { useFormatters } from "../../../i18n/format";
 
 export const Route = createFileRoute("/studentView/courses/$id")({
   component: RouteComponent,
@@ -19,6 +21,8 @@ export const Route = createFileRoute("/studentView/courses/$id")({
 
 
 function RouteComponent() {
+  const { t } = useTranslation("student");
+  const { formatDate } = useFormatters();
   const { id } = Route.useParams();
   const [courseData, setCourseData] = useState<StudentViewCourseDto | null>(
     null,
@@ -45,7 +49,7 @@ function RouteComponent() {
   }, [id]);
 
   if (ldgState.loading) {
-    return <Loading message="Načítám kurz..." />;
+    return <Loading message={t("course.loading")} />;
   }
   if (ldgState.error) {
     return <LoadingError message={ldgState.error} onRetry={loadCourse} />;
@@ -71,10 +75,10 @@ function RouteComponent() {
             </svg>
           </div>
           <h3 className="text-lg font-medium text-gray-900 mb-1">
-            Kurz nenalezen
+            {t("course.notFoundTitle")}
           </h3>
           <p className="text-gray-500">
-            Požadovaný kurz neexistuje nebo k němu nemáte přístup.
+            {t("course.notFoundText")}
           </p>
         </div>
       </div>
@@ -102,7 +106,7 @@ function RouteComponent() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg> */}
                       <TaskIcon />
-                      <span className="hidden sm:block">Úkoly: &nbsp;</span>
+                      <span className="hidden sm:block">{t("course.tasksLabel")}</span>
                       {courseData.course.tasksCount}
                     </div>
                   )}
@@ -112,7 +116,7 @@ function RouteComponent() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg> */}
                       <AttendanceIcon />
-                      <span className="hidden sm:block">Docházka: &nbsp;</span>
+                      <span className="hidden sm:block">{t("course.attendanceLabel")}</span>
                       {courseData.course.attendancesCount}
                     </div>
                   )}
@@ -124,7 +128,7 @@ function RouteComponent() {
 
         {/* Celkové hodnocení */}
         <div className="bg-white rounded-lg shadow-sm mb-6 p-4">
-          <h2 className="text-lg font-medium text-gray-900 mb-2">Celkové hodnocení</h2>
+          <h2 className="text-lg font-medium text-gray-900 mb-2">{t("course.finalTitle")}</h2>
           {courseData.finalGrades && courseData.finalGrades.length > 0 ? (
             <div className="space-y-2">
               {courseData.finalGrades.map((fg) => (
@@ -133,7 +137,7 @@ function RouteComponent() {
                   className="flex items-center justify-between border rounded border-gray-200 p-3"
                 >
                   <div>
-                    <div className="text-sm text-gray-500">Body</div>
+                    <div className="text-sm text-gray-500">{t("course.points")}</div>
                     <div
                       className={`text-xl font-semibold ${
                         fg.value <= 50 ? "text-red-600" : "text-green-600"
@@ -144,8 +148,8 @@ function RouteComponent() {
                   </div>
                   <div className="text-right text-sm text-gray-500">
                     {fg.recordedDateTime
-                      ? new Date(fg.recordedDateTime).toLocaleDateString()
-                      : "(předběžné)"}
+                      ? formatDate(fg.recordedDateTime)
+                      : t("course.preliminary")}
                     {fg.comment && (
                       <div className="text-gray-700 mt-1">{fg.comment}</div>
                     )}
@@ -154,7 +158,7 @@ function RouteComponent() {
               ))}
             </div>
           ) : (
-            <div className="text-gray-500">Zatím žádné celkové hodnocení</div>
+            <div className="text-gray-500">{t("course.noFinal")}</div>
           )}
         </div>
 
@@ -162,11 +166,11 @@ function RouteComponent() {
         <TabLabelBlock selectedTabKey="a">
           <TabLabelLink to={`/studentView/courses/${id}/tasks`} tabKey="a">
             <TaskIcon />
-            Úkoly
+            {t("course.tabs.tasks")}
           </TabLabelLink>
           <TabLabelLink to={`/studentView/courses/${id}/attendance`} tabKey="b">
             <AttendanceIcon />
-            Docházka
+            {t("course.tabs.attendance")}
           </TabLabelLink>
         </TabLabelBlock>
 

@@ -2,6 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import type { StudentViewCourseDto } from "../../../../model/student-view-dto";
 import { useStudentViewData } from "../../../../contexts/StudentViewDataContext";
 import { gradeService } from "../../../../services/grade-service";
+import { useTranslation } from "react-i18next";
+import { useFormatters } from "../../../../i18n/format";
 
 interface TaskWithGrades {
   id: number;
@@ -22,6 +24,8 @@ export const Route = createFileRoute("/studentView/courses/$id/tasks")({
 });
 
 function RouteComponent() {
+  const { t } = useTranslation("student");
+  const { formatDate } = useFormatters();
   const courseDataOrNull: StudentViewCourseDto | null = useStudentViewData();
   const courseData = courseDataOrNull!;
   const tasks = courseData.tasks || [];
@@ -65,8 +69,8 @@ function RouteComponent() {
             />
           </svg>
         </div>
-        <h3 className="text-lg font-medium text-gray-900 mb-1">Žádné úkoly</h3>
-        <p className="text-gray-500">V tomto kurzu zatím nejsou žádné úkoly.</p>
+        <h3 className="text-lg font-medium text-gray-900 mb-1">{t("tasks.emptyTitle")}</h3>
+        <p className="text-gray-500">{t("tasks.emptyText")}</p>
       </div>
     );
   }
@@ -75,7 +79,7 @@ function RouteComponent() {
     <div className="bg-white">
       {tasksWithGrades.length === 0 ? (
         <div className="p-6 text-center text-gray-400 italic">
-          Žádné úkoly k zobrazení
+          {t("tasks.nothingToShow")}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -90,8 +94,8 @@ function RouteComponent() {
                   {task.title}
                 </div>
                 <div className="text-xs text-gray-500 mt-1">
-                  <div>Max body: {task.maxGrade ?? "N/A"}</div>
-                  <div>Min body: {task.minGrade ?? "N/A"}</div>
+                  <div>{t("tasks.maxPoints", { value: task.maxGrade ?? t("tasks.na") })}</div>
+                  <div>{t("tasks.minPoints", { value: task.minGrade ?? t("tasks.na") })}</div>
                 </div>
               </div>
 
@@ -104,7 +108,7 @@ function RouteComponent() {
                       className="flex justify-between items-center bg-gray-50 p-2 rounded"
                     >
                       <div className="text-xs text-gray-500">
-                        {new Date(grade.date).toLocaleDateString("cs-CZ")}
+                        {formatDate(grade.date)}
                       </div>
                       <div>
                         {grade.rating !== null ? (
@@ -120,19 +124,19 @@ function RouteComponent() {
                           </span>
                         ) : (
                           <span className="text-gray-400 italic">
-                            Neohodnoceno
+                            {t("tasks.unrated")}
                           </span>
                         )}
                       </div>
                       <div className="text-xs text-gray-700 italic">
-                        {grade.comment || "Bez komentáře"}
+                        {grade.comment || t("tasks.noComment")}
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
                 <div className="text-sm text-gray-400 italic">
-                  Zatím neohodnoceno
+                  {t("tasks.notYetRated")}
                 </div>
               )}
             </div>

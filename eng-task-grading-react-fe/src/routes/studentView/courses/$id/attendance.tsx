@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useStudentViewData } from '../../../../contexts/StudentViewDataContext';
+import { useTranslation } from 'react-i18next';
 
 interface AttendanceDay {
   title: string;
@@ -18,6 +19,7 @@ export const Route = createFileRoute('/studentView/courses/$id/attendance')({
 })
 
 function RouteComponent() {
+  const { t } = useTranslation('student');
   const courseDataOrNull = useStudentViewData();
   const courseData = courseDataOrNull!;
   const attendances = courseData.attendances;
@@ -29,7 +31,7 @@ function RouteComponent() {
       const record = attendanceRecords.find(r => r.attendanceDayId === day.id);
       return {
         title: day.title,
-        recordTitle: record ? record.attendanceValueTitle : "Žádný záznam",
+        recordTitle: record ? record.attendanceValueTitle : t('attendance.noRecord'),
         weight: record?.attendanceValueWeight
       };
     });
@@ -51,8 +53,8 @@ function RouteComponent() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
           </svg>
         </div>
-        <h3 className="text-lg font-medium text-gray-900 mb-1">Žádná docházka</h3>
-        <p className="text-gray-500">Pro tento kurz nejsou evidovány žádné docházky.</p>
+        <h3 className="text-lg font-medium text-gray-900 mb-1">{t('attendance.emptyTitle')}</h3>
+        <p className="text-gray-500">{t('attendance.emptyText')}</p>
       </div>
     );
   }
@@ -72,10 +74,10 @@ function RouteComponent() {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Den/Událost
+                    {t('attendance.dayEvent')}
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Stav účasti
+                    {t('attendance.status')}
                   </th>
                 </tr>
               </thead>

@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 interface SuccessModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -6,6 +8,7 @@ interface SuccessModalProps {
 }
 
 export function SuccessModal({ isOpen, onClose, title, message }: SuccessModalProps) {
+  const { t } = useTranslation('student');
   if (!isOpen) return null;
 
   return (
@@ -54,7 +57,7 @@ export function SuccessModal({ isOpen, onClose, title, message }: SuccessModalPr
             onClick={onClose}
             className="inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
           >
-            Rozumím
+            {t('successModal.ok')}
           </button>
         </div>
       </div>

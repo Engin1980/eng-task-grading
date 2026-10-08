@@ -7,12 +7,14 @@ import { LoadingError } from "../../../ui/loadingError";
 import { useLoadingState } from "../../../types/loadingState";
 import { useToast } from "../../../hooks/use-toast";
 import { useLogger } from "../../../hooks/use-logger";
+import { useTranslation } from "react-i18next";
 
 export const Route = createFileRoute("/studentView/courses/")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
+  const { t } = useTranslation("student");
   const navigate = useNavigate();
   const [courses, setCourses] = useState<CourseDto[]>([]);
   const ldgState = useLoadingState();
@@ -37,7 +39,7 @@ function RouteComponent() {
   }, []);
 
   if (ldgState.loading) {
-    return <Loading message="Načítám kurzy..." />;
+    return <Loading message={t("courses.loading")} />;
   }
   if (ldgState.error) {
     return <LoadingError message={ldgState.error} onRetry={loadCourses} />;
@@ -49,9 +51,9 @@ function RouteComponent() {
         <div className="px-6 py-4 border-b border-gray-200">
           <div className="flex justify-between items-start">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Moje kurzy</h1>
+              <h1 className="text-2xl font-bold text-gray-900">{t("courses.title")}</h1>
               <p className="text-gray-600 mt-1">
-                Přehled kurzů, do kterých jste zapsáni
+                {t("courses.subtitle")}
               </p>
             </div>
           </div>
@@ -75,9 +77,9 @@ function RouteComponent() {
               </svg>
             </div>
             <h3 className="text-lg font-medium text-gray-900 mb-1">
-              Žádné kurzy
+              {t("courses.emptyTitle")}
             </h3>
-            <p className="text-gray-500">Nejste zapsáni do žádných kurzů.</p>
+            <p className="text-gray-500">{t("courses.emptyText")}</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -102,7 +104,7 @@ function RouteComponent() {
                     <div className="mt-3">
                       <div>
                         <span className="text-xs text-gray-500 uppercase">
-                          Úkoly
+                          {t("courses.tasks")}
                         </span>
                         <span className="ml-2 text-lg font-semibold text-gray-900">
                           {course.tasksCount}
@@ -110,7 +112,7 @@ function RouteComponent() {
                       </div>
                       <div>
                         <span className="text-xs text-gray-500 uppercase">
-                          Docházky
+                          {t("courses.attendances")}
                         </span>
                         <span className="ml-2 text-lg font-semibold text-gray-900">
                           {course.attendancesCount}

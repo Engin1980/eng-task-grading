@@ -3,12 +3,14 @@ import { useEffect } from 'react'
 import { attendanceService } from '../../../services/attendance-service'
 import { Loading } from '../../../ui/loading'
 import { useLoadingState } from '../../../types/loadingState'
+import { useTranslation } from 'react-i18next';
 
 export const Route = createFileRoute('/studentView/self-sign-verify/$token')({
   component: RouteComponent,
 })
 
 function RouteComponent() {
+  const { t } = useTranslation('student')
   const { token } = Route.useParams()
   const ldg = useLoadingState();
 
@@ -29,11 +31,11 @@ function RouteComponent() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md">
-        <h1 className="text-2xl font-bold mb-6 text-center text-blue-700">Ověřování samo-přihlášení</h1>
+        <h1 className="text-2xl font-bold mb-6 text-center text-blue-700">{t('selfSignVerify.title')}</h1>
 
         {ldg.loading && (
           <div className="text-center">
-            <Loading message="Probíhá ověření..." />
+            <Loading message={t('selfSignVerify.verifying')} />
           </div>
         )}
 
@@ -44,13 +46,13 @@ function RouteComponent() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <h2 className="text-xl font-semibold text-green-700 mb-2">Úspěch</h2>
-            <p className="text-sm text-gray-600 mb-4">Ověření proběhlo úspěšně.</p>
+            <h2 className="text-xl font-semibold text-green-700 mb-2">{t('selfSignVerify.successTitle')}</h2>
+            <p className="text-sm text-gray-600 mb-4">{t('selfSignVerify.successText')}</p>
             <a
               href="/studentView/login"
               className="inline-block w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-center"
             >
-              Zpět na přihlášení
+              {t('selfSignVerify.back')}
             </a>
           </div>
         )}
@@ -62,13 +64,13 @@ function RouteComponent() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <h2 className="text-xl font-semibold text-red-700 mb-2">Neúspěch</h2>
-            <p className="text-sm text-gray-600 mb-4">Ověření selhalo. Zkuste prosím zkontrolovat odkaz.</p>
+            <h2 className="text-xl font-semibold text-red-700 mb-2">{t('selfSignVerify.failTitle')}</h2>
+            <p className="text-sm text-gray-600 mb-4">{t('selfSignVerify.failText')}</p>
             <a
               href="/studentView/login"
               className="inline-block w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-center"
             >
-              Zpět na přihlášení
+              {t('selfSignVerify.back')}
             </a>
           </div>
         )}

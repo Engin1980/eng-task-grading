@@ -7,6 +7,8 @@ import { useLoadingState } from "../../../types/loadingState";
 import { useAuthContext } from "../../../contexts/AuthContext";
 import { useToast } from "../../../hooks/use-toast";
 import { useLogger } from "../../../hooks/use-logger";
+import { useTranslation } from "react-i18next";
+import { useFormatters } from "../../../i18n/format";
 
 export const Route = createFileRoute("/studentView/login-management/")({
   component: RouteComponent,
@@ -31,6 +33,8 @@ function getStudentNumberFromJWT(): string | null {
 }
 
 function RouteComponent() {
+  const { t } = useTranslation("student");
+  const { formatDateTime } = useFormatters();
   const studentNumber = getStudentNumberFromJWT();
   const [tokens, setTokens] = useState<StudentTokenInfoDto[]>([]);
   const lds = useLoadingState();
@@ -47,7 +51,7 @@ function RouteComponent() {
         lds.setDone();
       } catch (error) {
         logger.error("Error fetching tokens:", error);
-        lds.setError("Chyba při načítání tokenů.");
+        lds.setError(t("loginManagement.loadError"));
         tst.error(error);
       }
     };
@@ -65,7 +69,7 @@ function RouteComponent() {
       navigate({ to: "/studentView/login" });
     } catch (error) {
       logger.error("Error deleting tokens:", error);
-      lds.setError("Chyba při zneplatňování tokenů.");
+      lds.setError(t("loginManagement.revokeError"));
       tst.error(error);
     }
   };
@@ -79,10 +83,10 @@ function RouteComponent() {
             <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">
-                  Správa přihlášených zařízení
+                  {t("loginManagement.title")}
                 </h1>
                 <p className="text-gray-600 mt-1">
-                  Správa vašich přihlášených zařízení k prohlížení
+                  {t("loginManagement.subtitle")}
                 </p>
               </div>
 
@@ -91,7 +95,7 @@ function RouteComponent() {
                   className="w-full sm:w-auto px-4 py-2 border border-red-600 bg-white text-red-600 rounded-md hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 text-sm font-medium transition-colors"
                   onClick={revokeAllTokens}
                 >
-                  Zneplatnit všechna přihlášení
+                  {t("loginManagement.revokeAll")}
                 </button>
                 <StudentInfo studentNumber={studentNumber} />
               </div>
@@ -102,7 +106,7 @@ function RouteComponent() {
           <div className="p-6">
             {lds.loading && (
               <div className="text-center text-gray-500">
-                Načítání aktivních tokenů...
+                {t("loginManagement.loadingTokens")}
               </div>
             )}
 
@@ -119,25 +123,25 @@ function RouteComponent() {
                     className="bg-gray-50 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow"
                   >
                     <div className="text-sm font-medium text-gray-900 mb-3">
-                      Přístupový token hodnocení
+                      {t("loginManagement.tokenTitle")}
                     </div>
 
                     <div className="space-y-2 text-sm">
                       <div>
                         <div className="text-xs text-gray-500 uppercase tracking-wide">
-                          Vytvořeno
+                          {t("loginManagement.created")}
                         </div>
                         <div className="text-gray-900">
-                          {new Date(token.createdAt).toLocaleString()}
+                          {formatDateTime(token.createdAt)}
                         </div>
                       </div>
 
                       <div>
                         <div className="text-xs text-gray-500 uppercase tracking-wide">
-                          Platné do
+                          {t("loginManagement.validUntil")}
                         </div>
                         <div className="text-gray-900">
-                          {new Date(token.expiresAt).toLocaleString()}
+                          {formatDateTime(token.expiresAt)}
                         </div>
                       </div>
                     </div>
@@ -148,7 +152,7 @@ function RouteComponent() {
 
             {lds.done && tokens.length === 0 && (
               <div className="text-center text-gray-500">
-                Žádné tokeny nebyly nalezeny.
+                {t("loginManagement.none")}
               </div>
             )}
           </div>

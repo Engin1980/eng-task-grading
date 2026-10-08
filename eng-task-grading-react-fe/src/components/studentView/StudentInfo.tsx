@@ -2,6 +2,7 @@ import { useNavigate } from '@tanstack/react-router';
 import { studentViewService } from '../../services/student-view-service';
 import { useToast } from '../../hooks/use-toast';
 import { useLogger } from '../../hooks/use-logger';
+import { useTranslation } from 'react-i18next';
 
 interface StudentInfoProps {
   studentNumber: string | null;
@@ -10,6 +11,7 @@ interface StudentInfoProps {
 export function StudentInfo({ studentNumber }: StudentInfoProps) {
   const navigate = useNavigate();
   const tst = useToast();
+  const { t } = useTranslation(['student', 'common']);
 const logger = useLogger("StudentInfo");
 
   const handleLogout = async () => {
@@ -47,7 +49,7 @@ const logger = useLogger("StudentInfo");
   return (
     <div className="text-right">
       <div className="mb-3">
-        <p className="text-sm text-gray-500">Studijní číslo</p>
+        <p className="text-sm text-gray-500">{t('info.studentNumber')}</p>
         <p className="text-lg font-semibold text-gray-900">{studentNumber}</p>
       </div>
       <button
@@ -57,7 +59,7 @@ const logger = useLogger("StudentInfo");
         <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
         </svg>
-        Odhlásit
+        {t('common:nav.logout')}
       </button>
     </div>
   );

@@ -8,12 +8,14 @@ import type { StudentViewLoginDto } from "../../model/student-view-dto";
 import { studentViewService } from "../../services/student-view-service";
 import { useToast } from "../../hooks/use-toast";
 import { useLogger } from "../../hooks/use-logger";
+import { Trans, useTranslation } from "react-i18next";
 
 export const Route = createFileRoute("/studentView/login")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
+  const { t } = useTranslation("student");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -27,7 +29,7 @@ function RouteComponent() {
   // Toast upozornění pokud chybí site key (pouze pokud je Cloudflare enabled)
   useEffect(() => {
     if (isCloudflareEnabled && !TURNSTILE_SITE_KEY) {
-      tst.error("Chyba: VITE_CLOUDFLARE_SITE_KEY není nastaven v .env.local");
+      tst.error(t("login.siteKeyMissing"));
     }
   }, [isCloudflareEnabled, TURNSTILE_SITE_KEY]);
 
@@ -73,14 +75,14 @@ function RouteComponent() {
     <>
       <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md">
         <h1 className="text-2xl font-bold mb-6 text-center text-blue-700">
-          Studentské přihlášení
+          {t("login.title")}
         </h1>
         <p className="text-center text-gray-600 text-sm mb-6">
-          Zadejte své studentské číslo pro přihlášení.
+          {t("login.instructions.line1")}
           <br />
-          Po přihlášení Vám bude zaslán ověřovací odkaz na Váš email.
+          {t("login.instructions.line2")}
           <br />
-          Přes tento odkaz se dostanete do systému.
+          {t("login.instructions.line3")}
         </p>
         <form
           onSubmit={(e) => {
@@ -95,12 +97,12 @@ function RouteComponent() {
             validators={{
               onChange: ({ value }) => {
                 if (!value || value.trim().length === 0) {
-                  return "Osobní číslo je povinné";
+                  return t("login.required");
                 }
 
                 const studentNumberRegex = /^[A-Za-z]\d{5}$/;
                 if (!studentNumberRegex.test(value.trim())) {
-                  return "Osobní studentské číslo musí být ve formátu: jedno písmeno následované 5 číslicemi (např. A12345)";
+                  return t("login.invalidFormat");
                 }
 
                 return undefined;
@@ -113,7 +115,7 @@ function RouteComponent() {
                   className="block text-sm font-medium text-gray-700 mb-2"
                   htmlFor="studentNumber"
                 >
-                  Osobní studentské číslo
+                  {t("login.studentNumber")}
                 </label>
                 <input
                   id="studentNumber"
@@ -122,7 +124,7 @@ function RouteComponent() {
                   value={field.state.value}
                   onChange={(e) => field.handleChange(e.target.value)}
                   onBlur={field.handleBlur}
-                  placeholder="Např. R99873"
+                  placeholder={t("login.placeholder")}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   disabled={isSubmitting}
                 />
@@ -145,7 +147,7 @@ function RouteComponent() {
                 />
               ) : (
                 <div className="text-red-600 text-sm text-center py-4">
-                  Chyba: VITE_CLOUDFLARE_SITE_KEY není nastaven v .env.local
+                  {t("login.siteKeyMissing")}
                 </div>
               )}
             </div>
@@ -160,15 +162,15 @@ function RouteComponent() {
             }
             className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isSubmitting ? "Přihlašuji..." : "Přihlásit se"}
+            {isSubmitting ? t("login.submitting") : t("login.submit")}
           </button>
         </form>
         <p className="text-center text-gray-500 text-sm mt-4">
-          Jste učitel? Přihlašte se{" "}
-          <a href="/login" className="text-blue-500 hover:underline">
-            zde
-          </a>
-          .
+          <Trans
+            t={t}
+            i18nKey="login.isTeacher"
+            components={{ a: <a href="/login" className="text-blue-500 hover:underline" /> }}
+          />
         </p>
       </div>
 
@@ -176,8 +178,8 @@ function RouteComponent() {
       <SuccessModal
         isOpen={showSuccessModal}
         onClose={() => setShowSuccessModal(false)}
-        title="Úspěšně odesláno!"
-        message="Ověřovací odkaz byl odeslán na Váš email. Pokračujte dle instrukcí v emailu."
+        title={t("login.successTitle")}
+        message={t("login.successMessage")}
       />
     </>
   );

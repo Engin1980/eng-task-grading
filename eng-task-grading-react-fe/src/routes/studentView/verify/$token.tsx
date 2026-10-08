@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useAuthContext } from "../../../contexts/AuthContext";
 import { useToast } from "../../../hooks/use-toast";
 import { useLogger } from "../../../hooks/use-logger";
+import { useTranslation } from "react-i18next";
 
 export const Route = createFileRoute("/studentView/verify/$token")({
   component: RouteComponent,
@@ -38,6 +39,7 @@ function convertDurationToSeconds(duration: string): number {
 }
 
 function RouteComponent() {
+  const { t } = useTranslation("student");
   const { token } = Route.useParams();
   const navigate = useNavigate();
   const [selectedDuration, setSelectedDuration] = useState("");
@@ -73,39 +75,24 @@ function RouteComponent() {
       //TODO resolve and unify error handling w.r.t. tst/toast usage
       // Check if it's a 401 Unauthorized error
       if (error instanceof Error && error.message.includes("401")) {
-        tst.error(
-          "Token je neplatný nebo vypršel. Požádejte o nový odkaz pro ověření.",
-        );
+        tst.error(t("verify.invalidToken"));
       } else if (error instanceof Response && error.status === 401) {
-        tst.error(
-          "Token je neplatný nebo vypršel. Požádejte o nový odkaz pro ověření.",
-        );
+        tst.error(t("verify.invalidToken"));
       } else {
-        tst.error("Došlo k chybě při ověřování. Zkuste to prosím znovu.");
+        tst.error(t("verify.genericError"));
       }
     } finally {
       setIsLoading(false);
     }
   };
 
-  const durationOptions = [
-    {
-      value: "5m",
-      label: "5 minut",
-      description: "Krátká relace pro rychlé úkoly",
-    },
-    {
-      value: "30m",
-      label: "30 minut",
-      description: "Standardní práce s úkoly",
-    },
-    { value: "1d", label: "1 den", description: "Celý den práce" },
-    { value: "1w", label: "1 týden", description: "Týdenní přístup" },
-    { value: "1M", label: "1 měsíc", description: "Měsíční přístup" },
-    { value: "2M", label: "2 měsíce", description: "Dlouhodobější přístup" },
-    { value: "6M", label: "6 měsíců", description: "Půlroční přístup" },
-    { value: "1y", label: "1 rok", description: "Roční přístup" },
-  ];
+  const durationOptions = (["5m", "30m", "1d", "1w", "1M", "2M", "6M", "1y"] as const).map(
+    (value) => ({
+      value,
+      label: t(`verify.durations.${value}.label`),
+      description: t(`verify.durations.${value}.description`),
+    }),
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
@@ -127,14 +114,13 @@ function RouteComponent() {
             </svg>
           </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            Ověření přístupu
+            {t("verify.title")}
           </h1>
           <p className="text-gray-600">
-            Vyberte, jak dlouho chcete mít aktivní přístup z tohoto prohlížeče.
+            {t("verify.description1")}
           </p>
           <p className="text-gray-600">
-            Po uplynutí lhůty nebo odhlášení budete muset znovu ověřit svůj
-            přístup pomocí odkazu zaslaného na váš email.
+            {t("verify.description2")}
           </p>
         </div>
 
@@ -193,16 +179,16 @@ function RouteComponent() {
           {isLoading ? (
             <div className="flex items-center justify-center">
               <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-              Ověřuji...
+              {t("verify.confirming")}
             </div>
           ) : (
-            "Potvrdit a aktivovat přístup"
+            t("verify.confirm")
           )}
         </button>
 
         <div className="mt-4 text-center">
           <p className="text-xs text-gray-500">
-            Token: <span className="font-mono">{token.substring(0, 8)}...</span>
+            {t("verify.token")} <span className="font-mono">{token.substring(0, 8)}...</span>
           </p>
         </div>
       </div>

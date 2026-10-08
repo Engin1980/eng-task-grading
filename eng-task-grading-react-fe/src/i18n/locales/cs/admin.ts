@@ -28,6 +28,7 @@ export const admin = {
     next: "Vpřed",
   },
   clientLogs: {
+    confirmDeleteAll: "Opravdu smazat všechna pravidla?",
     saved: "Uloženo",
   },
 };

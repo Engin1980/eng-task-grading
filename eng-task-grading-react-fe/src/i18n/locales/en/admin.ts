@@ -30,6 +30,7 @@ export const admin: typeof cs = {
     next: "Next",
   },
   clientLogs: {
+    confirmDeleteAll: "Really delete all rules?",
     saved: "Saved",
   },
 };

@@ -33,7 +33,7 @@ function RouteComponent() {
   };
 
   const handleDelete = () => {
-    if (confirm('Opravdu smazat všechna pravidla?')) {
+    if (confirm(t('clientLogs.confirmDeleteAll'))) {
       senderRulesHandler.deleteFromStorage();
       senderRulesHandler.setDefaults();
       setRules(senderRulesHandler.getRules());

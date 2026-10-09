@@ -7,8 +7,8 @@ export const auth = {
     rememberMe: "Zapamatovat si přihlášení",
     siteKeyMissing: "Chyba: VITE_CLOUDFLARE_SITE_KEY není nastaven v .env.local",
     submit: "Log In",
-    noAccount: "Nemáte účet?00a0<a>Zaregistrujte se</a>.",
-    forgotPassword: "Zapomněli jste heslo?00a0<a>Obnovte si jej</a>.",
+    noAccount: "Nemáte účet? <a>Zaregistrujte se</a>.",
+    forgotPassword: "Zapomněli jste heslo? <a>Obnovte si jej</a>.",
     isStudent: "Jste student? Přihlašte se <a>zde</a>.",
   },
   register: {

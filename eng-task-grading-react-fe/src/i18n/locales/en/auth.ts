@@ -9,8 +9,8 @@ export const auth: typeof cs = {
     rememberMe: "Remember me",
     siteKeyMissing: "Error: VITE_CLOUDFLARE_SITE_KEY is not set in .env.local",
     submit: "Log in",
-    noAccount: "Don't have an account?00a0<a>Sign up</a>.",
-    forgotPassword: "Forgot your password?00a0<a>Reset it</a>.",
+    noAccount: "Don't have an account? <a>Sign up</a>.",
+    forgotPassword: "Forgot your password? <a>Reset it</a>.",
     isStudent: "Are you a student? Log in <a>here</a>.",
   },
   register: {

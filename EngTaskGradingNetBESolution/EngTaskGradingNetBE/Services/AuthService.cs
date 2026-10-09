@@ -202,6 +202,14 @@ namespace EngTaskGradingNetBE.Services
         <p>Pokud jste o toto obnovení nepožádali, tento e-mail ignorujte, vaše heslo zůstane nezměněno.</p>
         <p>V případě dotazů prosím kontaktuje administrátora systému.</p>
         <p>Hezký den přeje tým EngTaskGrading.</p>
+        <hr/>
+        <p>Hello,</p>
+        <p>a password reset request has been received for your account in the EngTaskGrading system.</p>
+        <p>If you requested this reset, please click the following link. The link is valid for 1 hour from receiving this e-mail.</p>
+        <p><a href="{feUrl}/teacherPasswordReset/set-new-password/{token}">Reset your password in the EngTaskGrading grading system</a></p>
+        <p>If you did not request this reset, please ignore this e-mail; your password will remain unchanged.</p>
+        <p>If you have any questions, please contact the system administrator.</p>
+        <p>Have a nice day, the EngTaskGrading team.</p>
         """;
       try
       {
@@ -308,11 +316,19 @@ namespace EngTaskGradingNetBE.Services
       string body = $$"""
         <p>Dobrý den,</p>
         <p>pro váš účet byla přijata žádost o samozápis  na termín <strong>{{attendanceDayTitle}}</strong>
-        v kurzu <string>{{courseRef}}</strong>. 
+        v kurzu <strong>{{courseRef}}</strong>.</p>
         <p>Pokud jste o tento zápis požádali, klikněte na následující odkaz. </p>
         <p><a href="{{feUrl}}/studentView/self-sign-verify/{{token}}">Potvrdit docházku na kurzu</a></p>
         <p>Pokud jste o zápis nepožádali, tento e-mail ignorujte. Pokud se situace opakuje, nebo v případě  dotazů prosím kontaktuje administrátora systému.</p>
         <p>Hezký den přeje tým EngTaskGrading.</p>
+        <hr/>
+        <p>Hello,</p>
+        <p>a self-sign request has been received for your account for the session <strong>{{attendanceDayTitle}}</strong>
+        in the course <strong>{{courseRef}}</strong>.</p>
+        <p>If you made this request, please click the following link.</p>
+        <p><a href="{{feUrl}}/studentView/self-sign-verify/{{token}}">Confirm attendance in the course</a></p>
+        <p>If you did not make this request, please ignore this e-mail. If this keeps happening, or if you have any questions, please contact the system administrator.</p>
+        <p>Have a nice day, the EngTaskGrading team.</p>
         """;
       try
       {

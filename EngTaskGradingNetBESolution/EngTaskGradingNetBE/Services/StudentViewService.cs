@@ -50,6 +50,14 @@ namespace EngTaskGradingNetBE.Services
         <p>Pokud jste o tento přístup nepožádali, tento e-mail ignorujte, nikdo nebude mít přístup k vašim známkám.</p>
         <p>V případě dotazů prosím kontaktuje vyučujícího daného předmětu.</p>
         <p>Hezký den přeje tým EngTaskGrading.</p>
+        <hr/>
+        <p>Hello,</p>
+        <p>a request has been received to access the grade overview in the EngTaskGrading system for your student number.</p>
+        <p>If you made this request, please click the following link. The link is valid for {studentSecuritySettings.LoginTokenExpiryMinutes} minutes from receiving this e-mail.</p>
+        <p><a href="{feUrl}/studentView/verify/{token}">Log in to the EngTaskGrading grading system</a></p>
+        <p>If you did not make this request, please ignore this e-mail; no one will have access to your grades.</p>
+        <p>If you have any questions, please contact the teacher of the relevant course.</p>
+        <p>Have a nice day, the EngTaskGrading team.</p>
         """;
       try
       {
